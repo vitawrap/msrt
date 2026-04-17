@@ -1,0 +1,73 @@
+#include "script_host.hpp"
+#include "core/util.hpp"
+#include "io/log.hpp"
+#include "script_qjs.hpp"
+
+/* Script list */
+SCRIPT_RESOLVE_EMBED(__script_play_js)
+
+namespace ms {
+namespace browser {
+
+    thread_local JSContext* JSTempVal::s_context = nullptr;
+
+    void ScriptHost::createEngine() {
+        destroyEngine();
+        auto* js = m_engine = new ScriptEngine;
+
+        js->runtime = JS_NewRuntime(); // TODO: Test with fast allocator libs
+        if (! js->runtime) {
+            throw ScriptEngineException("QuickJS: Cannot create runtime!");
+        }
+        js->context = JS_NewContext(js->runtime); // Assume only one frame for microstudio
+        if (! js->context) {
+            throw ScriptEngineException("QuickJS: Cannot create context for runtime!");
+        }
+#ifdef NDEBUG
+        // try to have a better memory footprint in release mode
+        JS_SetStripInfo(js->runtime, JS_STRIP_DEBUG | JS_STRIP_SOURCE);
+#endif
+
+        // TODO: Browser API
+        installRuntime();
+    }
+
+    void ScriptHost::destroyEngine() {
+        if (m_engine) {
+            JS_FreeContext(m_engine->context);
+            JS_FreeRuntime(m_engine->runtime);
+            delete m_engine;
+            m_engine = nullptr;
+        }
+    }
+
+    void ScriptHost::evalScript(std::string const& script, std::string const& path) {
+        JSTempVal::scopeContext(m_engine->context);
+
+        const JSTempVal result = JS_Eval(m_engine->context, script.c_str(), script.length(), path.c_str(), JS_EVAL_TYPE_GLOBAL);
+        if (JS_IsException(result)) {
+            const JSTempVal except = JS_GetException(m_engine->context);
+            char const* exMsg = JS_ToCString(m_engine->context, except);
+            std::string err = path + " eval failed: " + exMsg;
+            JS_FreeCString(m_engine->context, exMsg);
+            throw ScriptException(err.c_str());
+        }
+    }
+
+    void ScriptHost::installRuntime() {
+        // all calls in this method need this context scoped
+        JSTempVal::scopeContext(m_engine->context);
+        try {
+            installLibHTML();
+            installLibCanvas();
+
+            evalScript(std::string(embed::__script_play_js, embed::__script_play_js_size), "play.js");
+        } catch (ScriptEngineException const& see) {
+            LOG_MSGF("[SCRIPT ENGINE] %s\n", see.what());
+        } catch (ScriptException const& se) {
+            LOG_MSGF("[SCRIPT] %s\n", se.what());
+        }
+    }
+
+}
+}
