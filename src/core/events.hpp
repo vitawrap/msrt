@@ -32,9 +32,11 @@ namespace ms {
 
         void sweepDeadEntries() {
             if (m_hasZombies) {
-                for (auto itr = m_slots.cbegin(); itr != m_slots.cend(); ++itr) {
+                for (auto itr = m_slots.cbegin(); itr != m_slots.cend();) {
                     if ((*itr).flags & CONN_DEAD)
                         itr = m_slots.erase(itr);
+                    else
+                        ++itr;
                 }
                 m_hasZombies = false;
             }
