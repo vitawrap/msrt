@@ -50,22 +50,19 @@ namespace browser {
     template <typename T>
     class ScriptProxy {
     protected:
-        T m_object;
         JSValue m_ownValue;
         JSContext* m_context;
+        T m_object;
     public:
         typedef ScriptProxy Self;
 
         template <typename... Args>
         ScriptProxy(JSContext* ctx, Args&& ...args) :
             m_context(ctx),
-            m_object(std::forward<Args>(args)...) {
-                static_assert(offsetof(ScriptProxy, m_object) == size_t(0),
-                "ScriptProxy: owned object must be at start of block!");
-            }
+            m_object(std::forward<Args>(args)...) {}
         ~ScriptProxy() { JS_FreeValue(m_context, m_ownValue); }
 
-        void setValue(JSValue value) { m_ownValue; }
+        void setValue(JSValue value) { value = m_ownValue; }
         JSValueConst getValue() const { return m_ownValue; }
         operator JSValue() { return m_ownValue; }
 
@@ -74,6 +71,23 @@ namespace browser {
 
         T const* operator ->() const { return m_object; }
         T* operator ->() { return &m_object; }
+
+        /**
+         * Cast a raw pointer obtained from foreign env (who shall be a ScriptProxy<any>*) to its owned object.
+         * template typename T can be a base class here.
+         */
+        static T* cast(void* ptr) {
+            return reinterpret_cast<T*>((char*)ptr + offsetof(ScriptProxy, m_object));
+        }
+
+        /**
+         * Cast an owned pointer obtained from a foreing env (who shall be from a ScriptProxy<any>*) to its associated value.
+         * template typename T can be a base class here.
+         */
+        static JSValueConst* toValue(T const* proxyOwnedObject) {
+            char* proxyBase = ((char*)proxyOwnedObject - offsetof(ScriptProxy, m_object));
+            return reinterpret_cast<JSValueConst*>(proxyBase + offsetof(ScriptProxy, m_ownValue));
+        }
     };
 
 }
