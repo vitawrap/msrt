@@ -104,6 +104,9 @@ namespace ms {
         inline void invokeDeferred(Args... args);
     };
 
+    /** This type alias only exists to be able to reference enums */
+    using EventEnum = Event<>;
+
     class EventQueue {
     public:
         typedef std::function<void()> EventFuncType;
