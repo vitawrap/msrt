@@ -68,6 +68,7 @@ namespace ms {
         Thread::setMainThread();
         io::LogDispatcher::get().addStandardOutput();
         m_browser.init();
+        m_browser.getScriptHost()->installRuntime();
 
         // add all supported resource types so far
         PRECACHE_REGISTER_EXT(".wav", res::AudioStreamWAV);

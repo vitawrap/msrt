@@ -63,6 +63,11 @@ namespace browser {
         void evalScript(std::string const& script, std::string const& path = "");
 
         /**
+         * Install libraries necessary to emulate browser environment
+         */
+        void installLibs();
+
+        /**
          * Install microstudio runtime onto the script engine
          */
         void installRuntime();

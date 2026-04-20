@@ -28,8 +28,9 @@ namespace browser {
         JS_SetStripInfo(js->runtime, JS_STRIP_DEBUG | JS_STRIP_SOURCE);
 #endif
 
-        // TODO: Browser API
-        installRuntime();
+        // Browser API
+        JSTempVal::scopeContext(m_engine->context);
+        installLibs();
     }
 
     void ScriptHost::destroyEngine() {
@@ -42,8 +43,6 @@ namespace browser {
     }
 
     void ScriptHost::evalScript(std::string const& script, std::string const& path) {
-        JSTempVal::scopeContext(m_engine->context);
-
         const JSTempVal result = JS_Eval(m_engine->context, script.c_str(), script.length(), path.c_str(), JS_EVAL_TYPE_GLOBAL);
         if (JS_IsException(result)) {
             const JSTempVal except = JS_GetException(m_engine->context);
@@ -54,13 +53,19 @@ namespace browser {
         }
     }
 
-    void ScriptHost::installRuntime() {
-        // all calls in this method need this context scoped
-        JSTempVal::scopeContext(m_engine->context);
+    void ScriptHost::installLibs() {        
         try {
             installLibHTML();
             installLibCanvas();
+        } catch (ScriptEngineException const& see) {
+            LOG_MSGF("[SCRIPT ENGINE] %s\n", see.what());
+        } catch (ScriptException const& se) {
+            LOG_MSGF("[SCRIPT] %s\n", se.what());
+        }
+    }
 
+    void ScriptHost::installRuntime() {
+        try {
             evalScript(std::string(embed::__script_play_js, embed::__script_play_js_size), "play.js");
         } catch (ScriptEngineException const& see) {
             LOG_MSGF("[SCRIPT ENGINE] %s\n", see.what());
