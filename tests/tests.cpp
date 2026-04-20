@@ -18,12 +18,37 @@ static void crash_handler(int sig) {
 { LOG_MSGF("Test %s aborted: assertion \"%s\" failed.\n", __func__, #cond); goto fail; }
 #define TEST_EPILOGUE return true; fail: return false;
 
+/* test includes */
+
+#include "core/events.hpp"
+
 /* start tests */
 
 namespace Test {
 
     bool Self() {
         TEST_ASSERT(true);
+        TEST_EPILOGUE;
+    }
+
+    bool AwaitEvent() {
+        auto* queue = ms::EventQueue::get(); // ensure it exists
+
+        int intChange = 0;
+        std::string strChange = "";
+
+        struct EventInvoker {
+            ms::Event<int, std::string const&> testEvent;
+        } a;
+        a.testEvent.connect([&](int i, std::string const& s) {
+            intChange = i; strChange = s;
+        }, ms::EventEnum::CONN_ONCE);
+        a.testEvent.invokeDeferred(1000, "Changed by lambda!");
+
+        queue->flushNotifications();
+
+        TEST_ASSERT(intChange == 1000);
+        TEST_ASSERT(strChange == "Changed by lambda!");
         TEST_EPILOGUE;
     }
 
@@ -40,6 +65,7 @@ int main(int argc, char* argv[]) {
     
     // list all tests
     RUN_TEST(Self);
+    RUN_TEST(AwaitEvent);
 
     LOG_MSGF("\n%s Tests: %d succeded, %d failed.\n", failed == 0? "\u2705" : "\u274C", succeeded, failed);
     return failed > 0;
