@@ -40,6 +40,20 @@ namespace Test {
         TEST_EPILOGUE;
     }
 
+    bool EventConnection() {
+        auto* queue = ms::EventQueue::get(); // ensure it exists
+
+        struct EventInvoker {
+            ms::Event<> testEvent;
+        } a;
+        auto conn = a.testEvent.connect([&]() {}, ms::EventEnum::CONN_ONCE);
+        TEST_ASSERT(a.testEvent.connections() == 1);
+        
+        a.testEvent.disconnect(conn.id);
+        TEST_ASSERT(a.testEvent.connections() == 0);
+        TEST_EPILOGUE;
+    }
+
     bool AwaitEvent() {
         auto* queue = ms::EventQueue::get(); // ensure it exists
 
@@ -74,6 +88,7 @@ int main(int argc, char* argv[]) {
     
     // list all tests
     RUN_TEST(Self);
+    RUN_TEST(EventConnection);
     RUN_TEST(AwaitEvent);
     RUN_TEST(BrowserLifecycle);
 
