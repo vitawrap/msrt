@@ -41,8 +41,6 @@ namespace Test {
     }
 
     bool EventConnection() {
-        auto* queue = ms::EventQueue::get(); // ensure it exists
-
         struct EventInvoker {
             ms::Event<> testEvent;
         } a;
@@ -55,7 +53,7 @@ namespace Test {
     }
 
     bool AwaitEvent() {
-        auto* queue = ms::EventQueue::get(); // ensure it exists
+        ms::EventQueue queue; // make local queue
 
         int intChange = 0;
         std::string strChange = "";
@@ -66,9 +64,9 @@ namespace Test {
         a.testEvent.connect([&](int i, std::string const& s) {
             intChange = i; strChange = s;
         }, ms::EventEnum::CONN_ONCE);
-        a.testEvent.invokeDeferred(1000, "Changed by lambda!");
+        a.testEvent.invokeDeferredQueue(1000, "Changed by lambda!", &queue);
 
-        queue->flushNotifications();
+        queue.flushNotifications();
 
         TEST_ASSERT(intChange == 1000);
         TEST_ASSERT(strChange == "Changed by lambda!");
