@@ -62,7 +62,7 @@ namespace ms {
         bool disconnect(uint64_t id) {
             std::lock_guard<decltype(m_mutex)> lock(m_mutex);
             /** TODO: Look at std::remove_if */
-            for (auto itr = m_slots.cbegin(); itr != m_slots.cend(); ++itr) {
+            for (auto itr = m_slots.begin(); itr != m_slots.end(); ++itr) {
                 Connection& conn = *itr;
                 if (conn.id == id) {
                     if (m_invokeDepth > 0) {
