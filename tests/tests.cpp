@@ -1,0 +1,46 @@
+#include "io/log.hpp"
+
+// those should be cross-platform
+#include <signal.h>
+#include <setjmp.h>
+
+static jmp_buf test_env;
+static int last_signal;
+static int succeeded = 0, failed = 0;
+static void crash_handler(int sig) {
+    longjmp(test_env, sig? sig : 1); // skip test and continue forth
+}
+
+#define RUN_TEST(func) { LOG_MSGF("Running test %s... ", #func); if ((last_signal = setjmp(test_env)) == 0) \
+{ if (Test:: func()) { LOG_MSG("OK\n"); ++succeeded; } else ++failed; } else \
+{ LOG_MSGF("Test %s crashed with signal %d!\n", #func, last_signal); ++failed; } }
+#define TEST_ASSERT(cond) if (!(cond)) \
+{ LOG_MSGF("Test %s aborted: assertion \"%s\" failed.\n", __func__, #cond); goto fail; }
+#define TEST_EPILOGUE return true; fail: return false;
+
+/* start tests */
+
+namespace Test {
+
+    bool Self() {
+        TEST_ASSERT(true);
+        TEST_EPILOGUE;
+    }
+
+}
+
+/* end tests */
+
+int main(int argc, char* argv[]) {
+    ms::io::LogDispatcher::get().addStandardOutput();
+    signal(SIGILL, crash_handler);
+    signal(SIGFPE, crash_handler);
+    signal(SIGSEGV, crash_handler);
+    signal(SIGABRT, crash_handler);
+    
+    // list all tests
+    RUN_TEST(Self);
+
+    LOG_MSGF("\n%s Tests: %d succeded, %d failed.\n", failed == 0? "\u2705" : "\u274C", succeeded, failed);
+    return failed > 0;
+}

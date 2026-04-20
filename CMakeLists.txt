@@ -74,11 +74,37 @@ file(GLOB_RECURSE SOURCES_ASM
 
 set_property(SOURCE ${SOURCES_ASM} APPEND PROPERTY COMPILE_OPTIONS "-I${CMAKE_SOURCE_DIR}")
 
+# main executable
+
 add_executable(${PROJECT_NAME} ${SOURCES} ${SOURCES_ASM})
 target_include_directories(${PROJECT_NAME} PRIVATE src include)
 target_include_directories(${PROJECT_NAME} PUBLIC "${quickjs_SOURCE_DIR}" "${minizip_SOURCE_DIR}")
 
 target_link_libraries(${PROJECT_NAME} 
+    PRIVATE 
+        raylib
+        minizip
+        ${QJS_LIB}
+        ${MESSAGEBOX_LIB}
+)
+
+# link-time linux specific shenanigans
+if(UNIX AND NOT APPLE)
+    target_link_libraries(${PROJECT_NAME} PRIVATE m pthread dl rt)
+endif()
+
+# test executable
+
+file(GLOB_RECURSE TEST_SOURCES
+    "tests/*.cpp"
+)
+
+add_executable(unit_tests ${TEST_SOURCES} ${SOURCES} ${SOURCES_ASM})
+target_compile_definitions(unit_tests PRIVATE PLATFORM_NO_MAIN)
+target_include_directories(unit_tests PRIVATE src include)
+target_include_directories(unit_tests PUBLIC "${quickjs_SOURCE_DIR}" "${minizip_SOURCE_DIR}")
+
+target_link_libraries(unit_tests 
     PRIVATE 
         raylib
         minizip
