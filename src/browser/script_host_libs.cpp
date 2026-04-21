@@ -14,12 +14,6 @@
 namespace ms {
 namespace browser {
 
-    /* Classes */
-
-    static JSClassID classId_Node;
-    static JSClassID classId_HTMLElement;
-    static JSClassID classId_HTMLCanvas;
-
     /* Util */
 
     static inline JSValue getClassProtoOrThrow(JSContext* ctx, JSValueConst const& new_target, JSClassID clid, char const* clname) {
@@ -36,7 +30,7 @@ namespace browser {
         return proto; // not a temp value, but should be assigned to one when leaving this function!
     }
 
-    /* Libraries */
+#pragma region Objects
 
     template <typename T, JSClassID const& classID>
     static JSValue constructObject(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv) {
@@ -62,6 +56,11 @@ namespace browser {
     template <typename T, JSClassID const& classID>
     static const auto constructNode = constructObject<T, classID>; // node has no specific setup in constructor
 
+#pragma endregion
+#pragma region Nodes
+
+    static JSClassID classId_Node;
+
     // node (and derived) gc tagging of children
     static void gcMarkNode(JSRuntime* rt, JSValueConst v, JS_MarkFunc mfn) {
         void* opaque = JS_GetOpaque(v, JS_GetClassID(v));
@@ -79,18 +78,28 @@ namespace browser {
         cdef.class_name = "Node";
         cdef.finalizer = &destructObject<Node>;
         cdef.gc_mark = &gcMarkNode;
-        JS_NewClassID(&classId_HTMLCanvas);
-        JS_NewClass(JS_GetRuntime(ctx), classId_HTMLCanvas, &cdef);
+        JS_NewClassID(&classId_Node);
+        JS_NewClass(JS_GetRuntime(ctx), classId_Node, &cdef);
         JSValue proto = JS_NewObject(ctx);
         JS_SetPropertyFunctionList(ctx, proto, nullptr, 0);
         // global constructor
         JSValue ctor = JS_NewCFunction2(ctx, constructNode<Node, classId_Node>, 
             cdef.class_name, 0, JS_CFUNC_constructor, 0);
         JS_SetConstructor(ctx, ctor, proto);
-        JS_SetClassProto(ctx, classId_HTMLCanvas, proto);
+        JS_SetClassProto(ctx, classId_Node, proto);
         JSTempVal globalThis = JS_GetGlobalObject(ctx);
         JS_SetPropertyStr(ctx, globalThis, cdef.class_name, ctor);
     }
+
+#pragma endregion
+#pragma region Element
+
+    static JSClassID classId_HTMLElement;
+
+#pragma endregion
+#pragma region Canvas
+
+    static JSClassID classId_HTMLCanvas;
 
     void ScriptHost::installLibCanvas() {
         auto* ctx = m_engine->context;
@@ -113,6 +122,8 @@ namespace browser {
         JSTempVal globalThis = JS_GetGlobalObject(ctx);
         JS_SetPropertyStr(ctx, globalThis, cdef.class_name, ctor);
     }
+
+#pragma endregion
 
     static void installConsole(JSContext* ctx) {
         JSTempVal globalThis = JS_GetGlobalObject(ctx);
