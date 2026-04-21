@@ -12,6 +12,7 @@
 #include <quickjs.h>
 #include <utility>
 #include <cstddef>
+#include <string>
 
 namespace ms {
 namespace browser {
@@ -90,6 +91,74 @@ namespace browser {
                 return *reinterpret_cast<JSValueConst*>(proxyBase + offsetof(ScriptProxy, m_ownValue));
             }
             return JS_NULL;
+        }
+    };
+
+    struct ScriptCast {        
+        template <typename V>
+        static V arg(JSValueConst& jsv) {
+            return V();
+        }
+
+        template <typename V>
+        static JSValue ret(JSContext* ctx, V const& ret) {
+            if constexpr (std::is_base_of_v<std::string, V>) { // c++ string
+                return JS_NewStringLen(ctx, ret.c_str(), ret.length());
+            } else if constexpr (std::is_same_v<std::decay_t<V>, const char*>) { // static c string
+                return JS_NewString(ctx, ret);
+            } else if constexpr (std::is_same_v<bool, V>) { // boolean
+                return JS_NewBool(ctx, ret);
+            } else if constexpr (std::is_pointer_v<V>) { // pointer to unmanaged data
+                static_assert(false, "Casting arbitrary memory to JSValue is not yet possible...");
+            } else if constexpr (std::is_integral_v<V>) {
+                return JS_NewInt64(ctx, static_cast<int64_t>(ret));
+            } else if constexpr (std::is_floating_point_v<V>) {
+                return JS_NewFloat64(ctx, static_cast<double>(ret));
+            }
+            return JS_UNDEFINED;
+        }
+    };
+
+    /**
+     * @brief wildcard internal template for script call into native call
+     */
+    template <typename R, typename T, typename... Args>
+    struct ScriptMethodInternal {
+    public:
+        template <size_t... IS>
+        static JSValue call(R (T::*fptr) (Args...), T* object, JSValueConst* argv, std::index_sequence<IS...> const&) {
+            return ScriptCast::ret((object->*fptr)(ScriptCast::arg<Args>(argv[IS])...));
+        }
+    };
+
+    /**
+     * @brief void return type template for script call into native call
+     */
+    template <typename T, typename... Args>
+    struct ScriptMethodInternal<void, T, Args...> {
+        template <size_t... IS>
+        static JSValue call(void (T::*fptr) (Args...), T* object, JSValueConst* argv, std::index_sequence<IS...> const&) {
+            (object->*fptr)(ScriptCast::arg<Args>(argv[IS])...);
+            return JS_UNDEFINED;
+        }
+    };
+
+    /**
+     * @brief public part of script method registration
+     * this does all the necessary template work to accept bare C++ functions
+     */
+    struct ScriptMethod {
+    public:
+        template <JSClassID const& ClassID, typename T, typename R, typename... Args>
+        static JSCFunction* from(R (T::*fptr) (Args...)) {
+            static auto methodPtr = fptr; // doesn't need thread-safety, should be template-unique
+            return [](JSContext *ctx, JSValueConst self, int argc, JSValueConst *argv) -> JSValue {
+                void* opaque = JS_GetOpaque(self, JS_GetClassID(self));
+                DEBUG_ASSERT(opaque && "wrong classID in ScriptMethod::from!");
+                T* object = ScriptProxy<T>::cast(opaque);
+                constexpr auto is = std::index_sequence_for<Args...>{};
+                return ScriptMethodInternal<R, T, Args...>::call(methodPtr, object, argv, is);
+            };
         }
     };
 

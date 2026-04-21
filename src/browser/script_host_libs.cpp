@@ -74,6 +74,10 @@ namespace browser {
     template <typename T, JSClassID const& classID>
     static const auto constructElement = constructNode<T, classID>; /** TODO: element-specific construction */
 
+    static JSCFunctionListEntry nodeProto[] {
+        JS_CFUNC_DEF("appendChild", 1, ScriptMethod::from<classId_Node>(&Node::appendChild))
+    };
+
     static void installNodes(JSContext* ctx) {
         JSClassDef cdef;
         cdef.class_name = "Node";
