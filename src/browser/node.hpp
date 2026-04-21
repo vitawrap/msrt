@@ -11,9 +11,18 @@ namespace browser {
         typedef std::vector<Node*> NodeList;
 
     private:
+        Node* m_parent;
         NodeList m_children;
     
     public:
+        Node() :
+            m_parent(nullptr)
+        {}
+
+        void appendChild(Node* node);
+        void removeChild(Node* node);
+
+        bool hasChildNodes() const { return m_children.size(); }
 
         // STL interface
         const NodeList::const_iterator begin() const { return m_children.cbegin(); }
