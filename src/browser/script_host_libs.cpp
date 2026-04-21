@@ -54,7 +54,7 @@ namespace browser {
 
     template <typename T>
     static void destructObject(JSRuntime* rt, JSValue self) {
-        auto* proxy = reinterpret_cast<ScriptProxy<Node>*>(JS_GetOpaque(self, JS_GetClassID(self)));
+        auto* proxy = reinterpret_cast<ScriptProxy<T>*>(JS_GetOpaque(self, JS_GetClassID(self)));
         DEBUG_ASSERT(proxy && "wrong classID in destructObject!");
         delete proxy; // also destroys encapsulated T. Every qjs subclass MUST derive this destructor, since no dynamic binding test will be made.
     }
