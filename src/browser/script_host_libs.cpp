@@ -73,6 +73,16 @@ namespace browser {
     template <typename T, JSClassID const& classID>
     static const auto constructElement = constructNode<T, classID>; /** TODO: element-specific construction */
 
+    static JSValue NodeProto_treeChild(JSContext *ctx, JSValueConst self, int argc, JSValueConst *argv, int magic) {
+        /** TODO: Shared check to see if argv0 is a valid Node, then split into appendChild or removeChild. */
+        return JS_UNDEFINED;
+    }
+
+    static JSCFunctionListEntry defineNode[] = {
+        JS_CFUNC_MAGIC_DEF("appendChild", 1, NodeProto_treeChild, 0),
+        JS_CFUNC_MAGIC_DEF("appendChild", 1, NodeProto_treeChild, 1)
+    };
+
     static void installNodes(JSContext* ctx) {
         JSClassDef cdef;
         cdef.class_name = "Node";
