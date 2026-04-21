@@ -68,7 +68,7 @@ namespace browser {
         DEBUG_ASSERT(opaque && "wrong classID in gcMarkNode!");
         auto const* ptr = ScriptProxy<Node>::cast(opaque);
         for (const auto* child : *ptr) // (recursively) assumes ALL children are allocated by JS!!
-            JS_MarkValue(rt, *ScriptProxy<Node>::toValue(child), mfn);
+            JS_MarkValue(rt, ScriptProxy<Node>::toValue(child), mfn);
     }
 
     template <typename T, JSClassID const& classID>
