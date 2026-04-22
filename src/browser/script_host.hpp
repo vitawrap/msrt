@@ -58,9 +58,9 @@ namespace browser {
         void destroyEngine();
 
         /**
-         * Evaluate script contents in engine
+         * Evaluate script contents in engine and return result as a string
          */
-        void evalScript(std::string const& script, std::string const& path = "");
+        std::string evalScript(std::string const& script, std::string const& path = "");
 
         /**
          * Install libraries necessary to emulate browser environment

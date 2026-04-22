@@ -43,7 +43,7 @@ namespace browser {
         }
     }
 
-    void ScriptHost::evalScript(std::string const& script, std::string const& path) {
+    std::string ScriptHost::evalScript(std::string const& script, std::string const& path) {
         const JSTempVal result = JS_Eval(m_engine->context, script.c_str(), script.length(), path.c_str(), JS_EVAL_TYPE_GLOBAL);
         if (JS_IsException(result)) {
             const JSTempVal except = JS_GetException(m_engine->context);
@@ -52,6 +52,11 @@ namespace browser {
             JS_FreeCString(m_engine->context, exMsg);
             throw ScriptException(err.c_str());
         }
+        // result js string to std string
+        char const* str = JS_ToCString(m_engine->context, result);
+        std::string resultStr(str);
+        JS_FreeCString(m_engine->context, str);
+        return resultStr;
     }
 
     void ScriptHost::installLibs() {        
