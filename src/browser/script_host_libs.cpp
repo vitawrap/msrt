@@ -53,6 +53,14 @@ namespace browser {
         delete proxy; // also destroys encapsulated T. Every qjs subclass MUST derive this destructor, since no dynamic binding test will be made.
     }
 
+    template <typename T>
+    static inline T* opaqueToObject(JSValueConst const& v) {
+        void* opaque = JS_GetOpaque(v, JS_GetClassID(v));
+        if (!opaque)
+            throw ScriptEngineException("Wrong ClassID in opaqueToObject!");
+        return ScriptProxy<T>::cast(opaque);
+    }
+
     template <typename T, JSClassID const& classID>
     static const auto constructNode = constructObject<T, classID>; // node has no specific setup in constructor
 
@@ -63,9 +71,7 @@ namespace browser {
 
     // node (and derived) gc tagging of children
     static void gcMarkNode(JSRuntime* rt, JSValueConst v, JS_MarkFunc mfn) {
-        void* opaque = JS_GetOpaque(v, JS_GetClassID(v));
-        DEBUG_ASSERT(opaque && "wrong classID in gcMarkNode!");
-        auto const* ptr = ScriptProxy<Node>::cast(opaque);
+        auto const* ptr = opaqueToObject<Node>(v);
         for (const auto* child : *ptr) // (recursively) assumes ALL children are allocated by JS!!
             JS_MarkValue(rt, ScriptProxy<Node>::toValue(child), mfn);
     }

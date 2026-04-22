@@ -81,7 +81,7 @@ namespace browser {
         }
 
         /**
-         * Cast an owned pointer obtained from a foreing env (who shall be from a ScriptProxy<any>*) to its associated value.
+         * Cast an owned pointer obtained from a foreign env (who shall be from a ScriptProxy<any>*) to its associated value.
          * template typename T can be a base class here.
          */
         static JSValueConst toValue(T const* proxyOwnedObject) {
