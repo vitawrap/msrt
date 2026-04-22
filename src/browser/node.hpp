@@ -18,11 +18,13 @@ namespace browser {
         Node() :
             m_parent(nullptr)
         {}
+        virtual ~Node() {}; // children are GC collected
 
-        void appendChild(Node* node);
-        void removeChild(Node* node);
+        bool appendChild(Node* node);
+        bool removeChild(Node* node);
 
         bool hasChildNodes() const { return m_children.size(); }
+        Node* getParent() const { return m_parent; }
 
         // STL interface
         const NodeList::const_iterator begin() const { return m_children.cbegin(); }
