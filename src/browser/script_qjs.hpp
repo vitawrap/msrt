@@ -62,7 +62,7 @@ namespace browser {
             m_object(std::forward<Args>(args)...) {}
         ~ScriptProxy() { JS_FreeValue(m_context, m_ownValue); }
 
-        void setValue(JSValue value) { value = m_ownValue; }
+        void setValue(JSValue value) { m_ownValue = value; }
         JSValueConst getValue() const { return m_ownValue; }
         operator JSValue() { return m_ownValue; }
 
