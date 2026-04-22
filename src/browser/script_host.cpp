@@ -36,6 +36,7 @@ namespace browser {
     void ScriptHost::destroyEngine() {
         if (m_engine) {
             JS_FreeContext(m_engine->context);
+            JS_RunGC(m_engine->runtime); // gc has to be run manually before shutdown
             JS_FreeRuntime(m_engine->runtime);
             delete m_engine;
             m_engine = nullptr;
