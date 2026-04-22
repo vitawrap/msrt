@@ -1,4 +1,5 @@
 #include "context.hpp"
+#include "core/util.hpp"
 
 namespace ms {
 namespace browser {
@@ -17,6 +18,11 @@ namespace browser {
 
     void Context::processRepaintNotifications() {
         m_repaintQueue.flushNotifications();
+    }
+
+    void Context::setDOMRoot(Node* gcPtr) {
+        DEBUG_ASSERT((!m_domRoot) && "DOM root was not null before setDOMRoot!");
+        m_domRoot = gcPtr;
     }
 
     void Context::repaint(platform::IWindowManager* wm) {

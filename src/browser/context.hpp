@@ -11,11 +11,12 @@ namespace browser {
     class Context {
         EventQueue m_repaintQueue;
         ScriptHost m_scriptHost;
-        Node m_domRoot;
+        Node* m_domRoot;
 
     public:
-        Context()
-            : m_scriptHost(this)
+        Context() :
+            m_scriptHost(this),
+            m_domRoot(nullptr) // allocated by script
         {}
 
         /** Get the underlying javascript engine */
@@ -28,8 +29,11 @@ namespace browser {
         void free();
 
         /** Get simulated DOM root (no document system) */
-        Node const* getDOM() const { return &m_domRoot; }
-        Node* getDOM() { return &m_domRoot; }
+        Node const* getDOM() const { return m_domRoot; }
+        Node* getDOM() { return m_domRoot; }
+
+        /** Set DOM root from externally allocated node (script engine pointer managed by GC) */
+        void setDOMRoot(Node* gcPtr);
 
         /** add listener to be invoked BEFORE a repaint */
         void addRepaintListener(EventQueue::EventFuncType slot);
