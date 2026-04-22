@@ -80,13 +80,34 @@ namespace browser {
     static const auto constructElement = constructNode<T, classID>; /** TODO: element-specific construction */
 
     static JSValue NodeProto_treeChild(JSContext *ctx, JSValueConst self, int argc, JSValueConst *argv, int magic) {
-        /** TODO: Shared check to see if argv0 is a valid Node, then split into appendChild or removeChild. */
+        auto* parent = opaqueToObject<Node>(self);
+        auto* child = opaqueToObject<Node>(argv[0]);
+        switch (magic) {
+            case 0: // appendChild
+            if (!parent->appendChild(child)) JS_ThrowInternalError(ctx, "%s", "Failed to add child node to parent");
+            break;
+            case 1: // removeChild
+            if (!parent->removeChild(child)) JS_ThrowInternalError(ctx, "%s", "Failed to remove child from parent!");
+            break;
+        }
+        return JS_UNDEFINED;
+    }
+
+    static JSValue NodeProto_getters(JSContext *ctx, JSValueConst self, int magic) {
+        auto* node = opaqueToObject<Node>(self);
+        switch (magic) {
+            /* parentNode */ case 0: return JS_DupValue(ctx, ScriptProxy<Node>::toValue(node->getParent()));
+            /* parentElement */ case 1:
+                return dynamic_cast<HTMLElement*>(node->getParent())? JS_DupValue(ctx, ScriptProxy<Node>::toValue(node->getParent())) : JS_NULL;
+        }
         return JS_UNDEFINED;
     }
 
     static JSCFunctionListEntry defineNode[] = {
         JS_CFUNC_MAGIC_DEF("appendChild", 1, NodeProto_treeChild, 0),
-        JS_CFUNC_MAGIC_DEF("appendChild", 1, NodeProto_treeChild, 1)
+        JS_CFUNC_MAGIC_DEF("removeChild", 1, NodeProto_treeChild, 1),
+        JS_CGETSET_MAGIC_DEF("parentNode", NodeProto_getters, nullptr, 0),
+        JS_CGETSET_MAGIC_DEF("parentElement", NodeProto_getters, nullptr, 1),
     };
 
     static void installNodes(JSContext* ctx) {
