@@ -9,9 +9,12 @@
  */
 
 #include "core/util.hpp"
-#include <quickjs.h>
 #include <utility>
 #include <cstddef>
+
+// QuickJS includes
+#include <cutils.h>
+#include <quickjs.h>
 
 namespace ms {
 namespace browser {

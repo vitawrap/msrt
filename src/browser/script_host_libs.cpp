@@ -1,5 +1,4 @@
 #include "core/app.hpp"
-#include "quickjs.h"
 #include "script_host.hpp"
 #include "script_qjs.hpp"
 #include "io/log.hpp"
@@ -42,6 +41,7 @@ namespace browser {
         }
         auto* proxy = new ScriptProxy<T>(ctx);
         JS_SetOpaque(obj, proxy);
+        //proxy->setValue(JS_DupValue(ctx, obj)); // dup into opaque: don't hold onto temp value container
         proxy->setValue(obj);
         return obj;
     }
@@ -61,13 +61,13 @@ namespace browser {
         return ScriptProxy<T>::cast(opaque);
     }
 
-    template <typename T, JSClassID const& classID>
-    static const auto constructNode = constructObject<T, classID>; // node has no specific setup in constructor
-
 #pragma endregion
 #pragma region Nodes
 
     static JSClassID classId_Node;
+
+    template <typename T, JSClassID const& classID>
+    static const auto constructNode = constructObject<T, classID>; // node has no specific setup in constructor
 
     // node (and derived) gc tagging of children
     static void gcMarkNode(JSRuntime* rt, JSValueConst v, JS_MarkFunc mfn) {
@@ -75,9 +75,6 @@ namespace browser {
         for (const auto* child : *ptr) // (recursively) assumes ALL children are allocated by JS!!
             JS_MarkValue(rt, ScriptProxy<Node>::toValue(child), mfn);
     }
-
-    template <typename T, JSClassID const& classID>
-    static const auto constructElement = constructNode<T, classID>; /** TODO: element-specific construction */
 
     static JSValue NodeProto_treeChild(JSContext *ctx, JSValueConst self, int argc, JSValueConst *argv, int magic) {
         auto* parent = opaqueToObject<Node>(self);
@@ -111,14 +108,14 @@ namespace browser {
     };
 
     static void installNodes(JSContext* ctx) {
-        JSClassDef cdef;
+        JSClassDef cdef{};
         cdef.class_name = "Node";
         cdef.finalizer = &destructObject<Node>;
         cdef.gc_mark = &gcMarkNode;
         JS_NewClassID(&classId_Node);
         JS_NewClass(JS_GetRuntime(ctx), classId_Node, &cdef);
         JSValue proto = JS_NewObject(ctx);
-        JS_SetPropertyFunctionList(ctx, proto, nullptr, 0);
+        JS_SetPropertyFunctionList(ctx, proto, defineNode, countof(defineNode));
         // global constructor
         JSValue ctor = JS_NewCFunction2(ctx, constructNode<Node, classId_Node>, 
             cdef.class_name, 0, JS_CFUNC_constructor, 0);
@@ -133,6 +130,9 @@ namespace browser {
 
     static JSClassID classId_HTMLElement;
 
+    template <typename T, JSClassID const& classID>
+    static const auto constructElement = constructNode<T, classID>; /** TODO: element-specific construction */
+
 #pragma endregion
 #pragma region Canvas
 
@@ -140,7 +140,7 @@ namespace browser {
 
     void ScriptHost::installLibCanvas() {
         auto* ctx = m_engine->context;
-        JSClassDef cdef;
+        JSClassDef cdef{};
         cdef.class_name = "HTMLCanvasElement";
         cdef.finalizer = &destructObject<HTMLCanvasElement>;
         cdef.gc_mark = &gcMarkNode;
@@ -207,16 +207,14 @@ namespace browser {
         }, "requestAnimationFrame", 1);
         JS_SetPropertyStr(ctx, globalThis, "requestAnimationFrame", reqFrame);
 
-        // re-add globalThis as window
-        JS_SetPropertyStr(ctx, globalThis, "window", globalThis);
-
-
-
         // install conventional objects
         installConsole(ctx);
 
         // install basic nodes
         installNodes(ctx);
+
+        // re-add globalThis as window
+        JS_SetPropertyStr(ctx, globalThis, "window", globalThis);
     }
 
 }
