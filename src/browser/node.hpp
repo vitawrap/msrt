@@ -18,7 +18,10 @@ namespace browser {
         Node() :
             m_parent(nullptr)
         {}
-        virtual ~Node() {}; // children are GC collected
+        virtual ~Node() {
+            if (m_parent)
+                m_parent->removeChild(this);
+        } // children are GC collected
 
         bool appendChild(Node* node);
         bool removeChild(Node* node);
