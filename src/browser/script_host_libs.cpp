@@ -69,13 +69,14 @@ namespace browser {
     template <typename T, JSClassID const& classID>
     static const auto constructNode = constructObject<T, classID>; // node has no specific setup in constructor
 
+    template <typename T>
     static void destructNode(JSRuntime* rt, JSValue self) {
-        auto* parent = opaqueToObject<Node>(self);
+        auto* parent = opaqueToObject<T>(self);
         for (auto* child : *parent) {
             parent->removeChild(child); // remove children and decrement ownership ref
             JS_FreeValueRT(rt, ScriptProxy<Node>::toValue(child));
         }
-        destructObject<Node>(rt, self);
+        destructObject<T>(rt, self);
     }
 
     // node (and derived) gc tagging of children
@@ -130,7 +131,7 @@ namespace browser {
     static void installNodes(JSContext* ctx) {
         JSClassDef cdef{};
         cdef.class_name = "Node";
-        cdef.finalizer = &destructNode;
+        cdef.finalizer = &destructNode<Node>;
         cdef.gc_mark = &gcMarkNode;
         JS_NewClassID(&classId_Node);
         JS_NewClass(JS_GetRuntime(ctx), classId_Node, &cdef);
@@ -162,7 +163,7 @@ namespace browser {
         auto* ctx = m_engine->context;
         JSClassDef cdef{};
         cdef.class_name = "HTMLCanvasElement";
-        cdef.finalizer = &destructObject<HTMLCanvasElement>;
+        cdef.finalizer = &destructNode<HTMLCanvasElement>;
         cdef.gc_mark = &gcMarkNode;
         JS_NewClassID(&classId_HTMLCanvas);
         JS_NewClass(JS_GetRuntime(ctx), classId_HTMLCanvas, &cdef);
