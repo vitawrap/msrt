@@ -69,6 +69,15 @@ namespace browser {
     template <typename T, JSClassID const& classID>
     static const auto constructNode = constructObject<T, classID>; // node has no specific setup in constructor
 
+    static void destructNode(JSRuntime* rt, JSValue self) {
+        auto* parent = opaqueToObject<Node>(self);
+        for (auto* child : *parent) {
+            parent->removeChild(child); // remove children and decrement ownership ref
+            JS_FreeValueRT(rt, ScriptProxy<Node>::toValue(child));
+        }
+        destructObject<Node>(rt, self);
+    }
+
     // node (and derived) gc tagging of children
     static void gcMarkNode(JSRuntime* rt, JSValueConst v, JS_MarkFunc mfn) {
         auto const* ptr = opaqueToObject<Node>(v);
@@ -78,13 +87,24 @@ namespace browser {
 
     static JSValue NodeProto_treeChild(JSContext *ctx, JSValueConst self, int argc, JSValueConst *argv, int magic) {
         auto* parent = opaqueToObject<Node>(self);
-        auto* child = opaqueToObject<Node>(argv[0]);
+        JSValueConst& childVal = argv[0];
+        auto* child = opaqueToObject<Node>(childVal);
         switch (magic) {
             case 0: // appendChild
-            if (!parent->appendChild(child)) JS_ThrowInternalError(ctx, "%s", "Failed to add child node to parent");
+            if (parent->appendChild(child))
+                JS_DupValue(ctx, childVal); // increment ref
+            else {
+                JS_ThrowInternalError(ctx, "%s", "Failed to add child node to parent");
+                return JS_EXCEPTION;
+            }
             break;
             case 1: // removeChild
-            if (!parent->removeChild(child)) JS_ThrowInternalError(ctx, "%s", "Failed to remove child from parent!");
+            if (parent->removeChild(child))
+                JS_FreeValue(ctx, childVal); // decrement ref
+            else {
+                JS_ThrowInternalError(ctx, "%s", "Failed to remove child from parent!");
+                return JS_EXCEPTION;
+            }
             break;
         }
         return JS_UNDEFINED;
@@ -110,7 +130,7 @@ namespace browser {
     static void installNodes(JSContext* ctx) {
         JSClassDef cdef{};
         cdef.class_name = "Node";
-        cdef.finalizer = &destructObject<Node>;
+        cdef.finalizer = &destructNode;
         cdef.gc_mark = &gcMarkNode;
         JS_NewClassID(&classId_Node);
         JS_NewClass(JS_GetRuntime(ctx), classId_Node, &cdef);

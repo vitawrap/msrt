@@ -49,9 +49,9 @@ namespace Test {
             var rootNode = new Node();
             var childNode = new Node();
             rootNode.appendChild(childNode);
-            //childNode.parentNode == rootNode;
+            childNode.parentNode == rootNode;
         )js");
-        //TEST_ASSERT(eval == "true");
+        TEST_ASSERT(eval == "true");
 
         ctx.free();
         TEST_EPILOGUE;
