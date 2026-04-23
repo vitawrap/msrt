@@ -224,7 +224,7 @@ namespace browser {
                 return JS_UNDEFINED;
             }
             JS_ThrowTypeError(ctx, "%s arg in requestAnimationFrame", argc? "not a Function" : "expected 1");
-            return JS_UNDEFINED; /** TODO: this should be a counter system? */
+            return JS_EXCEPTION; /** TODO: this should be a counter system? */
         }, "requestAnimationFrame", 1);
         JS_SetPropertyStr(ctx, globalThis, "requestAnimationFrame", reqFrame);
 
