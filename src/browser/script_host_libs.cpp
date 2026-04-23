@@ -7,6 +7,10 @@
 #include "nodes/canvas.hpp"
 #include "core/events.hpp"
 
+/** quickjs really likes using mixed designators for JSCFunctionListEntry and it creates a flood of warnings... */
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wc99-designator"
+
 /**
  * All of those methods assume JSTempVal scoping was set up.
  */
@@ -240,3 +244,5 @@ namespace browser {
 
 }
 }
+
+#pragma clang diagnostic pop

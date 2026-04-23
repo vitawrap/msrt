@@ -52,6 +52,7 @@ namespace browser {
      */
     template <typename T>
     class ScriptProxy {
+        template <typename FT> friend class ScriptProxy;
     protected:
         JSValue m_ownValue;
         JSContext* m_context;
@@ -80,7 +81,8 @@ namespace browser {
          * template typename T can be a base class here.
          */
         static T* cast(void* ptr) {
-            return reinterpret_cast<T*>((char*)ptr + offsetof(ScriptProxy, m_object));
+            // use int specialization of ScriptProxy otherwise the compiler whines about non-standard layout despite object T being at the end
+            return reinterpret_cast<T*>((char*)ptr + offsetof(ScriptProxy<int>, m_object));
         }
 
         /**
@@ -89,8 +91,8 @@ namespace browser {
          */
         static JSValueConst toValue(T const* proxyOwnedObject) {
             if (proxyOwnedObject) {
-                char* proxyBase = ((char*)proxyOwnedObject - offsetof(ScriptProxy, m_object));
-                return *reinterpret_cast<JSValueConst*>(proxyBase + offsetof(ScriptProxy, m_ownValue));
+                char* proxyBase = ((char*)proxyOwnedObject - offsetof(ScriptProxy<int>, m_object));
+                return *reinterpret_cast<JSValueConst*>(proxyBase + offsetof(ScriptProxy<int>, m_ownValue));
             }
             return JS_NULL;
         }
