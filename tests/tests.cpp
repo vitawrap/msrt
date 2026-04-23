@@ -47,9 +47,24 @@ namespace Test {
         auto* js = ctx.getScriptHost();
         auto eval = js->evalScript(R"js(
             var rootNode = new Node();
-            var childNode = new Node();
+            var childNode = new HTMLElement();
             rootNode.appendChild(childNode);
             childNode.parentNode == rootNode;
+        )js");
+        TEST_ASSERT(eval == "true");
+
+        ctx.free();
+        TEST_EPILOGUE;
+    }
+
+    bool BrowserProtoChain() {
+        ms::browser::Context ctx;
+        ctx.init();
+
+        auto* js = ctx.getScriptHost();
+        auto eval = js->evalScript(R"js(
+            var canvas = new HTMLCanvasElement();
+            (canvas instanceof HTMLElement) && (canvas instanceof Node);
         )js");
         TEST_ASSERT(eval == "true");
 
@@ -107,6 +122,7 @@ int main(int argc, char* argv[]) {
     RUN_TEST(AwaitEvent);
     RUN_TEST(BrowserLifecycle);
     RUN_TEST(BrowserNodes);
+    RUN_TEST(BrowserProtoChain);
 
     LOG_MSGF("\n%s Tests: %d succeded, %d failed.\n", failed == 0? "\u2705" : "\u274C", succeeded, failed);
     return failed > 0;

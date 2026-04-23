@@ -142,10 +142,7 @@ namespace browser {
     };
 
     static void installNodes(JSContext* ctx) {
-        JSClassDef cdef{};
-        cdef.class_name = "Node";
-        cdef.finalizer = &destructNode<Node>;
-        cdef.gc_mark = &gcMarkNode;
+        JSClassDef cdef{ .class_name = "Node", .finalizer = &destructNode<Node>, .gc_mark = &gcMarkNode };
         JS_NewClassID(&classId_Node);
         JS_NewClass(JS_GetRuntime(ctx), classId_Node, &cdef);
         JSValue proto = JS_NewObject(ctx);
@@ -167,6 +164,24 @@ namespace browser {
     template <typename T, JSClassID const& classID>
     static const auto constructElement = constructNode<T, classID>; /** TODO: element-specific construction */
 
+    static void installElements(JSContext* ctx) {
+        JSClassDef cdef{ .class_name = "HTMLElement", .finalizer = &destructNode<HTMLElement>, .gc_mark = &gcMarkNode };
+        JS_NewClassID(&classId_HTMLElement);
+        JS_NewClass(JS_GetRuntime(ctx), classId_HTMLElement, &cdef);
+        JSValue proto = JS_NewObject(ctx);
+        if (inheritPrototype(ctx, proto, "Node")) {
+            JS_SetPropertyFunctionList(ctx, proto, nullptr, 0);
+            JSValue ctor = JS_NewCFunction2(ctx, constructElement<Node, classId_HTMLElement>, 
+                cdef.class_name, 0, JS_CFUNC_constructor, 0);
+            JS_SetConstructor(ctx, ctor, proto);
+            JS_SetClassProto(ctx, classId_HTMLElement, proto);
+            JSTempVal globalThis = JS_GetGlobalObject(ctx);
+            JS_SetPropertyStr(ctx, globalThis, cdef.class_name, ctor);
+            return;
+        }        
+        JS_FreeValue(ctx, proto);
+    }
+
 #pragma endregion
 #pragma region Canvas
 
@@ -174,24 +189,24 @@ namespace browser {
 
     void ScriptHost::installLibCanvas() {
         auto* ctx = m_engine->context;
-        JSClassDef cdef{};
-        cdef.class_name = "HTMLCanvasElement";
-        cdef.finalizer = &destructNode<HTMLCanvasElement>;
-        cdef.gc_mark = &gcMarkNode;
+        JSClassDef cdef{ .class_name = "HTMLCanvasElement", .finalizer = &destructNode<HTMLCanvasElement>, .gc_mark = &gcMarkNode };
         JS_NewClassID(&classId_HTMLCanvas);
         JS_NewClass(JS_GetRuntime(ctx), classId_HTMLCanvas, &cdef);
         JSValue proto = JS_NewObject(ctx);
-        JS_SetPropertyFunctionList(ctx, proto, nullptr, 0);
-        // global constructor
-        JSValue ctor = JS_NewCFunction2(ctx, [](JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv) -> JSValue {
-            JSValue base = constructElement<HTMLCanvasElement, classId_HTMLCanvas>(ctx, new_target, argc, argv);
-            return base;
-        }, cdef.class_name, 0, JS_CFUNC_constructor, 0);
-
-        JS_SetConstructor(ctx, ctor, proto);
-        JS_SetClassProto(ctx, classId_HTMLCanvas, proto);
-        JSTempVal globalThis = JS_GetGlobalObject(ctx);
-        JS_SetPropertyStr(ctx, globalThis, cdef.class_name, ctor);
+        if (inheritPrototype(ctx, proto, "HTMLElement")) {
+            JS_SetPropertyFunctionList(ctx, proto, nullptr, 0);
+            // global constructor
+            JSValue ctor = JS_NewCFunction2(ctx, [](JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv) -> JSValue {
+                JSValue base = constructElement<HTMLCanvasElement, classId_HTMLCanvas>(ctx, new_target, argc, argv);
+                return base;
+            }, cdef.class_name, 0, JS_CFUNC_constructor, 0);
+            JS_SetConstructor(ctx, ctor, proto);
+            JS_SetClassProto(ctx, classId_HTMLCanvas, proto);
+            JSTempVal globalThis = JS_GetGlobalObject(ctx);
+            JS_SetPropertyStr(ctx, globalThis, cdef.class_name, ctor);
+            return;
+        }
+        JS_FreeValue(ctx, proto);
     }
 
 #pragma endregion
@@ -246,6 +261,7 @@ namespace browser {
 
         // install basic nodes
         installNodes(ctx);
+        installElements(ctx);
 
         // re-add globalThis as window
         JS_SetPropertyStr(ctx, globalThis, "window", globalThis);
