@@ -9,8 +9,32 @@ namespace ms {
 
     class EventQueue;
 
+    /**
+     * @brief Event wildcard to allow invocation from base class to specialized event
+     */
+    class EventAny {
+    public:
+        template <typename... Args>
+        inline void invoke(Args&&... args);
+
+        template <typename... Args>
+        inline void invokeDeferred(Args&&... args);
+
+        template <typename... Args>
+        inline void invokeDeferredQueue(Args&&... args, EventQueue* queue);
+
+        template <typename... Args>
+        inline size_t connect(std::function<void(Args...)> const& func, int connFlags = 0);
+
+        virtual bool disconnect(size_t id) = 0;
+        virtual size_t connections() const = 0;
+    };
+
+    /**
+     * @brief Event specialization used in classes
+     */
     template <typename... Args>
-    class Event {
+    class Event : private EventAny {
     public:
         typedef std::function<void(Args...)> FuncType;
         enum ConnectionFlags {
@@ -59,7 +83,7 @@ namespace ms {
             return conn;
         }
 
-        bool disconnect(uint64_t id) {
+        bool disconnect(size_t id) override {
             std::lock_guard<decltype(m_mutex)> lock(m_mutex);
             /** TODO: Look at std::remove_if */
             for (auto itr = m_slots.begin(); itr != m_slots.end(); ++itr) {
@@ -77,7 +101,7 @@ namespace ms {
             return false;
         }
 
-        size_t connections() const {
+        size_t connections() const override {
             std::lock_guard<decltype(m_mutex)> lock(m_mutex);
             return m_slots.size();
         }
@@ -102,7 +126,30 @@ namespace ms {
         inline void invokeDeferredQueue(Args... args, EventQueue* queue);
 
         inline void invokeDeferred(Args... args);
+
+        operator EventAny*() { return this; }
     };
+
+    template <typename... Args>
+    void EventAny::invoke(Args&&... args) {
+        dynamic_cast<Event<Args...>*>(this)->invoke(std::forward<Args>(args)...);
+    }
+
+    template <typename... Args>
+    void EventAny::invokeDeferred(Args&&... args) {
+        dynamic_cast<Event<Args...>*>(this)->invokeDeferred(std::forward<Args>(args)...);
+    }
+
+    template <typename... Args>
+    void EventAny::invokeDeferredQueue(Args&&... args, EventQueue* queue) {
+        dynamic_cast<Event<Args...>*>(this)->invokeDeferredQueue(std::forward<Args>(args)..., queue);
+    }
+
+    template <typename... Args>
+    size_t EventAny::connect(std::function<void(Args...)> const& func, int connFlags) {
+        auto conn = dynamic_cast<Event<Args...>*>(this)->connect(func, connFlags);
+        return conn.id;
+    }
 
     /** This type alias only exists to be able to reference enums */
     using EventEnum = Event<>;

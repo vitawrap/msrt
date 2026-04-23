@@ -1,6 +1,8 @@
 #pragma once
 
+#include "core/events.hpp"
 #include "script_host.hpp"
+#include <unordered_map>
 #include <vector>
 
 namespace ms {
@@ -9,10 +11,15 @@ namespace browser {
     class Node {
     public:
         typedef std::vector<Node*> NodeList;
+        std::unordered_map<std::string, EventAny*> m_eventMap;
 
     private:
         Node* m_parent;
         NodeList m_children;
+
+    protected:
+        /** Add all events to the event map */
+        virtual void mapEvents() {}
     
     public:
         Node() :
@@ -28,6 +35,9 @@ namespace browser {
 
         bool hasChildNodes() const { return m_children.size(); }
         Node* getParent() const { return m_parent; }
+
+        // EventTarget
+
 
         // STL interface
         const NodeList::const_iterator begin() const { return m_children.cbegin(); }
