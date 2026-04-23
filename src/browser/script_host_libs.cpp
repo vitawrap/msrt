@@ -65,6 +65,15 @@ namespace browser {
         return ScriptProxy<T>::cast(opaque);
     }
 
+    static bool inheritPrototype(JSContext* ctx, JSValueConst const& derivedProto, char const* base) {
+        JSTempVal global = JS_GetGlobalObject(ctx);
+        JSTempVal ctor = JS_GetPropertyStr(ctx, global, base);
+        if (JS_IsException(ctor)) return false;
+        JSTempVal proto = JS_GetPropertyStr(ctx, ctor, "prototype"); // not GetPrototype because that'd be "Function"
+        if (JS_IsException(ctor)) return false;
+        return JS_SetPrototype(ctx, derivedProto, proto) != -1;
+    }
+
 #pragma endregion
 #pragma region Nodes
 
