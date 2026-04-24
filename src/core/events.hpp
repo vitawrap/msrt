@@ -50,7 +50,8 @@ namespace ms {
         typedef std::function<void(Args...)> FuncType;
         enum ConnectionFlags {
             CONN_DEAD = 1,  // should only be set by event queue!
-            CONN_ONCE = 2   // flag connection as disconnected once invoked.
+            CONN_ONCE = 2,  // flag connection as disconnected once invoked.
+            CONN_SCRIPT = 4 // special cleanup flag for script connections.
         };
         struct Connection {
             FuncType function;

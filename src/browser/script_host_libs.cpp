@@ -143,6 +143,46 @@ namespace browser {
         return JS_UNDEFINED;
     }
 
+    static JSValue NodeProto_eventListeners(JSContext* ctx, JSValueConst self, int argc, JSValueConst *argv, int magic) {
+        char const* funcTable[] = {"addEventListener", "removeEventListener"};
+        auto* target = opaqueToObject<Node>(self);
+        char const* eventName = JS_ToCString(ctx, argv[0]);
+        if (!eventName) {
+            JS_ThrowInternalError(ctx, "Node::%s(): Invalid event name.", funcTable[magic]);
+            return JS_EXCEPTION;
+        }
+        if (EventAny* event = target->findEvent(eventName)) { /** TODO: Allow path to events not defined in C++ */
+            JSValueConst& func = argv[1];
+            if (!JS_IsFunction(ctx, func)) {
+                JS_ThrowTypeError(ctx, "Node::%s(): Handler is not callable!", funcTable[magic]);
+                JS_FreeCString(ctx, eventName);
+                return JS_EXCEPTION;
+            }
+            JSValue ref = JS_DupValue(ctx, func); // it's valid, create strong reference
+            int64_t id = 0;
+            switch (magic) {
+                /* addEventListener */ case 0:
+                id = event->connect<HTMLEvent*>([ctx, ref](HTMLEvent* ev){
+                    if (!ev) { /** HACKHACK: killswitch using nullptr on CONN_SCRIPT entries!! */
+                        JS_FreeValue(ctx, ref);
+                        return;
+                    }
+                    JSValue eventValue = ScriptProxy<HTMLEvent>::toValue(ev);
+                    JS_Call(ctx, ref, JS_NULL, 1, &eventValue);
+                }, EventEnum::CONN_SCRIPT);
+                JS_SetPropertyStr(ctx, ref, "__listener_id", JS_NewInt64(ctx, id));
+                break;
+                /* removeEventListener */ case 1:
+                JS_ToInt64(ctx, &id, JS_GetPropertyStr(ctx, ref, "__listener_id"));
+                if ((id != 0) && event->disconnect(id))
+                    JS_FreeValue(ctx, ref); // drop strong reference
+                break;
+            }
+        }
+        JS_FreeCString(ctx, eventName);
+        return JS_UNDEFINED;
+    }
+
     static JSValue NodeProto_getters(JSContext *ctx, JSValueConst self, int magic) {
         auto* node = opaqueToObject<Node>(self);
         switch (magic) {
@@ -156,6 +196,8 @@ namespace browser {
     static JSCFunctionListEntry defineNode[] = {
         JS_CFUNC_MAGIC_DEF("appendChild", 1, NodeProto_treeChild, 0),
         JS_CFUNC_MAGIC_DEF("removeChild", 1, NodeProto_treeChild, 1),
+        JS_CFUNC_MAGIC_DEF("addEventListener", 1, NodeProto_eventListeners, 0),
+        JS_CFUNC_MAGIC_DEF("removeEventListener", 1, NodeProto_eventListeners, 1),
         JS_CGETSET_MAGIC_DEF("parentNode", NodeProto_getters, nullptr, 0),
         JS_CGETSET_MAGIC_DEF("parentElement", NodeProto_getters, nullptr, 1),
     };
