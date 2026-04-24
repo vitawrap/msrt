@@ -10,6 +10,12 @@ namespace ms {
     class EventQueue;
 
     /**
+     * @brief Concept-like type for template requirements
+     */
+    template <typename Lambda, typename... Args>
+    using EventCallable = decltype(std::declval<Lambda>()(std::declval<Args>()...));
+
+    /**
      * @brief Event wildcard to allow invocation from base class to specialized event
      */
     class EventAny {
@@ -25,6 +31,11 @@ namespace ms {
 
         template <typename... Args>
         inline size_t connect(std::function<void(Args...)> const& func, int connFlags = 0);
+
+        template <typename... Args, typename Lambda, typename = EventCallable<Lambda, Args...>>
+        size_t connect(Lambda lambda, int connFlags = 0) {
+            return connect(std::function<void(Args...)>(lambda), connFlags);
+        }
 
         virtual bool disconnect(size_t id) = 0;
         virtual size_t connections() const = 0;
