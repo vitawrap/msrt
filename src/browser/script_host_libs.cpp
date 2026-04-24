@@ -75,6 +75,25 @@ namespace browser {
     }
 
 #pragma endregion
+#pragma region Event
+
+    static JSClassID classId_Event;
+
+    static void installEvents(JSContext* ctx) {
+        JSClassDef cdef{ .class_name = "HTMLEvent", .finalizer = &destructObject<HTMLEvent>, .gc_mark = nullptr };
+        JS_NewClassID(&classId_Event);
+        JS_NewClass(JS_GetRuntime(ctx), classId_Event, &cdef);
+        JSValue proto = JS_NewObject(ctx);
+        // global constructor
+        JSValue ctor = JS_NewCFunction2(ctx, constructObject<HTMLEvent, classId_Event>, 
+            cdef.class_name, 0, JS_CFUNC_constructor, 0);
+        JS_SetConstructor(ctx, ctor, proto);
+        JS_SetClassProto(ctx, classId_Event, proto);
+        JSTempVal globalThis = JS_GetGlobalObject(ctx);
+        JS_SetPropertyStr(ctx, globalThis, cdef.class_name, ctor);
+    }
+
+#pragma endregion
 #pragma region Nodes
 
     static JSClassID classId_Node;
@@ -258,6 +277,7 @@ namespace browser {
 
         // install conventional objects
         installConsole(ctx);
+        installEvents(ctx);
 
         // install basic nodes
         installNodes(ctx);

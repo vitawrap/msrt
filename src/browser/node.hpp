@@ -8,6 +8,8 @@
 namespace ms {
 namespace browser {
 
+    class HTMLEvent {};
+
     class Node {
     public:
         typedef std::vector<Node*> NodeList;
