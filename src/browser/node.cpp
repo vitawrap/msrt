@@ -33,5 +33,14 @@ namespace browser {
         return false;
     }
 
+    EventAny* Node::findEvent(char const* name) {
+        if (m_eventMap.empty())
+            mapEvents();
+        auto itr = m_eventMap.find(name);
+        if (itr != m_eventMap.end())
+            return itr->second;
+        return nullptr;
+    }
+
 }
 }

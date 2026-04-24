@@ -37,7 +37,7 @@ namespace browser {
         Node* getParent() const { return m_parent; }
 
         // EventTarget
-
+        EventAny* findEvent(char const* name);
 
         // STL interface
         const NodeList::const_iterator begin() const { return m_children.cbegin(); }
@@ -51,7 +51,7 @@ namespace browser {
      * 
      */
     class HTMLElement : public Node {
-
+    public:
     };
 
 }
