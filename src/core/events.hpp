@@ -38,6 +38,7 @@ namespace ms {
         }
 
         virtual bool disconnect(size_t id) = 0;
+        virtual void disconnectAll() = 0;
         virtual size_t connections() const = 0;
     };
 
@@ -111,6 +112,18 @@ namespace ms {
                 }
             }
             return false;
+        }
+
+        void disconnectAll() override {
+            std::lock_guard<decltype(m_mutex)> lock(m_mutex);
+            if (m_invokeDepth > 0) {
+                for (auto& conn : m_slots) {
+                    conn.flags |= CONN_DEAD;
+                    conn.function = nullptr; // unref function
+                }
+                m_hasZombies = true;
+            } else
+                m_slots.clear();
         }
 
         size_t connections() const override {

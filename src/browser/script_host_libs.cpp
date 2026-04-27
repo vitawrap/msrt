@@ -101,19 +101,51 @@ namespace browser {
     template <typename T, JSClassID const& classID>
     static const auto constructNode = constructObject<T, classID>; // node has no specific setup in constructor
 
+    static bool nodeEventScript(JSContext* ctx, JSValue jv) { return false; }
+
+    static bool nodeEventDestroy(JSContext* ctx, JSValue jv) {
+        JS_FreeValue(ctx, jv);
+        return true;
+    }
+
+    static thread_local JS_MarkFunc* nodeEventMarkFunction = nullptr;
+    static bool nodeEventMark(JSContext* ctx, JSValue jv) {
+        JS_MarkValue(JS_GetRuntime(ctx), jv, nodeEventMarkFunction);
+        return true;
+    }
+
+    struct NodeEventOverride {
+        typedef bool(*OverrideFunc)(JSContext*, JSValue);
+        static inline thread_local OverrideFunc s_ptr = nodeEventScript;
+        OverrideFunc m_saved;
+        NodeEventOverride(OverrideFunc ptr) { m_saved = s_ptr; s_ptr = ptr; }
+        ~NodeEventOverride() { s_ptr = m_saved; }
+    };
+
     template <typename T>
     static void destructNode(JSRuntime* rt, JSValue self) {
         auto* parent = opaqueToObject<T>(self);
+        {
+            NodeEventOverride _(nodeEventDestroy);
+            parent->foreachEvent([](EventAny* event){
+                event->invoke(nullptr);
+                event->disconnectAll();
+            });
+        }
         for (auto* child : *parent) {
-            parent->removeChild(child); // remove children and decrement ownership ref
-            JS_FreeValueRT(rt, ScriptProxy<Node>::toValue(child));
+            if (parent->removeChild(child)) // remove children and decrement ownership ref
+                JS_FreeValueRT(rt, ScriptProxy<Node>::toValue(child));
         }
         destructObject<T>(rt, self);
     }
 
     // node (and derived) gc tagging of children
     static void gcMarkNode(JSRuntime* rt, JSValueConst v, JS_MarkFunc mfn) {
-        auto const* ptr = opaqueToObject<Node>(v);
+        auto* ptr = opaqueToObject<Node>(v);
+        {
+            NodeEventOverride _(nodeEventMark);
+            ptr->foreachEvent([](EventAny* e){ e->invoke(nullptr); });
+        }
         for (const auto* child : *ptr) // (recursively) assumes ALL children are allocated by JS!!
             JS_MarkValue(rt, ScriptProxy<Node>::toValue(child), mfn);
     }
@@ -163,10 +195,8 @@ namespace browser {
             switch (magic) {
                 /* addEventListener */ case 0:
                 id = event->connect<HTMLEvent*>([ctx, ref](HTMLEvent* ev){
-                    if (!ev) { /** HACKHACK: killswitch using nullptr on CONN_SCRIPT entries!! */
-                        JS_FreeValue(ctx, ref);
+                    if (NodeEventOverride::s_ptr(ctx, ref))
                         return;
-                    }
                     JSValue eventValue = ScriptProxy<HTMLEvent>::toValue(ev);
                     JS_Call(ctx, ref, JS_NULL, 1, &eventValue);
                 }, EventEnum::CONN_SCRIPT);
