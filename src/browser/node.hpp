@@ -39,7 +39,12 @@ namespace browser {
         Node* getParent() const { return m_parent; }
 
         // EventTarget
+
+        /** Find mapped event */
         EventAny* findEvent(char const* name);
+
+        /** Call a function for each mapped event */
+        void foreachEvent(void (*cb) (EventAny* event));
 
         // STL interface
         const NodeList::const_iterator begin() const { return m_children.cbegin(); }

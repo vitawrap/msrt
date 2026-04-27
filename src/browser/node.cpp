@@ -42,5 +42,10 @@ namespace browser {
         return nullptr;
     }
 
+    void Node::foreachEvent(void (*cb) (EventAny* event)) {
+        for (auto [key, event] : m_eventMap)
+            cb(event);
+    }
+
 }
 }
