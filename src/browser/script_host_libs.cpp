@@ -4,6 +4,7 @@
 #include "io/log.hpp"
 
 #include "core/events.hpp"
+#include "classes/screen.hpp"
 
 /** quickjs really likes using mixed designators for JSCFunctionListEntry and it creates a flood of warnings... */
 #pragma clang diagnostic push
@@ -72,6 +73,44 @@ namespace browser {
         return JS_SetPrototype(ctx, derivedProto, proto) != -1;
     }
 
+    static JSValue Proto_notImplemetedQuiet(JSContext* ctx, JSValueConst self, int argc, JSValueConst *argv) {
+        return JS_UNDEFINED;
+    }
+
+    static JSValue Proto_notImplemeted(JSContext* ctx, JSValueConst self, int argc, JSValueConst *argv) {
+        JS_ThrowInternalError(ctx, "%s", "Not implemented!");
+        return JS_EXCEPTION;
+    }
+
+#pragma endregion
+#pragma region Screen
+
+    static JSClassID classId_Screen;
+
+    static JSCFunctionListEntry defineScreen[] = {
+        JS_CFUNC_DEF("initContext", 0, Proto_notImplemetedQuiet),
+        JS_CFUNC_DEF("getInterface", 0, Proto_notImplemetedQuiet),
+        JS_CFUNC_DEF("updateInterface", 0, Proto_notImplemeted),
+        JS_CFUNC_DEF("clear", 1, Proto_notImplemeted),
+        JS_CFUNC_DEF("initDraw", 0, Proto_notImplemeted),
+        JS_CFUNC_DEF("setColor", 1, Proto_notImplemeted),
+    };
+
+    static void installScreen(JSContext* ctx) {
+        JSClassDef cdef{ .class_name = "Screen", .finalizer = &destructObject<Screen>, .gc_mark = nullptr };
+        JS_NewClassID(&classId_Screen);
+        JS_NewClass(JS_GetRuntime(ctx), classId_Screen, &cdef);
+        JSValue proto = JS_NewObject(ctx);
+        JS_SetPropertyFunctionList(ctx, proto, defineScreen, countof(defineScreen));
+        // global constructor
+        JSValue ctor = JS_NewCFunction2(ctx, constructObject<Screen, classId_Screen>, 
+            cdef.class_name, 0, JS_CFUNC_constructor, 0);
+        JS_SetConstructor(ctx, ctor, proto);
+        JS_SetClassProto(ctx, classId_Screen, proto);
+        JSTempVal globalThis = JS_GetGlobalObject(ctx);
+        JS_SetPropertyStr(ctx, globalThis, cdef.class_name, ctor);
+    }
+
 #pragma endregion
 
     static void installConsole(JSContext* ctx) {
@@ -121,6 +160,9 @@ namespace browser {
 
         // install conventional objects
         installConsole(ctx);
+
+        // install microstudio objects
+        installScreen(ctx);
 
         // re-add globalThis as window
         JS_SetPropertyStr(ctx, globalThis, "window", globalThis);
