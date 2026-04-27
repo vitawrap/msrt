@@ -39,7 +39,6 @@ namespace browser {
         ScriptEngine* m_engine;
 
         void installLibHTML();
-        void installLibCanvas();
     public:
         ScriptHost(Context* browser) :
             m_browser(browser),

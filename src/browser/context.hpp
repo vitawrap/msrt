@@ -3,7 +3,6 @@
 #include "core/events.hpp"
 #include "platform/windowing.hpp"
 #include "script_host.hpp"
-#include "node.hpp"
 
 namespace ms {
 namespace browser {
@@ -11,12 +10,10 @@ namespace browser {
     class Context {
         EventQueue m_repaintQueue;
         ScriptHost m_scriptHost;
-        Node* m_domRoot;
 
     public:
         Context() :
-            m_scriptHost(this),
-            m_domRoot(nullptr) // allocated by script
+            m_scriptHost(this)
         {}
 
         /** Get the underlying javascript engine */
@@ -27,13 +24,6 @@ namespace browser {
 
         /** Destroy the browser context */
         void free();
-
-        /** Get simulated DOM root (no document system) */
-        Node const* getDOM() const { return m_domRoot; }
-        Node* getDOM() { return m_domRoot; }
-
-        /** Set DOM root from externally allocated node (script engine pointer managed by GC) */
-        void setDOMRoot(Node* gcPtr);
 
         /** add listener to be invoked BEFORE a repaint */
         void addRepaintListener(EventQueue::EventFuncType slot);

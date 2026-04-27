@@ -62,7 +62,6 @@ namespace browser {
     void ScriptHost::installLibs() {        
         try {
             installLibHTML();
-            installLibCanvas();
         } catch (ScriptEngineException const& see) {
             LOG_MSGF("[SCRIPT ENGINE] %s\n", see.what());
         } catch (ScriptException const& se) {

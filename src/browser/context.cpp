@@ -20,11 +20,6 @@ namespace browser {
         m_repaintQueue.flushNotifications();
     }
 
-    void Context::setDOMRoot(Node* gcPtr) {
-        DEBUG_ASSERT((!m_domRoot) && "DOM root was not null before setDOMRoot!");
-        m_domRoot = gcPtr;
-    }
-
     void Context::repaint(platform::IWindowManager* wm) {
 
     }
