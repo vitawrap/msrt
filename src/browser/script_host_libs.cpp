@@ -113,6 +113,18 @@ namespace browser {
 
 #pragma endregion
 
+    static void installFakeObjects(JSContext* ctx) {
+        JSTempVal globalThis = JS_GetGlobalObject(ctx);
+        // mute "'CanvasRenderingContext2D' is not defined" error
+        JSValue rc2d = JS_NewObject(ctx);
+        JS_SetPropertyStr(ctx, rc2d, "prototype", JS_NewObject(ctx));
+        JS_SetPropertyStr(ctx, globalThis, "CanvasRenderingContext2D", rc2d);
+        // add Window.navigator
+        JSValue nav = JS_NewObject(ctx);
+        JS_SetPropertyStr(ctx, nav, "language", JS_NewString(ctx, "en-US"));
+        JS_SetPropertyStr(ctx, globalThis, "navigator", nav);
+    }
+
     static void installConsole(JSContext* ctx) {
         JSTempVal globalThis = JS_GetGlobalObject(ctx);
         JSValue console = JS_NewObject(ctx);
@@ -160,6 +172,7 @@ namespace browser {
 
         // install conventional objects
         installConsole(ctx);
+        installFakeObjects(ctx);
 
         // install microstudio objects
         installScreen(ctx);
