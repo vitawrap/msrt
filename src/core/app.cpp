@@ -88,6 +88,9 @@ namespace ms {
 
         if (m_wm.createWindow(m_project.getSettings().title.c_str()) >= 0) {
 
+            // start up script layer
+            m_browser.getScriptHost()->onLoaded();
+
             // main event loop
             while (! m_wm.closeRequested()) {
 

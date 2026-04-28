@@ -70,6 +70,11 @@ namespace browser {
          * Install microstudio runtime onto the script engine
          */
         void installRuntime();
+
+        /**
+         * Reproduce the load event instantiating the runtime
+         */
+        void onLoaded();
     };
 
 }

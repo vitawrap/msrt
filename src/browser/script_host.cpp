@@ -79,5 +79,15 @@ namespace browser {
         }
     }
 
+    void ScriptHost::onLoaded() {
+        try {
+            evalScript("window.player = new Player();", "load");
+        } catch (ScriptEngineException const& see) {
+            LOG_MSGF("[SCRIPT ENGINE] %s\n", see.what());
+        } catch (ScriptException const& se) {
+            LOG_MSGF("[SCRIPT] %s\n", se.what());
+        }
+    }
+
 }
 }
