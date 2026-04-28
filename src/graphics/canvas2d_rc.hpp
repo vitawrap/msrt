@@ -22,8 +22,16 @@ namespace gfx {
         void init(platform::IWindowManager *wm, int wid = 0) override;
         void free() override;
 
+        void push() override;
+        bool pop() override;
+
         void beginFrame() override;
         void submitFrame() override;
+
+        /* Canvas2D operations */
+
+        void fillRect(int x, int y, int w, int h);
+        void strokeRect(int x, int y, int w, int h);
     };
 
 }

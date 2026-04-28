@@ -17,6 +17,11 @@ namespace gfx {
         virtual void init(platform::IWindowManager* wm, int wid = 0) = 0;
         virtual void free() = 0;
 
+        /** Save canvas drawing state */
+        virtual void push() = 0;
+        /** Restore canvas drawing state */
+        virtual bool pop() = 0;
+
         virtual void beginFrame() = 0;
         virtual void submitFrame() = 0;
     };
