@@ -10,6 +10,8 @@ namespace browser {
 
     void Context::free() {
         m_scriptHost.destroyEngine();
+        if (m_renderer.isReady())
+            m_renderer.free();
     }
 
     void Context::addRepaintListener(EventQueue::EventFuncType slot) {
@@ -20,8 +22,14 @@ namespace browser {
         m_repaintQueue.flushNotifications();
     }
 
-    void Context::repaint(platform::IWindowManager* wm) {
+    void Context::setupRepaint(platform::IWindowManager* wm) {
+        if (!m_renderer.isReady())
+            m_renderer.init(wm);
+        m_renderer.beginFrame();
+    }
 
+    void Context::repaint() {
+        m_renderer.submitFrame();
     }
 
 }

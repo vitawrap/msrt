@@ -1,6 +1,6 @@
 #pragma once
 
-#include "platform/windowing.hpp"
+#include "graphics/canvas2d_rc.hpp"
 
 namespace ms {
 namespace browser {
@@ -9,6 +9,8 @@ namespace browser {
      * @brief Microstudio screen class (default 2D graphics interface)
      */
     class Screen {
+        
+    
     public:
         
     };

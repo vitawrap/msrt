@@ -11,9 +11,6 @@
 #include "resources/audio_stream_mp3.hpp"
 #include "resources/audio_stream_wav.hpp"
 
-// DEBUG!!!!
-#include <raylib.h>
-
 namespace ms {
 
     /** Implement util */
@@ -94,12 +91,10 @@ namespace ms {
             // main event loop
             while (! m_wm.closeRequested()) {
 
-                BeginDrawing();
-                EndDrawing();
-
                 // browser repaint cycle
+                m_browser.setupRepaint(&m_wm);
                 m_browser.processRepaintNotifications();
-                m_browser.repaint(&m_wm);
+                m_browser.repaint();
 
                 // flush main thread global event notifications
                 EventQueue::get()->flushNotifications();

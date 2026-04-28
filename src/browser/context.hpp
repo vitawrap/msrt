@@ -3,6 +3,7 @@
 #include "core/events.hpp"
 #include "platform/windowing.hpp"
 #include "script_host.hpp"
+#include "graphics/canvas2d_rc.hpp"
 
 namespace ms {
 namespace browser {
@@ -10,6 +11,9 @@ namespace browser {
     class Context {
         EventQueue m_repaintQueue;
         ScriptHost m_scriptHost;
+
+        /** Implements and consolidates features similar to a browser canvas */
+        gfx::CanvasRC2D m_renderer;
 
     public:
         Context() :
@@ -31,8 +35,11 @@ namespace browser {
         /** flush notifications in repaint queue */
         void processRepaintNotifications();
 
+        /** set up repaint for this frame */
+        void setupRepaint(platform::IWindowManager* wm);
+
         /** Request to repaint current state of browser */
-        void repaint(platform::IWindowManager* wm);
+        void repaint();
     };
 
 }
