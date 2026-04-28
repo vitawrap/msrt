@@ -40,6 +40,9 @@ namespace browser {
 
         /** Request to repaint current state of browser */
         void repaint();
+
+        /** Get reference to canvas used in this context */
+        gfx::CanvasRC2D* getCanvas() { return &m_renderer; }
     };
 
 }
