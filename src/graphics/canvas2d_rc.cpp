@@ -70,6 +70,18 @@ namespace gfx {
         return true;
     }
 
+    int CanvasRC2D::getWidth() const {
+        if (m_window->selectWindow(m_windowId))
+            return m_window->getWindowWidth();
+        return 0;
+    }
+
+    int CanvasRC2D::getHeight() const {
+        if (m_window->selectWindow(m_windowId))
+            return m_window->getWindowHeight();
+        return 0;
+    }
+
     void CanvasRC2D::fillRect(int x, int y, int w, int h) {
         DrawRectangle(x, y, w, h, m_engine->fillColor);
     }
@@ -85,6 +97,22 @@ namespace gfx {
 
     void CanvasRC2D::submitFrame() {
         EndDrawing();
+    }
+
+    void CanvasRC2D::transform(float a, float b, float c, float d, float e, float f) {
+        Matrix m3x3 = { a, c, 0.0f, e,
+                      b, d, 0.0f, f,
+                      0.0f, 0.0f, 1.0f, 0.0f,
+                      0.0f, 0.0f, 0.0f, 1.0f };
+        m_engine->transform = MatrixMultiply(m_engine->transform, m3x3);
+    }
+
+    void CanvasRC2D::translate(float x, float y) {
+        transform(0.0, 0.0, 0.0, 0.0, x, y);
+    }
+
+    void CanvasRC2D::scale(float w, float h) {
+        transform(w, 0.0, 0.0, h, 0.0, 0.0);
     }
 
 }

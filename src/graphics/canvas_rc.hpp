@@ -22,6 +22,9 @@ namespace gfx {
         /** Restore canvas drawing state */
         virtual bool pop() = 0;
 
+        virtual int getWidth() const = 0;
+        virtual int getHeight() const = 0;
+
         virtual void beginFrame() = 0;
         virtual void submitFrame() = 0;
     };
