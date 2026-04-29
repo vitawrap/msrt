@@ -16,7 +16,9 @@ namespace platform {
 
     WindowManager::WindowManager() :
         m_hasWindow(false),
-        m_windowSelected(false)
+        m_windowSelected(false),
+        m_windowWidth(640),
+        m_windowHeight(480)
     {
 #ifdef PLATFORM_UNIX_MESSAGEBOXES
         unixMessageBoxInitialized = gtk_init_check(0, nullptr);
@@ -25,7 +27,7 @@ namespace platform {
 
     int WindowManager::createWindow(char const* title) {
         if (!m_hasWindow) {
-            InitWindow(640, 480, title);
+            InitWindow(m_windowWidth, m_windowHeight, title);
             m_hasWindow = IsWindowReady();
             if (m_hasWindow) {
                 SetWindowFocused();
@@ -38,6 +40,8 @@ namespace platform {
     }
 
     void WindowManager::setWindowSize(int w, int h) {
+        m_windowWidth = w;
+        m_windowHeight = h;
         if (m_windowSelected) {
             SetWindowSize(w, h);
         }
@@ -48,6 +52,14 @@ namespace platform {
             selectWindow(-1);
             CloseWindow();
         }
+    }
+
+    int WindowManager::getWindowWidth() const {
+        return m_windowWidth;
+    }
+
+    int WindowManager::getWindowHeight() const {
+        return m_windowHeight;
     }
 
     bool WindowManager::closeRequested() const {

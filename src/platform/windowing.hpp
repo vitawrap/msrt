@@ -39,6 +39,9 @@ namespace platform {
          */
         virtual void setWindowSize(int w, int h) = 0;
 
+        virtual int getWindowWidth() const = 0;
+        virtual int getWindowHeight() const = 0;
+
         /** Destroy currently selected window. */
         virtual void destroyWindow() = 0;
 

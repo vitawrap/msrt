@@ -12,6 +12,7 @@ namespace platform {
     class WindowManager : public virtual IWindowManager {
         bool m_hasWindow;
         bool m_windowSelected; // bool here because raylib only supports one window
+        int m_windowWidth, m_windowHeight;
     
     public:
         WindowManager();
@@ -23,6 +24,9 @@ namespace platform {
         int createWindow(char const* title) override;
         void setWindowSize(int w, int h) override;
         void destroyWindow() override;
+
+        int getWindowWidth() const override;
+        int getWindowHeight() const override;
 
         bool closeRequested() const override;
 
