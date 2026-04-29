@@ -55,6 +55,21 @@ namespace Test {
         TEST_EPILOGUE;
     }
 
+    bool BrowserDefaultObjects() {
+        ms::browser::Context ctx;
+        ctx.init();
+
+        // make sure whatever JS engine we're running has the minimum set of complex types
+        auto* js = ctx.getScriptHost();
+        auto eval = js->evalScript(R"js(
+            (Date !== undefined) && (Math !== undefined) && (BigInt !== undefined) && (Number !== undefined);
+        )js");
+        TEST_ASSERT(eval == "true");
+
+        ctx.free();
+        TEST_EPILOGUE;
+    }
+
     bool EventConnection() {
         struct EventInvoker {
             ms::Event<> testEvent;
@@ -104,6 +119,7 @@ int main(int argc, char* argv[]) {
     RUN_TEST(EventConnection);
     RUN_TEST(AwaitEvent);
     RUN_TEST(BrowserLifecycle);
+    RUN_TEST(BrowserDefaultObjects);
     RUN_TEST(BrowserScriptProto);
 
     LOG_MSGF("\n%s Tests: %d succeded, %d failed.\n", failed == 0? "\u2705" : "\u274C", succeeded, failed);
