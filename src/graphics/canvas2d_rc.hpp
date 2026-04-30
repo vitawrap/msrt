@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdint.h>
 #include "canvas_rc.hpp"
 
 namespace ms {
@@ -37,7 +38,12 @@ namespace gfx {
         void strokeRect(int x, int y, int w, int h);
         void transform(float a, float b, float c, float d, float e, float f); // 3x2 matrix
         void translate(float x, float y);
+        void rotate(float radians);
         void scale(float w, float h);
+        void setStrokeColor(uint32_t OxAABBGGRR);
+        void setFillColor(uint32_t OxAABBGGRR);
+        void clearWithColor(uint32_t OxAABBGGRR);
+        void clear();
     };
 
 }

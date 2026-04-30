@@ -7,6 +7,8 @@
 namespace ms {
 namespace gfx {
 
+    static_assert(sizeof(Color) == sizeof(uint32_t), "Size of color must equate to int color, for bit casting.");
+
     struct CanvasState {
         double lineWidth;
         Matrix transform;
@@ -113,6 +115,26 @@ namespace gfx {
 
     void CanvasRC2D::scale(float w, float h) {
         transform(w, 0.0, 0.0, h, 0.0, 0.0);
+    }
+
+    void CanvasRC2D::rotate(float radians) {
+        transform(cosf(radians), sinf(radians), -sinf(radians), cosf(radians), 0.0, 0.0);
+    }
+
+    void CanvasRC2D::setStrokeColor(uint32_t OxAABBGGRR) {
+        m_engine->strokeColor = *(Color*)&OxAABBGGRR;
+    }
+
+    void CanvasRC2D::setFillColor(uint32_t OxAABBGGRR) {
+        m_engine->fillColor = *(Color*)&OxAABBGGRR;
+    }
+
+    void CanvasRC2D::clear() {
+        ClearBackground(m_engine->fillColor);
+    }
+
+    void CanvasRC2D::clearWithColor(uint32_t OxAABBGGRR) {
+        ClearBackground(*(Color*)&OxAABBGGRR);
     }
 
 }
