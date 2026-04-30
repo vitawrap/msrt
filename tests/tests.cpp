@@ -46,7 +46,8 @@ namespace Test {
 
         auto* js = ctx.getScriptHost();
         auto eval = js->evalScript(R"js(
-            var screen = new Screen();
+            var rt = new Runtime();
+            var screen = new Screen(rt);
             (screen instanceof Screen) && (screen.clear instanceof Function);
         )js");
         TEST_ASSERT(eval == "true");

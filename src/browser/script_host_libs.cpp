@@ -5,6 +5,7 @@
 
 #include "core/events.hpp"
 #include "classes/screen.hpp"
+#include "classes/player.hpp"
 
 /** quickjs really likes using mixed designators for JSCFunctionListEntry and it creates a flood of warnings... */
 #pragma clang diagnostic push
@@ -83,6 +84,29 @@ namespace browser {
     }
 
 #pragma endregion
+#pragma region Runtime*
+
+    static JSClassID classId_Runtime;
+
+    static JSCFunctionListEntry defineRuntime[] = {
+    };
+
+    static void installRuntime(JSContext* ctx) {
+        JSClassDef cdef{ .class_name = "Runtime", .finalizer = &destructObject<Runtime>, .gc_mark = nullptr };
+        JS_NewClassID(&classId_Runtime);
+        JS_NewClass(JS_GetRuntime(ctx), classId_Runtime, &cdef);
+        JSValue proto = JS_NewObject(ctx);
+        JS_SetPropertyFunctionList(ctx, proto, defineRuntime, countof(defineRuntime));
+        // global constructor
+        JSValue ctor = JS_NewCFunction2(ctx, &constructObject<Runtime, classId_Runtime>,
+            cdef.class_name, 1, JS_CFUNC_constructor, 0);
+        JS_SetConstructor(ctx, ctor, proto);
+        JS_SetClassProto(ctx, classId_Runtime, proto);
+        JSTempVal globalThis = JS_GetGlobalObject(ctx);
+        JS_SetPropertyStr(ctx, globalThis, cdef.class_name, ctor);
+    }
+
+#pragma endregion
 #pragma region Screen
 
     static JSClassID classId_Screen;
@@ -96,17 +120,95 @@ namespace browser {
         JS_CFUNC_DEF("setColor", 1, Proto_notImplemeted),
     };
 
+    static JSValue constructScreen(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv) {
+        JSValue val = constructObject<Screen, classId_Screen>(ctx, new_target, argc, argv);
+        JSValueConst& rtVal = argv[0];
+        if (argc && JS_GetClassID(rtVal) == classId_Runtime) {
+            Runtime* rt = opaqueToObject<Runtime>(rtVal);
+            if (rt) JS_DupValue(ctx, rtVal);
+            opaqueToObject<Screen>(val)->setRuntime(rt);
+        } else {
+            JS_FreeValue(ctx, val);
+            JS_ThrowInternalError(ctx, "%s", "Trying to construct Screen without Runtime!");
+            return JS_EXCEPTION;
+        }
+        return val;
+    }
+
+    static void gcMarkScreen(JSRuntime* rt, JSValueConst self, JS_MarkFunc markFunc) {
+        auto* screen = opaqueToObject<Screen>(self);
+        if (screen->getRuntime())
+            JS_MarkValue(rt, ScriptProxy<Runtime>::toValue(screen->getRuntime()), markFunc);
+    }
+
+    static void destructScreen(JSRuntime* rt, JSValueConst self) {
+        auto* screen = opaqueToObject<Screen>(self);
+        if (screen->getRuntime()) {
+            JS_FreeValueRT(rt, ScriptProxy<Runtime>::toValue(screen->getRuntime()));
+            screen->setRuntime(nullptr);
+        }
+        destructObject<Screen>(rt, self);
+    }
+
     static void installScreen(JSContext* ctx) {
-        JSClassDef cdef{ .class_name = "Screen", .finalizer = &destructObject<Screen>, .gc_mark = nullptr };
+        JSClassDef cdef{ .class_name = "Screen", .finalizer = destructScreen, .gc_mark = gcMarkScreen };
         JS_NewClassID(&classId_Screen);
         JS_NewClass(JS_GetRuntime(ctx), classId_Screen, &cdef);
         JSValue proto = JS_NewObject(ctx);
         JS_SetPropertyFunctionList(ctx, proto, defineScreen, countof(defineScreen));
         // global constructor
-        JSValue ctor = JS_NewCFunction2(ctx, constructObject<Screen, classId_Screen>, 
-            cdef.class_name, 0, JS_CFUNC_constructor, 0);
+        JSValue ctor = JS_NewCFunction2(ctx, constructScreen, cdef.class_name, 1, JS_CFUNC_constructor, 0);
         JS_SetConstructor(ctx, ctor, proto);
         JS_SetClassProto(ctx, classId_Screen, proto);
+        JSTempVal globalThis = JS_GetGlobalObject(ctx);
+        JS_SetPropertyStr(ctx, globalThis, cdef.class_name, ctor);
+    }
+
+#pragma endregion
+#pragma region Player
+
+    static JSClassID classId_Player;
+
+    static void gcMarkPlayer(JSRuntime* rt, JSValueConst self, JS_MarkFunc markFunc) {
+        auto* player = opaqueToObject<Player>(self);
+        if (player->getRuntime())
+            JS_MarkValue(rt, ScriptProxy<Runtime>::toValue(player->getRuntime()), markFunc);
+    }
+
+    static void destructPlayer(JSRuntime* rt, JSValueConst self) {
+        auto* player = opaqueToObject<Player>(self);
+        if (player->getRuntime()) {
+            JS_FreeValueRT(rt, ScriptProxy<Runtime>::toValue(player->getRuntime()));
+            player->setRuntime(nullptr);
+        }
+        destructObject<Runtime>(rt, self);
+    }
+
+    static JSValue PlayerProto_start(JSContext *ctx, JSValueConst self, int argc, JSValueConst *argv) {
+        auto* player = opaqueToObject<Player>(self);
+        // construct runtime using proxy exposed to JS, so that it sees (and collects) this object as well
+        auto* runtimeProxy = new ScriptProxy<Runtime>(ctx);
+        JS_DupValue(ctx, runtimeProxy->getValue()); // create strong reference
+        player->setRuntime(runtimeProxy->getObject());
+        player->start();
+        return JS_UNDEFINED;
+    }
+
+    static JSCFunctionListEntry definePlayer[] = {
+        JS_CFUNC_DEF("start", 0, PlayerProto_start),
+    };
+
+    static void installPlayer(JSContext* ctx) {
+        JSClassDef cdef{ .class_name = "Player", .finalizer = destructPlayer, .gc_mark = gcMarkPlayer };
+        JS_NewClassID(&classId_Player);
+        JS_NewClass(JS_GetRuntime(ctx), classId_Player, &cdef);
+        JSValue proto = JS_NewObject(ctx);
+        JS_SetPropertyFunctionList(ctx, proto, definePlayer, countof(definePlayer));
+        // global constructor
+        JSValue ctor = JS_NewCFunction2(ctx, &constructObject<Player, classId_Player>,
+            cdef.class_name, 1, JS_CFUNC_constructor, 0);
+        JS_SetConstructor(ctx, ctor, proto);
+        JS_SetClassProto(ctx, classId_Player, proto);
         JSTempVal globalThis = JS_GetGlobalObject(ctx);
         JS_SetPropertyStr(ctx, globalThis, cdef.class_name, ctor);
     }
@@ -144,8 +246,7 @@ namespace browser {
 
     /**
      * Minimum viable product for HTML interop from play.js
-     * Exposes a window and console,
-     * Supports elements "a", "canvas", "canvaswrapper", and "script"
+     * Exposes a window and console + ms objects converted to C++
      */
     void ScriptHost::installLibHTML() {
         auto* ctx = m_engine->context;
@@ -174,11 +275,18 @@ namespace browser {
         installConsole(ctx);
         installFakeObjects(ctx);
 
-        // install microstudio objects
-        installScreen(ctx);
-
         // re-add globalThis as window
         JS_SetPropertyStr(ctx, globalThis, "window", globalThis);
+    }
+
+    /**
+     * After play.js is executed, this replaces all main global script classes with ours
+     */
+    void ScriptHost::patchRuntime() {
+        auto* ctx = m_engine->context;
+        browser::installRuntime(ctx);
+        browser::installScreen(ctx);
+        browser::installPlayer(ctx);
     }
 
 }

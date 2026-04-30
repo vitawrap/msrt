@@ -72,6 +72,11 @@ namespace browser {
         void installRuntime();
 
         /**
+         * Replace evaluated script classes with C++ equivalents
+         */
+        void patchRuntime();
+
+        /**
          * Reproduce the load event instantiating the runtime
          */
         void onLoaded();

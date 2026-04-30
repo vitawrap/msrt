@@ -80,8 +80,9 @@ namespace browser {
     }
 
     void ScriptHost::onLoaded() {
+        patchRuntime();
         try {
-            evalScript("window.player = new Player();", "load");
+            evalScript("window.player = new Player(); player.start();", "load");
         } catch (ScriptEngineException const& see) {
             LOG_MSGF("[SCRIPT ENGINE] %s\n", see.what());
         } catch (ScriptException const& se) {
