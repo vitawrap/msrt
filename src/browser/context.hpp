@@ -43,6 +43,10 @@ namespace browser {
 
         /** Get reference to canvas used in this context */
         gfx::CanvasRC2D* getCanvas() { return &m_renderer; }
+
+        /* Events */
+
+        Event<int, int> windowResized;
     };
 
 }
