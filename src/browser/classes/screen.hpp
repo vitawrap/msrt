@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include "runtime.hpp"
 #include "graphics/canvas2d_rc.hpp"
 
 namespace ms {
@@ -10,12 +11,29 @@ namespace browser {
      * @brief Microstudio screen class (default 2D graphics interface)
      */
     class Screen {
+        /** Runtime reference, allocated by script */
+        Runtime* m_runtime;
         gfx::CanvasRC2D* m_canvas;
+        
+        bool m_screenTransform;
 
         /** Virtual width and height */
         int m_width, m_height;
+        /** Color + alpha */
+        uint32_t m_color;
+        /** Stroke line width */
+        float m_lineWidth;
+        /** Transform values */
+        float m_transX, m_transY, m_scaleX, m_scaleY, m_degrees;
+        /** Object transform values */
+        float m_objectScaleX, m_objectScaleY, m_objectDegrees;
     
     public:
+        Screen();
+
+        /** Must only be called by script constructor */
+        void setRuntime(Runtime* rt) { m_runtime = rt; }
+
         /** Grab context */
         void initContext();
 
@@ -25,12 +43,32 @@ namespace browser {
         /** Set color state */
         void setColor(uint32_t color);
 
-        /** Translate a color notation string to an actual color */
+        /** Set alpha state */
+        void setAlpha(int value);
+
+        /** Resize canvas and virtual viewport */
+        void resize();
+
+        /** ? */
+        void initDraw();
+
+        /** Returns true if context has to be restored (closeDrawOp) */
+        bool initDrawOp(float x, float y, bool objectTransform = true);
+
+        /** Restore context */
+        void closeDrawOp();
+
+        /** Translate a color notation string to an actual color (ARGB) */
         static uint32_t stringToColor(char const* str);
 
-        /** Short decimal notation (000-999) to conventional color */
+        /** Short decimal notation (000-999) to conventional color (ARGB) */
         static uint32_t decimalToColor(int dec);
+
+        /** Convert web hex color to raylib color */
+        static uint32_t ARGBtoABGR(uint32_t hex);
         
+        /** Get the runtime controlling this screen */
+        Runtime* getRuntime() const { return m_runtime; }
     };
 
 }
