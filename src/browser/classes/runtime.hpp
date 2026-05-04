@@ -30,6 +30,8 @@ namespace browser {
         /** Must only be called by script constructor */
         void setScreen(Screen* screen) { m_screen = screen; }
 
+        Screen* getScreen() const { return m_screen; }
+
         /** Get aspect ratio scalar from enum value */
         static inline float getRatioFor(AspectRatio enumval);
 
