@@ -17,15 +17,6 @@ namespace browser {
         ScriptException(char const* err)
             : std::runtime_error(err) {}
     };
-
-    /**
-     * Script error on the engine side (QuickJS, ...)
-     */
-    class ScriptEngineException : public std::runtime_error {
-    public:
-        ScriptEngineException(char const* err)
-            : std::runtime_error(err) {}
-    };
     
     class Context;
     class ScriptEngine;

@@ -3,7 +3,6 @@
 #include "script_qjs.hpp"
 #include "io/log.hpp"
 
-#include "core/events.hpp"
 #include "classes/screen.hpp"
 #include "classes/player.hpp"
 
@@ -16,74 +15,6 @@
  */
 namespace ms {
 namespace browser {
-
-    /* Util */
-
-    static inline JSValue getClassProtoOrThrow(JSContext* ctx, JSValueConst const& new_target, JSClassID clid, char const* clname) {
-        JSValue proto;
-        if (JS_IsUndefined(new_target)) {
-            proto = JS_GetClassProto(ctx, clid);
-        } else {
-            proto = JS_GetPropertyStr(ctx, new_target, "prototype");
-            if (JS_IsException(proto)) {
-                std::string exMsg = std::string(clname) + ": Invalid prototype when constructing instance!";
-                throw ScriptEngineException(exMsg.c_str());
-            }
-        }
-        return proto; // not a temp value, but should be assigned to one when leaving this function!
-    }
-
-#pragma region Objects
-
-    template <typename T, JSClassID const& classID>
-    static JSValue constructObject(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv) {
-        JSTempVal proto = getClassProtoOrThrow(ctx, new_target, classID, typeid(T).name());
-        JSValue obj = JS_NewObjectProtoClass(ctx, proto, classID);
-        if (JS_IsException(obj)) {
-            std::string except = typeid(T).name();
-            throw ScriptEngineException((except + ": Failed to construct new C instance!").c_str());
-        }
-        auto* proxy = new ScriptProxy<T>(ctx);
-        JS_SetOpaque(obj, proxy);
-        //proxy->setValue(JS_DupValue(ctx, obj)); // dup into opaque: don't hold onto temp value container
-        proxy->setValue(obj);
-        return obj;
-    }
-
-    template <typename T>
-    static void destructObject(JSRuntime* rt, JSValue self) {
-        auto* proxy = reinterpret_cast<ScriptProxy<T>*>(JS_GetOpaque(self, JS_GetClassID(self)));
-        DEBUG_ASSERT(proxy && "wrong classID in destructObject!");
-        delete proxy; // also destroys encapsulated T. Every qjs subclass MUST derive this destructor, since no dynamic binding test will be made.
-    }
-
-    template <typename T>
-    static inline T* opaqueToObject(JSValueConst const& v) {
-        void* opaque = JS_GetOpaque(v, JS_GetClassID(v));
-        if (!opaque)
-            throw ScriptEngineException("Wrong ClassID in opaqueToObject!");
-        return ScriptProxy<T>::cast(opaque);
-    }
-
-    static bool inheritPrototype(JSContext* ctx, JSValueConst const& derivedProto, char const* base) {
-        JSTempVal global = JS_GetGlobalObject(ctx);
-        JSTempVal ctor = JS_GetPropertyStr(ctx, global, base);
-        if (JS_IsException(ctor)) return false;
-        JSTempVal proto = JS_GetPropertyStr(ctx, ctor, "prototype"); // not GetPrototype because that'd be "Function"
-        if (JS_IsException(ctor)) return false;
-        return JS_SetPrototype(ctx, derivedProto, proto) != -1;
-    }
-
-    static JSValue Proto_notImplemetedQuiet(JSContext* ctx, JSValueConst self, int argc, JSValueConst *argv) {
-        return JS_UNDEFINED;
-    }
-
-    static JSValue Proto_notImplemeted(JSContext* ctx, JSValueConst self, int argc, JSValueConst *argv) {
-        JS_ThrowInternalError(ctx, "%s", "Not implemented!");
-        return JS_EXCEPTION;
-    }
-
-#pragma endregion
 #pragma region Screen
 
     static JSClassID classId_Screen;
