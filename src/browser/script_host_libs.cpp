@@ -120,7 +120,7 @@ namespace browser {
             JS_MarkValue(rt, ScriptProxy<Runtime>::toValue(screen->getRuntime()), markFunc);
     }
 
-    static void destructScreen(JSRuntime* rt, JSValueConst self) {
+    static void destructScreen(JSRuntime* rt, JSValue self) {
         auto* screen = opaqueToObject<Screen>(self);
         if (screen->getRuntime()) {
             JS_FreeValueRT(rt, ScriptProxy<Runtime>::toValue(screen->getRuntime()));
@@ -144,7 +144,7 @@ namespace browser {
     }
 
 #pragma endregion
-#pragma region Runtime*
+#pragma region Runtime
 
     static JSClassID classId_Runtime;
 
