@@ -76,6 +76,16 @@ file(GLOB_RECURSE SOURCES_ASM
 
 set_property(SOURCE ${SOURCES_ASM} APPEND PROPERTY COMPILE_OPTIONS "-I${CMAKE_SOURCE_DIR}")
 
+# tell cmake that ASM sources depend on JS scripts
+
+file(GLOB_RECURSE SOURCES_JS
+    "js_scripts/*.js"
+)
+
+set_source_files_properties(${SOURCES_ASM}
+    PROPERTIES OBJECT_DEPENDS "${SOURCES_JS}"
+)
+
 # main executable
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${SOURCES_ASM})
