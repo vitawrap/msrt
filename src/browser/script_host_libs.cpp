@@ -213,7 +213,7 @@ namespace browser {
             JS_FreeValueRT(rt, ScriptProxy<Runtime>::toValue(player->getRuntime()));
             player->setRuntime(nullptr);
         }
-        destructObject<Runtime>(rt, self);
+        destructObject<Player>(rt, self);
     }
 
     static JSValue PlayerProto_start(JSContext *ctx, JSValueConst self, int argc, JSValueConst *argv) {
