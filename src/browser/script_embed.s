@@ -22,3 +22,4 @@
 
 /* all file embeds go here */
 embed "js_scripts/play.js", "__script_play_js"
+embed "js_scripts/patch.js", "__script_patch_js"

@@ -5,6 +5,7 @@
 
 /* Script list */
 SCRIPT_RESOLVE_EMBED(__script_play_js)
+SCRIPT_RESOLVE_EMBED(__script_patch_js)
 
 namespace ms {
 namespace browser {
@@ -82,7 +83,7 @@ namespace browser {
     void ScriptHost::onLoaded() {
         patchRuntime();
         try {
-            evalScript("window.player = new Player(); player.start();", "load");
+            evalScript(std::string(embed::__script_patch_js, embed::__script_patch_js_size), "patch.js");
         } catch (ScriptEngineException const& see) {
             LOG_MSGF("[SCRIPT ENGINE] %s\n", see.what());
         } catch (ScriptException const& se) {
