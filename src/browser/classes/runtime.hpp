@@ -1,5 +1,7 @@
 #pragma once
 
+#include "core/events.hpp"
+
 namespace ms {
 namespace browser {
 
@@ -40,6 +42,11 @@ namespace browser {
 
         /** Get device aspect ratio */
         AspectRatio getAspectRatio() const { return m_aspect; }
+
+        void startReady();
+
+    public:
+        Event<> startVM;
     };
 
     float Runtime::getRatioFor(AspectRatio enumval)  {

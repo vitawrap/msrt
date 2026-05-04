@@ -83,6 +83,11 @@ namespace browser {
 
     static JSValue constructRuntime(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv) {
         JSValue rtValue = constructObject<Runtime, classId_Runtime>(ctx, new_target, argc, argv);
+        Runtime* rt = opaqueToObject<Runtime>(rtValue);
+        rt->startVM.connect([ctx, rtValue]() {
+            JSTempVal startFn = JS_GetPropertyStr(ctx, rtValue, "__startReady");
+            JS_Call(ctx, startFn, rtValue, 0, nullptr);
+        });
         JSValue screen = constructScreen(ctx, JS_UNDEFINED, 0, nullptr);
         JS_SetPropertyStr(ctx, rtValue, "screen", JS_DupValue(ctx, screen));
         return rtValue;

@@ -20,6 +20,8 @@ namespace browser {
         
         void start();
 
+        void resize();
+
         Runtime* getRuntime() const { return m_runtime; }
     };
 
