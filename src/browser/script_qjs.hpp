@@ -55,16 +55,16 @@ namespace browser {
         template <typename FT> friend class ScriptProxy;
     protected:
         JSValue m_ownValue;
-        JSContext* m_context;
+        JSRuntime* m_rt;
         T m_object;
     public:
         typedef ScriptProxy Self;
 
         template <typename... Args>
         ScriptProxy(JSContext* ctx, Args&& ...args) :
-            m_context(ctx),
+            m_rt(JS_GetRuntime(ctx)),
             m_object(std::forward<Args>(args)...) {}
-        ~ScriptProxy() { JS_FreeValue(m_context, m_ownValue); }
+        ~ScriptProxy() { JS_FreeValueRT(m_rt, m_ownValue); }
 
         void setValue(JSValue value) { m_ownValue = value; }
         JSValueConst getValue() const { return m_ownValue; }
