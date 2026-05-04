@@ -84,32 +84,11 @@ namespace browser {
     }
 
 #pragma endregion
-#pragma region Runtime*
-
-    static JSClassID classId_Runtime;
-
-    static JSCFunctionListEntry defineRuntime[] = {
-    };
-
-    static void installRuntime(JSContext* ctx) {
-        JSClassDef cdef{ .class_name = "Runtime", .finalizer = &destructObject<Runtime>, .gc_mark = nullptr };
-        JS_NewClassID(&classId_Runtime);
-        JS_NewClass(JS_GetRuntime(ctx), classId_Runtime, &cdef);
-        JSValue proto = JS_NewObject(ctx);
-        JS_SetPropertyFunctionList(ctx, proto, defineRuntime, countof(defineRuntime));
-        // global constructor
-        JSValue ctor = JS_NewCFunction2(ctx, &constructObject<Runtime, classId_Runtime>,
-            cdef.class_name, 1, JS_CFUNC_constructor, 0);
-        JS_SetConstructor(ctx, ctor, proto);
-        JS_SetClassProto(ctx, classId_Runtime, proto);
-        JSTempVal globalThis = JS_GetGlobalObject(ctx);
-        JS_SetPropertyStr(ctx, globalThis, cdef.class_name, ctor);
-    }
-
-#pragma endregion
 #pragma region Screen
 
     static JSClassID classId_Screen;
+
+    static JSClassID getRuntimeClassID();
 
     static JSCFunctionListEntry defineScreen[] = {
         JS_CFUNC_DEF("initContext", 0, Proto_notImplemetedQuiet),
@@ -123,7 +102,7 @@ namespace browser {
     static JSValue constructScreen(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv) {
         JSValue val = constructObject<Screen, classId_Screen>(ctx, new_target, argc, argv);
         JSValueConst& rtVal = argv[0];
-        if (argc && JS_GetClassID(rtVal) == classId_Runtime) {
+        if (argc && JS_GetClassID(rtVal) == getRuntimeClassID()) {
             Runtime* rt = opaqueToObject<Runtime>(rtVal);
             if (rt) JS_DupValue(ctx, rtVal);
             opaqueToObject<Screen>(val)->setRuntime(rt);
@@ -160,6 +139,59 @@ namespace browser {
         JSValue ctor = JS_NewCFunction2(ctx, constructScreen, cdef.class_name, 1, JS_CFUNC_constructor, 0);
         JS_SetConstructor(ctx, ctor, proto);
         JS_SetClassProto(ctx, classId_Screen, proto);
+        JSTempVal globalThis = JS_GetGlobalObject(ctx);
+        JS_SetPropertyStr(ctx, globalThis, cdef.class_name, ctor);
+    }
+
+#pragma endregion
+#pragma region Runtime*
+
+    static JSClassID classId_Runtime;
+
+    static JSClassID getRuntimeClassID() { return classId_Runtime; }
+
+    static JSValue constructRuntime(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv) {
+        JSValue rtValue = constructObject<Runtime, classId_Runtime>(ctx, new_target, argc, argv);
+        JSValue screen = constructScreen(ctx, JS_UNDEFINED, 0, nullptr);
+        JS_SetPropertyStr(ctx, rtValue, "screen", JS_DupValue(ctx, screen));
+        return rtValue;
+    }
+
+    static void destructRuntime(JSRuntime* rt, JSValue self) {
+        Runtime* runtime = opaqueToObject<Runtime>(self);
+        if (Screen* screen = runtime->getScreen()) {
+            JS_FreeValueRT(rt, ScriptProxy<Screen>::toValue(screen));
+            runtime->setScreen(nullptr);
+        }
+        destructObject<Runtime>(rt, self);
+    }
+
+    static JSValue RuntimeProto_screen(JSContext* ctx, JSValueConst self) {
+        Runtime* runtime = opaqueToObject<Runtime>(self);
+        return JS_DupValue(ctx, ScriptProxy<Screen>::toValue(runtime->getScreen()));
+    }
+
+    static void gcMarkRuntime(JSRuntime* rt, JSValueConst self, JS_MarkFunc markFunc) {
+        Runtime* runtime = opaqueToObject<Runtime>(self);
+        if (Screen* screen = runtime->getScreen())
+            JS_MarkValue(rt, ScriptProxy<Screen>::toValue(screen), markFunc);
+    }
+
+    static JSCFunctionListEntry defineRuntime[] = {
+        JS_CGETSET_DEF("screen", RuntimeProto_screen, nullptr)
+    };
+
+    static void installRuntime(JSContext* ctx) {
+        JSClassDef cdef{ .class_name = "Runtime", .finalizer = destructRuntime, .gc_mark = gcMarkRuntime };
+        JS_NewClassID(&classId_Runtime);
+        JS_NewClass(JS_GetRuntime(ctx), classId_Runtime, &cdef);
+        JSValue proto = JS_NewObject(ctx);
+        JS_SetPropertyFunctionList(ctx, proto, defineRuntime, countof(defineRuntime));
+        // global constructor
+        JSValue ctor = JS_NewCFunction2(ctx, constructRuntime,
+            cdef.class_name, 1, JS_CFUNC_constructor, 0);
+        JS_SetConstructor(ctx, ctor, proto);
+        JS_SetClassProto(ctx, classId_Runtime, proto);
         JSTempVal globalThis = JS_GetGlobalObject(ctx);
         JS_SetPropertyStr(ctx, globalThis, cdef.class_name, ctor);
     }
