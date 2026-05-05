@@ -89,6 +89,9 @@ namespace ms {
 
         if (m_wm.createWindow(m_project.getSettings().title.c_str()) >= 0) {
 
+            // make canvas ready before script access
+            m_browser.getCanvas()->init(&m_wm);
+
             // start up script layer
             m_browser.getScriptHost()->onLoaded();
 
