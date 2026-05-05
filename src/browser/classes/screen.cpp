@@ -9,6 +9,7 @@ namespace browser {
 
     Screen::Screen() :
         m_runtime(nullptr),
+        m_canvas(nullptr),
         m_transX(0.f),
         m_transY(0.f),
         m_scaleX(1.f),
