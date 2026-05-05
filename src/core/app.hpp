@@ -16,6 +16,7 @@ namespace ms {
         res::Project m_project;
         browser::Context m_browser;
         platform::WindowManager m_wm;
+        bool m_programExit;
 
         void init();
 
@@ -51,6 +52,12 @@ namespace ms {
          * Step simulation, process and dispatch events, render, etc.
          */
         int run();
+
+        /**
+         * @brief Request to quit
+         * Send the application a request to soft quit
+         */
+        void quit();
 
         /** Get global application pointer */
         static Application* get() {

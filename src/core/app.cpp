@@ -62,6 +62,7 @@ namespace ms {
     }
 
     void Application::init() {
+        m_programExit = false;
         Thread::setMainThread();
         io::LogDispatcher::get().addStandardOutput();
         m_browser.init();
@@ -93,6 +94,8 @@ namespace ms {
 
             // main event loop
             while (! m_wm.closeRequested()) {
+                if (m_programExit) break;
+
                 // poll window manager events
                 m_wm.pollWindowEvents();
 
@@ -114,5 +117,9 @@ namespace ms {
         }
         LOG_MSG("Failed to create app window!");
         return 1;
+    }
+
+    void Application::quit() {
+        m_programExit = true;
     }
 }
