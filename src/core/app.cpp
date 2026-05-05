@@ -93,6 +93,8 @@ namespace ms {
 
             // main event loop
             while (! m_wm.closeRequested()) {
+                // poll window manager events
+                m_wm.pollWindowEvents();
 
                 // browser repaint cycle
                 m_browser.setupRepaint(&m_wm);

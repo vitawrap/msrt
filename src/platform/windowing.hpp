@@ -1,6 +1,7 @@
 #pragma once
 
 #include "platform.hpp"
+#include "core/events.hpp"
 
 namespace ms {
 namespace platform {
@@ -15,6 +16,9 @@ namespace platform {
 
         /** Must be available from implementers */
         IWindowManager() {}
+
+        /** Poll window events for window managers that need it */
+        virtual void pollWindowEvents() = 0;
 
         /** Get max supported windows for this implementation. */
         virtual int getMaxSupportedWindows() { return 0xFFFFFFFF; }
@@ -52,6 +56,10 @@ namespace platform {
          * Show a blocking OS message box
          */
         virtual void showMessageBox(char const* title, char const* message, MessageBoxType type = MB_INFO) = 0;
+
+        /** Events */
+
+        Event<int, int, int> resized;
     };
 
 }

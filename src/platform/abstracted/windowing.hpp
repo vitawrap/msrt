@@ -17,6 +17,7 @@ namespace platform {
     public:
         WindowManager();
 
+        void pollWindowEvents() override;
         int getMaxSupportedWindows() override { return 1; }
         int getWindowCount() const override { return m_hasWindow; }
         bool selectWindow(int i) override { return m_windowSelected = (i == 0); }

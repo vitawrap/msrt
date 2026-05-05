@@ -44,6 +44,7 @@ namespace platform {
         m_windowHeight = h;
         if (m_windowSelected) {
             SetWindowSize(w, h);
+            resized.invoke(0, w, h);
         }
     }
 
@@ -64,6 +65,15 @@ namespace platform {
 
     bool WindowManager::closeRequested() const {
         return WindowShouldClose();
+    }
+
+    void WindowManager::pollWindowEvents() {
+        // window resized last frame
+        if (IsWindowResized()) {
+            m_windowWidth = GetScreenWidth();
+            m_windowHeight = GetScreenHeight();
+            resized.invoke(0, m_windowWidth, m_windowHeight);
+        }
     }
 
     void WindowManager::showMessageBox(char const* title, char const* message, MessageBoxType type) {
