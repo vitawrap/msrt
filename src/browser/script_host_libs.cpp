@@ -86,10 +86,16 @@ namespace browser {
         Runtime* rt = opaqueToObject<Runtime>(rtValue);
         rt->startVM.connect([ctx, rtValue]() {
             JSTempVal startFn = JS_GetPropertyStr(ctx, rtValue, "__startReady");
-            JS_Call(ctx, startFn, rtValue, 0, nullptr);
+            JSTempVal ret = JS_Call(ctx, startFn, rtValue, 0, nullptr);
+            maybeRethrow<ScriptException>(ctx, ret);
         });
-        JSValue screen = constructScreen(ctx, JS_UNDEFINED, 0, nullptr);
-        JS_SetPropertyStr(ctx, rtValue, "screen", JS_DupValue(ctx, screen));
+        rt->timerStep.connect([ctx, rtValue]() {
+            JSTempVal startFn = JS_GetPropertyStr(ctx, rtValue, "__timer");
+            JSTempVal ret = JS_Call(ctx, startFn, rtValue, 0, nullptr);
+            maybeRethrow<ScriptException>(ctx, ret);
+        });
+        JSValue screen = constructScreen(ctx, JS_UNDEFINED, 1, &rtValue);
+        rt->setScreen(opaqueToObject<Screen>(screen));
         return rtValue;
     }
 
@@ -107,6 +113,20 @@ namespace browser {
         return JS_DupValue(ctx, ScriptProxy<Screen>::toValue(runtime->getScreen()));
     }
 
+    static JSValue RuntimeProto_simple(JSContext *ctx, JSValueConst self, int argc, JSValueConst *argv, int magic) {
+        Runtime* runtime = opaqueToObject<Runtime>(self);
+        switch (magic) {
+            case 0: runtime->exit(); break;
+            case 1: runtime->drawCall(); break;
+            case 2: runtime->start(); break;
+            case 3: runtime->startReady(); break;
+            case 4: runtime->checkStartReady(); break;
+            case 5: runtime->timer(); break;
+            case 6: runtime->updateControls(); break;
+        }
+        return JS_UNDEFINED;
+    }
+
     static void gcMarkRuntime(JSRuntime* rt, JSValueConst self, JS_MarkFunc markFunc) {
         Runtime* runtime = opaqueToObject<Runtime>(self);
         if (Screen* screen = runtime->getScreen())
@@ -114,7 +134,14 @@ namespace browser {
     }
 
     static JSCFunctionListEntry defineRuntime[] = {
-        JS_CGETSET_DEF("screen", RuntimeProto_screen, nullptr)
+        JS_CGETSET_DEF("screen", RuntimeProto_screen, nullptr),
+        JS_CFUNC_MAGIC_DEF("exit", 0, RuntimeProto_simple, 0),
+        JS_CFUNC_MAGIC_DEF("drawCall", 0, RuntimeProto_simple, 1),
+        JS_CFUNC_MAGIC_DEF("start", 0, RuntimeProto_simple, 2),
+        JS_CFUNC_MAGIC_DEF("startReady", 0, RuntimeProto_simple,3),
+        JS_CFUNC_MAGIC_DEF("checkStartReady", 0, RuntimeProto_simple, 4),
+        JS_CFUNC_MAGIC_DEF("timer", 0, RuntimeProto_simple, 5),
+        JS_CFUNC_MAGIC_DEF("updateControls", 0, RuntimeProto_simple, 6),
     };
 
     static void installRuntime(JSContext* ctx) {
@@ -139,14 +166,14 @@ namespace browser {
 
     static void gcMarkPlayer(JSRuntime* rt, JSValueConst self, JS_MarkFunc markFunc) {
         auto* player = opaqueToObject<Player>(self);
-        if (player->getRuntime())
-            JS_MarkValue(rt, ScriptProxy<Runtime>::toValue(player->getRuntime()), markFunc);
+        if (Runtime* runtime = player->getRuntime())
+            JS_MarkValue(rt, ScriptProxy<Runtime>::toValue(runtime), markFunc);
     }
 
     static void destructPlayer(JSRuntime* rt, JSValueConst self) {
         auto* player = opaqueToObject<Player>(self);
-        if (player->getRuntime()) {
-            JS_FreeValueRT(rt, ScriptProxy<Runtime>::toValue(player->getRuntime()));
+        if (Runtime* runtime = player->getRuntime()) {
+            JS_FreeValueRT(rt, ScriptProxy<Runtime>::toValue(runtime));
             player->setRuntime(nullptr);
         }
         destructObject<Player>(rt, self);
@@ -155,9 +182,8 @@ namespace browser {
     static JSValue PlayerProto_start(JSContext *ctx, JSValueConst self, int argc, JSValueConst *argv) {
         auto* player = opaqueToObject<Player>(self);
         // construct runtime using proxy exposed to JS, so that it sees (and collects) this object as well
-        auto* runtimeProxy = new ScriptProxy<Runtime>(ctx);
-        JS_DupValue(ctx, runtimeProxy->getValue()); // create strong reference
-        player->setRuntime(runtimeProxy->getObject());
+        JSValue rtValue = constructRuntime(ctx, JS_UNDEFINED, 0, nullptr);
+        player->setRuntime(opaqueToObject<Runtime>(rtValue));
         player->start();
         return JS_UNDEFINED;
     }

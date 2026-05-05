@@ -27,8 +27,12 @@ namespace browser {
         } m_aspect;
     protected:
         Screen* m_screen;
+
+        bool m_started;
     
     public:
+        Runtime();
+
         /** Must only be called by script constructor */
         void setScreen(Screen* screen) { m_screen = screen; }
 
@@ -45,8 +49,24 @@ namespace browser {
 
         void startReady();
 
+        void checkStartReady();
+
+        void start();
+
+        void timer();
+
+        //void updateCall();
+
+        void drawCall();
+
+        void updateControls();
+
+        /** Exit runtime */
+        void exit();
+
     public:
         Event<> startVM;
+        Event<> timerStep;
     };
 
     float Runtime::getRatioFor(AspectRatio enumval)  {
