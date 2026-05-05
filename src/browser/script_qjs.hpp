@@ -126,6 +126,17 @@ namespace browser {
         return proto; // not a temp value, but should be assigned to one when leaving this function!
     }
 
+    template <typename T>
+    static inline void maybeRethrow(JSContext* ctx, JSValue ret) {
+        if (JS_IsException(ret)) {
+            JSTempVal except = JS_GetException(ctx);
+            char const* str = JS_ToCString(ctx, except);
+            std::string err(str);
+            JS_FreeCString(ctx, str);
+            throw T(str);
+        }
+    }
+
 #pragma region Objects
 
     template <typename T, JSClassID const& classID>
