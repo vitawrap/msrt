@@ -81,7 +81,8 @@ namespace ms {
 
     public:
         Event():
-            m_invokeDepth(0ul)
+            m_invokeDepth(0ul),
+            m_hasZombies(false)
         {}
 
         Connection connect(FuncType slot, int connFlags = 0) {
