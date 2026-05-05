@@ -4,8 +4,19 @@
 #include "script_qjs.hpp"
 
 /* Script list */
-SCRIPT_RESOLVE_EMBED(__script_play_js)
-SCRIPT_RESOLVE_EMBED(__script_patch_js)
+SCRIPT_RESOLVE_EMBED(play_js)
+SCRIPT_RESOLVE_EMBED(patch_js)
+
+/* Microscript V2 interpreter script list */
+SCRIPT_RESOLVE_EMBED(compiler_js)
+SCRIPT_RESOLVE_EMBED(parser_js)
+SCRIPT_RESOLVE_EMBED(processor_js)
+SCRIPT_RESOLVE_EMBED(program_js)
+SCRIPT_RESOLVE_EMBED(routine_js)
+SCRIPT_RESOLVE_EMBED(runner_js)
+SCRIPT_RESOLVE_EMBED(token_js)
+SCRIPT_RESOLVE_EMBED(tokenizer_js)
+SCRIPT_RESOLVE_EMBED(transpiler_js)
 
 namespace ms {
 namespace browser {
@@ -70,9 +81,20 @@ namespace browser {
         }
     }
 
+    #define EVAL_STATIC_SCRIPT(global_name) evalScript(std::string(embed::__script_##global_name, embed::__script_##global_name##_size), #global_name)
+
     void ScriptHost::installRuntime() {
         try {
-            evalScript(std::string(embed::__script_play_js, embed::__script_play_js_size), "play.js");
+            EVAL_STATIC_SCRIPT(play_js);
+            EVAL_STATIC_SCRIPT(compiler_js);
+            EVAL_STATIC_SCRIPT(parser_js);
+            EVAL_STATIC_SCRIPT(processor_js);
+            EVAL_STATIC_SCRIPT(program_js);
+            EVAL_STATIC_SCRIPT(routine_js);
+            EVAL_STATIC_SCRIPT(runner_js);
+            EVAL_STATIC_SCRIPT(token_js);
+            EVAL_STATIC_SCRIPT(tokenizer_js);
+            EVAL_STATIC_SCRIPT(transpiler_js);
         } catch (ScriptEngineException const& see) {
             LOG_MSGF("[SCRIPT ENGINE] %s\n", see.what());
         } catch (ScriptException const& se) {
@@ -83,7 +105,7 @@ namespace browser {
     void ScriptHost::onLoaded() {
         patchRuntime();
         try {
-            evalScript(std::string(embed::__script_patch_js, embed::__script_patch_js_size), "patch.js");
+            EVAL_STATIC_SCRIPT(patch_js);
         } catch (ScriptEngineException const& see) {
             LOG_MSGF("[SCRIPT ENGINE] %s\n", see.what());
         } catch (ScriptException const& se) {
