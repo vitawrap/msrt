@@ -113,6 +113,7 @@ this.Runtime.prototype.__timer = function() {
   if (this.vm.runner.tick != null) {
     this.vm.runner.tick();
   }
+  console.log("went this far");
 }
 
 this.Runtime.prototype.updateCall = function() {
@@ -129,7 +130,6 @@ this.Runtime.prototype.updateCall = function() {
   try {
     //time = Date.now()
     this.vm.call("update");
-    this.time_machine.step();
     this.reportWarnings();
     //console.info "update time: "+(Date.now()-time)
     if (this.vm.error_info != null) {
