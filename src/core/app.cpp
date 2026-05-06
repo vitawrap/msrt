@@ -65,8 +65,6 @@ namespace ms {
         m_programExit = false;
         Thread::setMainThread();
         io::LogDispatcher::get().addStandardOutput();
-        m_browser.init();
-        m_browser.getScriptHost()->installRuntime();
 
         // add all supported resource types so far
         PRECACHE_REGISTER_EXT(".wav", res::AudioStreamWAV);
@@ -89,7 +87,9 @@ namespace ms {
 
         if (m_wm.createWindow(m_project.getSettings().title.c_str()) >= 0) {
 
-            // start up script layer
+            // start up browser and script layer
+            m_browser.init();
+            m_browser.getScriptHost()->installRuntime();
             m_browser.getScriptHost()->onLoaded();
 
             // main event loop
