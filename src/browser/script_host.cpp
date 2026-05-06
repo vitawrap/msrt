@@ -58,10 +58,11 @@ namespace browser {
     std::string ScriptHost::evalScript(std::string const& script, std::string const& path) {
         const JSTempVal result = JS_Eval(m_engine->context, script.c_str(), script.length(), path.c_str(), JS_EVAL_TYPE_GLOBAL);
         if (JS_IsException(result)) {
-            const JSTempVal except = JS_GetException(m_engine->context);
+            JSValue except = JS_GetException(m_engine->context);
             char const* exMsg = JS_ToCString(m_engine->context, except);
             std::string err = path + " eval failed: " + exMsg;
             JS_FreeCString(m_engine->context, exMsg);
+            JS_FreeValue(m_engine->context, except);
             throw ScriptException(err.c_str());
         }
         // result js string to std string

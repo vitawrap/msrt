@@ -129,11 +129,12 @@ namespace browser {
     template <typename T>
     static inline void maybeRethrow(JSContext* ctx, JSValue ret) {
         if (JS_IsException(ret)) {
-            JSTempVal except = JS_GetException(ctx);
+            JSValue except = JS_GetException(ctx);
             char const* str = JS_ToCString(ctx, except);
             std::string err(str);
+            JS_FreeValue(ctx, except);
             JS_FreeCString(ctx, str);
-            throw T(str);
+            throw T(err.c_str());
         }
     }
 
