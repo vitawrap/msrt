@@ -26,9 +26,12 @@ namespace browser {
         if (m_canvas) {
             m_canvas->pop();
         } else {
-            auto* browser = Application::get()->getBrowserContext();
-            m_canvas = browser->getCanvas();
+            auto* app = Application::get();
+            m_canvas = app->getBrowserContext()->getCanvas();
+            if (!m_canvas->isReady())
+                m_canvas->init(app->getWindowManager());
         }
+        if (!m_canvas->isReady()) return;
         m_canvas->push();
         m_canvas->translate(m_canvas->getWidth() >> 1, m_canvas->getHeight() >> 1);
         float ratio = std::min(m_canvas->getWidth() / 200, m_canvas->getHeight() / 200);
@@ -54,6 +57,7 @@ namespace browser {
     }
 
     bool Screen::initDrawOp(float x, float y, bool objectTransform) {
+        if (!m_canvas->isReady()) return false;
         bool restore = false;
         if (m_screenTransform) {
             m_canvas->push();
@@ -77,22 +81,26 @@ namespace browser {
     }
 
     void Screen::closeDrawOp() {
+        if (!m_canvas->isReady()) return;
         m_canvas->pop();
     }
 
     void Screen::setColor(uint32_t color) {
         m_color = color;
+        if (!m_canvas->isReady()) return;
         m_canvas->setFillColor(ARGBtoABGR(m_color));
         m_canvas->setStrokeColor(ARGBtoABGR(m_color));
     }
 
     void Screen::setAlpha(int value) {
         m_color = (m_color & 0xFFFFFF) | ((value & 255) << 24);
+        if (!m_canvas->isReady()) return;
         m_canvas->setFillColor(ARGBtoABGR(m_color));
         m_canvas->setStrokeColor(ARGBtoABGR(m_color));
     }
 
     void Screen::clear(uint32_t color) {
+        if (!m_canvas->isReady()) return;
         m_canvas->clearWithColor(ARGBtoABGR(color));
     }
 
