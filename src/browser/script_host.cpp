@@ -56,13 +56,21 @@ namespace browser {
     }
 
     std::string ScriptHost::evalScript(std::string const& script, std::string const& path) {
-        const JSTempVal result = JS_Eval(m_engine->context, script.c_str(), script.length(), path.c_str(), JS_EVAL_TYPE_GLOBAL);
+        JSContext* ctx = m_engine->context;
+        const JSTempVal result = JS_Eval(ctx, script.c_str(), script.length(), path.c_str(), JS_EVAL_TYPE_GLOBAL);
         if (JS_IsException(result)) {
-            JSValue except = JS_GetException(m_engine->context);
-            char const* exMsg = JS_ToCString(m_engine->context, except);
-            std::string err = path + " eval failed: " + exMsg;
-            JS_FreeCString(m_engine->context, exMsg);
-            JS_FreeValue(m_engine->context, except);
+            JSValue except = JS_GetException(ctx);
+            char const* exMsg = JS_ToCString(ctx, except);
+            JSValue stackVal = JS_GetPropertyStr(ctx, except, "stack");
+            char const* exTrace = "";
+            if (!JS_IsUndefined(stackVal)) {
+                exTrace = JS_ToCString(ctx, stackVal);
+                JS_FreeValue(ctx, stackVal);
+            }
+            std::string err = path + " eval failed: " + exMsg + exTrace;
+            JS_FreeCString(ctx, exMsg);
+            JS_FreeCString(ctx, exTrace);
+            JS_FreeValue(ctx, except);
             throw ScriptException(err.c_str());
         }
         // result js string to std string
