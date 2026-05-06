@@ -284,22 +284,24 @@ namespace browser {
         JSValue globalThis = JS_GetGlobalObject(ctx);
 
         // requestAnimationFrame
-        JSValue reqFrame = JS_NewCFunction(ctx, 
-        [](JSContext *ctx, JSValueConst self, int argc, JSValueConst *argv) -> JSValue {
+        JSValue browserRef = JS_NewInt64(ctx, reinterpret_cast<int64_t>(m_browser));
+        JSValue reqFrame = JS_NewCFunctionData(ctx, 
+        [](JSContext *ctx, JSValueConst self, int argc, JSValueConst *argv, int, JSValue* data) -> JSValue {
             if (argc && JS_IsFunction(ctx, argv[0])) {
                 JSValue ownFn = JS_DupValue(ctx, argv[0]);
-                auto browser = Application::get()->getBrowserContext();
+                Context* browser = nullptr; JS_ToInt64(ctx, (int64_t*)&browser, data[0]);
                 browser->addRepaintListener([ctx, ownFn](){
                     JSValue tstamp = JS_NewObject(ctx); /** TODO: DOMHighResTimeStamp!!! */
                     JS_Call(ctx, ownFn, JS_UNDEFINED, 1, &tstamp);
-                    JS_FreeValue(ctx, ownFn);
                     JS_FreeValue(ctx, tstamp);
+                }, [ctx, ownFn](){
+                    JS_FreeValue(ctx, ownFn);
                 });
                 return JS_UNDEFINED;
             }
             /** TODO: this should be a counter system? */
             return JS_ThrowTypeError(ctx, "%s arg in requestAnimationFrame", argc? "not a Function" : "expected 1");
-        }, "requestAnimationFrame", 1);
+        }, 1, 0, 1, &browserRef);
         JS_SetPropertyStr(ctx, globalThis, "requestAnimationFrame", reqFrame);
 
         // install conventional objects
