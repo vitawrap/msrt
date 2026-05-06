@@ -87,12 +87,12 @@ namespace browser {
         rt->startVM.connect([ctx, rtValue]() {
             JSTempVal startFn = JS_GetPropertyStr(ctx, rtValue, "__startReady");
             JSTempVal ret = JS_Call(ctx, startFn, rtValue, 0, nullptr);
-            maybeRethrow<ScriptException>(ctx, ret);
+            MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
         });
         rt->timerStep.connect([ctx, rtValue]() {
             JSTempVal startFn = JS_GetPropertyStr(ctx, rtValue, "__timer");
             JSTempVal ret = JS_Call(ctx, startFn, rtValue, 0, nullptr);
-            maybeRethrow<ScriptException>(ctx, ret);
+            MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
         });
         JSValue screen = constructScreen(ctx, JS_UNDEFINED, 1, &rtValue);
         rt->setScreen(opaqueToObject<Screen>(screen));
@@ -124,7 +124,7 @@ namespace browser {
             case 5: runtime->timer(); break;
             case 6: runtime->updateControls(); break;
         }
-        return JS_UNDEFINED;
+        MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
     }
 
     static void gcMarkRuntime(JSRuntime* rt, JSValueConst self, JS_MarkFunc markFunc) {
@@ -185,7 +185,7 @@ namespace browser {
         JSValue rtValue = constructRuntime(ctx, JS_UNDEFINED, 0, nullptr);
         player->setRuntime(opaqueToObject<Runtime>(rtValue));
         player->start();
-        return JS_UNDEFINED;
+        MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
     }
 
     static JSCFunctionListEntry definePlayer[] = {
