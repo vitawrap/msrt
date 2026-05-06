@@ -21,13 +21,51 @@ namespace browser {
 
     static JSClassID getRuntimeClassID();
 
+    static JSValue ScreenProto_simple(JSContext *ctx, JSValueConst self, int argc, JSValueConst *argv, int magic) {
+        auto* screen = opaqueToObject<Screen>(self);
+        switch (magic) {
+            case 0: screen->startControl(); break;
+            case 1: screen->initContext(); break;
+            case 2: screen->initDraw(); break;
+            case 3: screen->closeDrawOp(); break;
+            case 4: screen->resize(); break;
+        }
+        MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
+    }
+
+    static JSValue ScreenProto_colorArg(JSContext* ctx, JSValueConst self, int argc, JSValueConst *argv, int magic) {
+        auto* screen = opaqueToObject<Screen>(self);
+        uint32_t color = 0x0;
+        if (argc) {
+            JSValue const& cVal = argv[0];
+            if (JS_IsString(cVal)) {
+                char const* colorStr = JS_ToCString(ctx, cVal);
+                color = screen->stringToColor(colorStr);
+                JS_FreeCString(ctx, colorStr);
+            } else if (JS_IsNumber(cVal) && (JS_ToUint32(ctx, &color, cVal) == 0)) {
+                color = screen->decimalToColor(color);
+            } else {
+                const char* names[] = {"setColor", "clear"};
+                return JS_ThrowTypeError(ctx, "%s: Cannot get color from argument", names[magic]); 
+            }
+        }
+        switch (magic) {
+            case 0: screen->setColor(color); break;
+            case 1: screen->clear(color); break;
+        }
+        MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
+    }
+
     static JSCFunctionListEntry defineScreen[] = {
-        JS_CFUNC_DEF("initContext", 0, Proto_notImplemetedQuiet),
+        JS_CFUNC_MAGIC_DEF("startControl", 0, ScreenProto_simple, 0),
+        JS_CFUNC_MAGIC_DEF("initContext", 0, ScreenProto_simple, 1),
+        JS_CFUNC_MAGIC_DEF("initDraw", 0, ScreenProto_simple, 2),
+        JS_CFUNC_MAGIC_DEF("closeDrawOp", 0, ScreenProto_simple, 3),
+        JS_CFUNC_MAGIC_DEF("resize", 0, ScreenProto_simple, 4),
+        JS_CFUNC_MAGIC_DEF("setColor", 1, ScreenProto_colorArg, 0),
+        JS_CFUNC_MAGIC_DEF("clear", 1, ScreenProto_colorArg, 1),
         JS_CFUNC_DEF("getInterface", 0, Proto_notImplemetedQuiet),
         JS_CFUNC_DEF("updateInterface", 0, Proto_notImplemeted),
-        JS_CFUNC_DEF("clear", 1, Proto_notImplemeted),
-        JS_CFUNC_DEF("initDraw", 0, Proto_notImplemeted),
-        JS_CFUNC_DEF("setColor", 1, Proto_notImplemeted),
     };
 
     static JSValue constructScreen(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv) {

@@ -50,6 +50,10 @@ namespace browser {
         initContext();
     }
 
+    void Screen::startControl() {
+        
+    }
+
     void Screen::initDraw() {
         m_color |= 0xff000000; // set alpha to fully opaque
         m_lineWidth = 1.f;

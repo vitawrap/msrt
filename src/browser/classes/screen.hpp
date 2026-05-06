@@ -58,6 +58,9 @@ namespace browser {
         /** Restore context */
         void closeDrawOp();
 
+        /** Originally serves as to register all pointing events */
+        void startControl();
+
         /** Translate a color notation string to an actual color (ARGB) */
         static uint32_t stringToColor(char const* str);
 
