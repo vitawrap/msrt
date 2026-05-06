@@ -9,6 +9,7 @@ namespace browser {
     }
 
     void Context::free() {
+        m_cleanupQueue.flushNotifications();
         m_scriptHost.destroyEngine();
         if (m_renderer.isReady())
             m_renderer.free();
@@ -18,8 +19,14 @@ namespace browser {
         m_repaintQueue.queueNotification(slot);
     }
 
+    void Context::addRepaintListener(EventQueue::EventFuncType slot, EventQueue::EventFuncType cleanup) {
+        m_repaintQueue.queueNotification(slot);
+        m_cleanupQueue.queueNotification(cleanup);
+    }
+
     void Context::processRepaintNotifications() {
         m_repaintQueue.flushNotifications();
+        m_cleanupQueue.flushNotifications();
     }
 
     void Context::setupRepaint(platform::IWindowManager* wm) {

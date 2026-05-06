@@ -10,6 +10,7 @@ namespace browser {
 
     class Context {
         EventQueue m_repaintQueue;
+        EventQueue m_cleanupQueue;
         ScriptHost m_scriptHost;
 
         /** Implements and consolidates features similar to a browser canvas */
@@ -31,6 +32,9 @@ namespace browser {
 
         /** add listener to be invoked BEFORE a repaint */
         void addRepaintListener(EventQueue::EventFuncType slot);
+
+        /** add listener to be invoked BEFORE a repaint, with a cleanup function */
+        void addRepaintListener(EventQueue::EventFuncType slot, EventQueue::EventFuncType cleanup);
 
         /** flush notifications in repaint queue */
         void processRepaintNotifications();
