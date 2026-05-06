@@ -39,8 +39,7 @@ namespace browser {
             opaqueToObject<Screen>(val)->setRuntime(rt);
         } else {
             JS_FreeValue(ctx, val);
-            JS_ThrowInternalError(ctx, "%s", "Trying to construct Screen without Runtime!");
-            return JS_EXCEPTION;
+            return JS_ThrowInternalError(ctx, "%s", "Trying to construct Screen without Runtime!");
         }
         return val;
     }
@@ -260,8 +259,8 @@ namespace browser {
                 });
                 return JS_UNDEFINED;
             }
-            JS_ThrowTypeError(ctx, "%s arg in requestAnimationFrame", argc? "not a Function" : "expected 1");
-            return JS_EXCEPTION; /** TODO: this should be a counter system? */
+            /** TODO: this should be a counter system? */
+            return JS_ThrowTypeError(ctx, "%s arg in requestAnimationFrame", argc? "not a Function" : "expected 1");
         }, "requestAnimationFrame", 1);
         JS_SetPropertyStr(ctx, globalThis, "requestAnimationFrame", reqFrame);
 
