@@ -45,6 +45,7 @@ namespace Test {
         ctx.init();
 
         auto* js = ctx.getScriptHost();
+        js->installRuntime();
         js->onLoaded();
         auto eval = js->evalScript(R"js(
             var rt = new Runtime();
