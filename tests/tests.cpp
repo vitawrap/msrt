@@ -49,7 +49,7 @@ namespace Test {
         js->onLoaded();
         auto eval = js->evalScript(R"js(
             var rt = new Runtime();
-            var screen = new Screen(rt);
+            var screen = rt.screen;
             (screen instanceof Screen) && (screen.clear instanceof Function);
         )js");
         TEST_ASSERT(eval == "true");
