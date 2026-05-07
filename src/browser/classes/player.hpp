@@ -19,6 +19,8 @@ namespace browser {
 
         Player();
         ~Player();
+
+        void loadSources();
         
         void start();
 
@@ -26,6 +28,7 @@ namespace browser {
 
         Runtime* getRuntime() const { return m_runtime; }
 
+        Event<std::string, std::string> sourceFileAdded;
         Event<> needRedraw;
     };
 

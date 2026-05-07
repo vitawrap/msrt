@@ -2,6 +2,7 @@
 
 #include "core/app.hpp"
 #include "screen.hpp"
+#include "resources/ms_script.hpp"
 
 namespace ms {
 namespace browser {
@@ -18,8 +19,19 @@ namespace browser {
                 .disconnect(m_resizeListener);
     }
 
+    void Player::loadSources() {
+        res::Project* pro = Application::get()->getProject();
+        if (pro) {
+            auto const& scripts = pro->getScriptMap();
+            for (auto const& entry : scripts) {
+                sourceFileAdded.invoke(entry.first, entry.second->getText());
+            }
+        }
+    }
+
     void Player::start() {
         // at this point Runtime has been allocated by the script realm
+        loadSources();
 
         auto* wm = Application::get()->getWindowManager();
         m_resizeListener = wm->resized.connect([this](int windowId, int w, int h){
