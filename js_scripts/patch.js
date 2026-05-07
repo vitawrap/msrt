@@ -130,7 +130,7 @@ this.Runtime.prototype.updateCall = function() {
   try {
     //time = Date.now()
     this.vm.call("update");
-    this.reportWarnings();
+    //this.reportWarnings();
     //console.info "update time: "+(Date.now()-time)
     if (this.vm.error_info != null) {
       err = this.vm.error_info;
@@ -143,7 +143,7 @@ this.Runtime.prototype.updateCall = function() {
     // if (this.report_errors) {
     //   return this.listener.reportError(err);
     // }
-    console.log(err);
+    console.log(err, err.stack);
   }
 }
 
@@ -162,6 +162,17 @@ this.Player.prototype.__resize = function() {
       return this.runtime.drawCall(); // this calls into our "drawCall"
     }
   }
+}
+
+// Do not create the storage service for now
+this.MicroVM.prototype.createStorageService = () => {
+  return service = {
+    api: {
+      set: (name, value) => {},
+      get: (name) => {}
+    },
+    check: () => {}
+  };
 }
 
 // finish off environment by booting up the player
