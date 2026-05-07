@@ -25,6 +25,9 @@ namespace browser {
     }
 
     void Context::processRepaintNotifications() {
+        // flushing repaintQueue may append to cleanupQueue which needs to run
+        // immediately after, but the process has to *look* atomic from the outside...
+        m_cleanupQueue.lockCurrentFlushSet();
         m_repaintQueue.flushNotifications();
         m_cleanupQueue.flushNotifications();
     }
