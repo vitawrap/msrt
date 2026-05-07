@@ -26,7 +26,7 @@ namespace browser {
             resize();
         }).id;
         resize();
-        if (Runtime* rt = m_runtime)
+        if (m_runtime)
             m_runtime->start();
     }
 
