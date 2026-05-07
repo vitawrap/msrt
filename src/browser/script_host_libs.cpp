@@ -90,9 +90,10 @@ namespace browser {
 
     static void destructScreen(JSRuntime* rt, JSValue self) {
         auto* screen = opaqueToObject<Screen>(self);
-        if (screen->getRuntime()) {
-            JS_FreeValueRT(rt, ScriptProxy<Runtime>::toValue(screen->getRuntime()));
+        if (Runtime* runtime = screen->getRuntime()) {
+            runtime->setScreen(nullptr);
             screen->setRuntime(nullptr);
+            JS_FreeValueRT(rt, ScriptProxy<Runtime>::toValue(runtime));
         }
         destructObject<Screen>(rt, self);
     }
@@ -139,8 +140,9 @@ namespace browser {
     static void destructRuntime(JSRuntime* rt, JSValue self) {
         Runtime* runtime = opaqueToObject<Runtime>(self);
         if (Screen* screen = runtime->getScreen()) {
-            JS_FreeValueRT(rt, ScriptProxy<Screen>::toValue(screen));
+            screen->setRuntime(nullptr);
             runtime->setScreen(nullptr);
+            JS_FreeValueRT(rt, ScriptProxy<Screen>::toValue(screen));
         }
         destructObject<Runtime>(rt, self);
     }
