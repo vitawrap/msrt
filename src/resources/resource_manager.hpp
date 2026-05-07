@@ -33,6 +33,7 @@ namespace res {
         explicit operator TResource*() const { return static_cast<TResource*>(ref.get()); }
         TResource* cast() { return (TResource*)(*this); }
         TResource* operator ->() { return cast(); }
+        TResource const* operator ->() const { return (TResource const*)(*this); }
     };
 
     /**
@@ -46,6 +47,9 @@ namespace res {
         ResourceHandle(Resource* res) : ref(res) {}
         operator Resource*() const { return ref.get(); }
         Resource* cast() { return (Resource*)(*this); }   // not needed, but soothes mistaken uses
+
+        template <typename T>
+        ResourceHandle<T> as() const { return ResourceHandle<T>{std::static_pointer_cast<T>(ref)}; }
     };
 
     /**
