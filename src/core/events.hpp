@@ -4,6 +4,8 @@
 #include <mutex>
 #include <queue>
 #include <vector>
+#include <atomic>
+#include "core/util.hpp"
 
 namespace ms {
 
@@ -187,14 +189,33 @@ namespace ms {
         static EventQueue* s_mainQueue;
         mutable std::recursive_mutex m_mutex;
         std::queue<EventFuncType> m_notifications;
+        std::queue<EventFuncType> m_addenda;
+        std::atomic<bool> m_notificationsLocked;
+
+        void checkShouldUnlockNotifications() {
+            DEBUG_ASSERT(m_notifications.empty());
+            if (m_notificationsLocked) {
+                if (m_addenda.size()) {
+                    std::swap(m_notifications, m_addenda);
+                }
+                m_notificationsLocked = false;
+            }
+        }
     public:
+        EventQueue():
+            m_notificationsLocked(false)
+        {}
+
         void flushNotifications() {
             decltype(m_notifications) saved;
             {
                 std::lock_guard<decltype(m_mutex)> lock(m_mutex);
-                if (m_notifications.empty())
+                if (m_notifications.empty()) {
+                    checkShouldUnlockNotifications();
                     return;
+                }
                 std::swap(saved, m_notifications);
+                checkShouldUnlockNotifications();
             }
             while (saved.size()) {
                 saved.front()();
@@ -204,7 +225,11 @@ namespace ms {
 
         void queueNotification(EventFuncType func) {
             std::lock_guard<decltype(m_mutex)> lock(m_mutex);
-            m_notifications.push(func);
+            (m_notificationsLocked? m_addenda : m_notifications).push(func);
+        }
+
+        void lockCurrentFlushSet() {
+            m_notificationsLocked = true;
         }
 
         static EventQueue* get() {
