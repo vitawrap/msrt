@@ -263,8 +263,8 @@ namespace browser {
     static void installConsole(JSContext* ctx) {
         JSTempVal globalThis = JS_GetGlobalObject(ctx);
         JSValue console = JS_NewObject(ctx);
-        JSValue log = JS_NewCFunction(ctx,
-        [](JSContext *ctx, JSValueConst self, int argc, JSValueConst *argv) -> JSValue {
+        auto output = [](JSContext *ctx, JSValueConst self, int argc, JSValueConst *argv, int magic) -> JSValue {
+            LOG_MSGF("[CONSOLE.%s] ", magic? "INFO" : "LOG");
             for (int i = 0; i < argc; ++i) {
                 char const* str = JS_ToCString(ctx, argv[i]);
                 LOG_MSGF("%s ", str);
@@ -272,8 +272,11 @@ namespace browser {
             }
             LOG_MSG("\n");
             return JS_UNDEFINED;
-        }, "log", 1);
+        };
+        JSValue log = JS_NewCFunctionMagic(ctx, output, "log", 1, JSCFunctionEnum::JS_CFUNC_generic_magic, 0);
+        JSValue info = JS_NewCFunctionMagic(ctx, output, "info", 1, JSCFunctionEnum::JS_CFUNC_generic_magic, 1);
         JS_SetPropertyStr(ctx, console, "log", log);
+        JS_SetPropertyStr(ctx, console, "info", info);
         JS_SetPropertyStr(ctx, globalThis, "console", console);
     }
 
