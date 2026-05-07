@@ -1,6 +1,8 @@
 #pragma once
 
 #include "io/zip_archive.hpp"
+#include "resources/ms_script.hpp"
+#include "resources/resource_manager.hpp"
 
 namespace ms {
 namespace res {
@@ -10,6 +12,11 @@ namespace res {
         struct Settings {
             std::string title;
         };
+
+        std::unordered_map<
+            std::string,
+            res::ResourceHandle<res::Script>
+        > m_scripts;
 
     private:
         Settings m_settings;
@@ -30,6 +37,9 @@ namespace res {
         
         /** Get settings associated with this project */
         Settings const& getSettings() const { return m_settings; }
+
+        /** Get map of loaded scripts */
+        decltype(m_scripts) const& getScriptMap() const { return m_scripts; }
     };
 
 }
