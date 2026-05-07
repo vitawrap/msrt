@@ -291,9 +291,8 @@ namespace browser {
                 JSValue ownFn = JS_DupValue(ctx, argv[0]);
                 Context* browser = nullptr; JS_ToInt64(ctx, (int64_t*)&browser, data[0]);
                 browser->addRepaintListener([ctx, ownFn](){
-                    JSValue tstamp = JS_NewObject(ctx); /** TODO: DOMHighResTimeStamp!!! */
-                    JS_Call(ctx, ownFn, JS_UNDEFINED, 1, &tstamp);
-                    JS_FreeValue(ctx, tstamp);
+                    JSTempVal tstamp = JS_NewObject(ctx); /** TODO: DOMHighResTimeStamp!!! */
+                    JSTempVal ret = JS_Call(ctx, ownFn, JS_UNDEFINED, 1, tstamp.ptr());
                 }, [ctx, ownFn](){
                     JS_FreeValue(ctx, ownFn);
                 });
