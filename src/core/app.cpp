@@ -67,6 +67,7 @@ namespace ms {
         io::LogDispatcher::get().addStandardOutput();
 
         // add all supported resource types so far
+        PRECACHE_REGISTER_EXT(".ms", res::Script);
         PRECACHE_REGISTER_EXT(".wav", res::AudioStreamWAV);
         PRECACHE_REGISTER_EXT(".mp3", res::AudioStreamMP3);
     }
