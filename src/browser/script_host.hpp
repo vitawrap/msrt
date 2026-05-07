@@ -53,6 +53,11 @@ namespace browser {
         std::string evalScript(std::string const& script, std::string const& path = "");
 
         /**
+         * Event loop for the script engine
+         */
+        void flushJobs();
+
+        /**
          * Install libraries necessary to emulate browser environment
          */
         void installLibs();

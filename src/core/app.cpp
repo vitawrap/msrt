@@ -99,6 +99,9 @@ namespace ms {
                 // poll window manager events
                 m_wm.pollWindowEvents();
 
+                // run all async script jobs
+                m_browser.getScriptHost()->flushJobs();
+
                 // browser repaint cycle
                 m_browser.setupRepaint(&m_wm);
                 m_browser.processRepaintNotifications();
