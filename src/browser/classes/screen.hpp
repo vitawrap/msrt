@@ -46,6 +46,9 @@ namespace browser {
         /** Set alpha state */
         void setAlpha(int value);
 
+        /** Draw a sprite frame on screen */
+        void drawSprite(std::string const& name, float x, float y, float w, float h);
+
         /** Resize canvas and virtual viewport */
         void resize();
 

@@ -1,5 +1,6 @@
 #include "screen.hpp"
 #include "core/app.hpp"
+#include "resources/resource_manager.hpp"
 #include <algorithm>
 
 namespace ms {
@@ -106,6 +107,10 @@ namespace browser {
     void Screen::clear(uint32_t color) {
         if (!m_canvas->isReady()) return;
         m_canvas->clearWithColor(ARGBtoABGR(color));
+    }
+
+    void Screen::drawSprite(std::string const& name, float x, float y, float w, float h) {
+        
     }
 
     uint32_t Screen::stringToColor(char const* str) {
