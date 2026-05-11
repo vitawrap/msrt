@@ -61,6 +61,10 @@ namespace res {
         return false;
     }
 
+    void Project::buildAtlas() {
+        
+    }
+
     void Project::close()
     {
         m_files.close();

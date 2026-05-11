@@ -2,6 +2,7 @@
 
 #include "io/zip_archive.hpp"
 #include "resources/ms_script.hpp"
+#include "resources/ms_image.hpp"
 #include "resources/resource_manager.hpp"
 
 namespace ms {
@@ -17,6 +18,11 @@ namespace res {
             std::string,
             res::ResourceHandle<res::Script>
         > m_scripts;
+
+        robin_hood::unordered_map<
+            std::string,
+            res::ResourceHandle<res::Image>
+        > m_sprites;
 
     private:
         Settings m_settings;
@@ -40,6 +46,9 @@ namespace res {
 
         /** Get map of loaded scripts */
         decltype(m_scripts) const& getScriptMap() const { return m_scripts; }
+
+        /** Build atlas out of project sprites */
+        void buildAtlas();
     };
 
 }
