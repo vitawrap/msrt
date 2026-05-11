@@ -122,15 +122,14 @@ namespace browser {
     static JSValue constructRuntime(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv) {
         JSValue rtValue = constructObject<Runtime, classId_Runtime>(ctx, new_target, argc, argv);
         Runtime* rt = opaqueToObject<Runtime>(rtValue);
+        JS_SetPropertyStr(ctx, rtValue, "update_memory", JS_NewObject(ctx));
         rt->startVM.connect([ctx, rtValue]() {
             JSTempVal startFn = JS_GetPropertyStr(ctx, rtValue, "__startReady");
             JSTempVal ret = JS_Call(ctx, startFn, rtValue, 0, nullptr);
-            MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
         });
         rt->timerStep.connect([ctx, rtValue]() {
             JSTempVal startFn = JS_GetPropertyStr(ctx, rtValue, "__timer");
             JSTempVal ret = JS_Call(ctx, startFn, rtValue, 0, nullptr);
-            MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
         });
         JSValue screen = constructScreen(ctx, JS_UNDEFINED, 1, &rtValue);
         rt->setScreen(opaqueToObject<Screen>(screen));
@@ -220,15 +219,30 @@ namespace browser {
 
     static JSValue PlayerProto_start(JSContext *ctx, JSValueConst self, int argc, JSValueConst *argv) {
         auto* player = opaqueToObject<Player>(self);
+        JS_SetPropertyStr(ctx, self, "sources", JS_NewObject(ctx));
         // construct runtime using proxy exposed to JS, so that it sees (and collects) this object as well
         JSValue rtValue = constructRuntime(ctx, JS_UNDEFINED, 0, nullptr);
         player->setRuntime(opaqueToObject<Runtime>(rtValue));
+        player->sourceFileAdded.connect([ctx, self](std::string name, std::string text){
+            JSTempVal startFn = JS_GetPropertyStr(ctx, self, "__sourceFileAdded");
+            JSTempVal values[] = {
+                JS_NewStringLen(ctx, name.c_str(), name.length()),
+                JS_NewStringLen(ctx, text.c_str(), text.length())};
+            JSTempVal ret = JS_Call(ctx, startFn, self, 2, reinterpret_cast<JSValue*>(values));
+            MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
+        });
         player->start();
         MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
     }
 
+    static JSValue PlayerProto_runtime(JSContext* ctx, JSValueConst self) {
+        Player* player = opaqueToObject<Player>(self);
+        return JS_DupValue(ctx, ScriptProxy<Runtime>::toValue(player->getRuntime()));
+    }
+
     static JSCFunctionListEntry definePlayer[] = {
         JS_CFUNC_DEF("start", 0, PlayerProto_start),
+        JS_CGETSET_DEF("runtime", PlayerProto_runtime, nullptr)
     };
 
     static void installPlayer(JSContext* ctx) {

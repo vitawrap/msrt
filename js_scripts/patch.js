@@ -5,6 +5,7 @@
 
 // add script methods to prototype
 this.Runtime.prototype.__startReady = function() {
+  var err, file, global, init, j, len1, lib, meta, namespace, ref, ref1, src;
   meta = {
     print: (text) => {
       if ((typeof text === "object" || typeof text === "function") && (this.vm != null)) {
@@ -45,7 +46,11 @@ this.Runtime.prototype.__startReady = function() {
   this.vm.context.global.system.file = System.file;
   this.vm.context.global.system.javascript = System.javascript;
   System.runtime = this;
-
+  ref1 = this.sources;
+  for (file in ref1) {
+    src = ref1[file];
+    this.updateSource(file, src, false);
+  }
   if (this.vm.runner.getFunctionSource != null) {
     init = this.vm.runner.getFunctionSource("init");
     if (init != null) {
@@ -113,7 +118,6 @@ this.Runtime.prototype.__timer = function() {
   if (this.vm.runner.tick != null) {
     this.vm.runner.tick();
   }
-  console.log("went this far");
 }
 
 this.Runtime.prototype.updateCall = function() {
@@ -147,6 +151,57 @@ this.Runtime.prototype.updateCall = function() {
   }
 }
 
+this.Runtime.prototype.updateSource = function(file, src, reinit = false) {
+  var err, init;
+  if (this.vm == null) {
+    return false;
+  }
+  if (src === this.update_memory[file]) {
+    return false;
+  }
+  this.update_memory[file] = src;
+  //this.audio.cancelBeeps();
+  this.screen.clear();
+  try {
+    this.vm.run(src, 3000, file);
+    // this.listener.postMessage({
+    //   name: "compile_success",
+    //   file: file
+    // });
+    //this.reportWarnings();
+    if (this.vm.error_info != null) {
+      console.error(err);
+      err = this.vm.error_info;
+      err.type = "init";
+      err.file = file;
+      //this.listener.reportError(err);
+      return false;
+    }
+    if (this.vm.runner.getFunctionSource != null) {
+      init = this.vm.runner.getFunctionSource("init");
+      if ((init != null) && init !== this.previous_init && reinit) {
+        this.previous_init = init;
+        this.vm.call("init");
+        if (this.vm.error_info != null) {
+          console.error(err);
+          err = this.vm.error_info;
+          err.type = "init";
+          //this.listener.reportError(err);
+        }
+      }
+    }
+    return true;
+  } catch (error) {
+    err = error;
+    if (this.report_errors) {
+      console.error(err);
+      err.file = file;
+      //this.listener.reportError(err);
+      return false;
+    }
+  }
+}
+
 this.Player.prototype.__resize = function() {
   if (this.runtime.vm != null) {
     if (this.runtime.vm.context.global.draw == null) {
@@ -162,6 +217,15 @@ this.Player.prototype.__resize = function() {
       return this.runtime.drawCall(); // this calls into our "drawCall"
     }
   }
+}
+
+this.Player.prototype.__sourceFileAdded = function(file, text) {
+  var name = file.split(".")[0];
+  this.sources[name] = text;
+  this.source_count++;
+
+  // do this here
+  this.runtime.sources = this.sources;
 }
 
 // Do not create the storage service for now
