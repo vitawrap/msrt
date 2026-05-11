@@ -9,7 +9,7 @@ The **MSRT** is an attempt to create a native platform for the **microStudio** w
 * Raylib *(5.5)*
 * QuickJS
 * Minizip
-* Minimp3
+* robin_hood.h
 * stb_rect_pack.h
 * GTK3 on Linux *(not included, as to abide by LGPL-2.1)*
 
