@@ -11,7 +11,7 @@ this.Runtime.prototype.__startReady = function() {
       if ((typeof text === "object" || typeof text === "function") && (this.vm != null)) {
         text = this.vm.runner.toString(text);
       }
-      return this.listener.log(text);
+      return console.log("[MS] " + text);
     }
   };
   global = {
