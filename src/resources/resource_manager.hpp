@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/robin_hood.hpp"
 #include "resource.hpp"
 #include "core/iterable_stack.hpp"
 #include "io/file.hpp"
@@ -8,7 +9,6 @@
 #include <memory>
 #include <mutex>
 #include <string>
-#include <unordered_map>
 #include <filesystem>
 #include <utility>
 #include <vector>
@@ -91,7 +91,7 @@ namespace res {
         /**
          * Resource storage (making use of filesystem::path hash specialization)
          */
-        std::unordered_map<std::filesystem::path, std::shared_ptr<Resource>, CPathHashFunctor> m_resources;
+        robin_hood::unordered_map<std::filesystem::path, std::shared_ptr<Resource>, CPathHashFunctor> m_resources;
 
         /**
          * Atomic lock for resource map
@@ -101,7 +101,7 @@ namespace res {
         /**
          * Resource handler (ext -> loader function) map
          */
-        std::unordered_map<std::string, TLoadingHandler> m_handlers;
+        robin_hood::unordered_map<std::string, TLoadingHandler> m_handlers;
 
         Resource* createFromHandler(std::string const& path, io::File* fp);
         Resource* loadResourceInternal(char const* filename, std::shared_ptr<Resource>* cached, bool noOverrides);

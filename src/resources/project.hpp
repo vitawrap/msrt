@@ -13,7 +13,7 @@ namespace res {
             std::string title;
         };
 
-        std::unordered_map<
+        robin_hood::unordered_map<
             std::string,
             res::ResourceHandle<res::Script>
         > m_scripts;
