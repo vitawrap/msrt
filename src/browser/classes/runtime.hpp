@@ -57,8 +57,6 @@ namespace browser {
 
         //void updateCall();
 
-        void drawCall();
-
         void updateControls();
 
         /** Exit runtime */

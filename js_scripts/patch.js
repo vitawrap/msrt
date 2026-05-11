@@ -3,6 +3,146 @@
  * have been added into the JS context.
  */
 
+this.Screen.prototype.getInterface = function() {
+  var screen;
+  if (this.interface != null) {
+    return this.interface;
+  }
+  screen = this;
+  return this.interface = {
+    width: this.width,
+    height: this.height,
+    clear: function(color) {
+      return screen.clear(color);
+    },
+    setColor: function(color) {
+      return screen.setColor(color);
+    },
+    setAlpha: function(alpha) {
+      return screen.setAlpha(alpha);
+    },
+    setPixelated: function(pixelated) {
+      return screen.setPixelated(pixelated);
+    },
+    setBlending: function(blending) {
+      return screen.setBlending(blending);
+    },
+    setLinearGradient: function(x1, y1, x2, y2, c1, c2) {
+      return screen.setLinearGradient(x1, y1, x2, y2, c1, c2);
+    },
+    setRadialGradient: function(x, y, radius, c1, c2) {
+      return screen.setRadialGradient(x, y, radius, c1, c2);
+    },
+    setFont: function(font) {
+      return screen.setFont(font);
+    },
+    setTranslation: function(tx, ty) {
+      return screen.setTranslation(tx, ty);
+    },
+    setScale: function(x, y) {
+      return screen.setScale(x, y);
+    },
+    setRotation: function(rotation) {
+      return screen.setRotation(rotation);
+    },
+    setDrawAnchor: function(ax, ay) {
+      return screen.setDrawAnchor(ax, ay);
+    },
+    setDrawRotation: function(rotation) {
+      return screen.setDrawRotation(rotation);
+    },
+    setDrawScale: function(x, y) {
+      return screen.setDrawScale(x, y);
+    },
+    fillRect: function(x, y, w, h, c) {
+      return screen.fillRect(x, y, w, h, c);
+    },
+    fillRoundRect: function(x, y, w, h, r, c) {
+      return screen.fillRoundRect(x, y, w, h, r, c);
+    },
+    fillRound: function(x, y, w, h, c) {
+      return screen.fillRound(x, y, w, h, c);
+    },
+    drawRect: function(x, y, w, h, c) {
+      return screen.drawRect(x, y, w, h, c);
+    },
+    drawRoundRect: function(x, y, w, h, r, c) {
+      return screen.drawRoundRect(x, y, w, h, r, c);
+    },
+    drawRound: function(x, y, w, h, c) {
+      return screen.drawRound(x, y, w, h, c);
+    },
+    drawSprite: function(sprite, x, y, w, h) {
+      return screen.drawSprite(sprite, x, y, w, h);
+    },
+    drawImage: function(sprite, x, y, w, h) {
+      return screen.drawSprite(sprite, x, y, w, h);
+    },
+    drawSpritePart: function(sprite, sx, sy, sw, sh, x, y, w, h) {
+      return screen.drawSpritePart(sprite, sx, sy, sw, sh, x, y, w, h);
+    },
+    drawImagePart: function(sprite, sx, sy, sw, sh, x, y, w, h) {
+      return screen.drawSpritePart(sprite, sx, sy, sw, sh, x, y, w, h);
+    },
+    drawMap: function(map, x, y, w, h) {
+      return screen.drawMap(map, x, y, w, h);
+    },
+    drawText: function(text, x, y, size, color) {
+      return screen.drawText(text, x, y, size, color);
+    },
+    drawTextOutline: function(text, x, y, size, color) {
+      return screen.drawTextOutline(text, x, y, size, color);
+    },
+    textWidth: function(text, size) {
+      return screen.textWidth(text, size);
+    },
+    setLineWidth: function(width) {
+      return screen.setLineWidth(width);
+    },
+    setLineDash: function(dash) {
+      return screen.setLineDash(dash);
+    },
+    drawLine: function(x1, y1, x2, y2, color) {
+      return screen.drawLine(x1, y1, x2, y2, color);
+    },
+    drawPolygon: function() {
+      return screen.drawPolygon(arguments);
+    },
+    drawPolyline: function() {
+      return screen.drawPolyline(arguments);
+    },
+    fillPolygon: function() {
+      return screen.fillPolygon(arguments);
+    },
+    drawQuadCurve: function() {
+      return screen.drawQuadCurve(arguments);
+    },
+    drawBezierCurve: function() {
+      return screen.drawBezierCurve(arguments);
+    },
+    drawArc: function(x, y, radius, angle1, angle2, ccw, color) {
+      return screen.drawArc(x, y, radius, angle1, angle2, ccw, color);
+    },
+    fillArc: function(x, y, radius, angle1, angle2, ccw, color) {
+      return screen.fillArc(x, y, radius, angle1, angle2, ccw, color);
+    },
+    setCursorVisible: function(visible) {
+      return screen.setCursorVisible(visible);
+    },
+    loadFont: function(font) {
+      return screen.loadFont(font);
+    },
+    isFontReady: function(font) {
+      return screen.isFontReady(font);
+    }
+  };
+}
+
+this.Screen.prototype.updateInterface = function() {
+  this.interface.width = this.width;
+  return this.interface.height = this.height;
+}
+
 // add script methods to prototype
 this.Runtime.prototype.__startReady = function() {
   var err, file, global, init, j, len1, lib, meta, namespace, ref, ref1, src;
@@ -15,7 +155,7 @@ this.Runtime.prototype.__startReady = function() {
     }
   };
   global = {
-    //screen: this.screen.getInterface(),
+    screen: this.screen.getInterface(),
     //audio: this.audio.getInterface(),
     //keyboard: this.keyboard.keyboard,
     //gamepad: this.gamepad.status,
@@ -141,6 +281,28 @@ this.Runtime.prototype.updateCall = function() {
       err.type = "update";
       //return this.listener.reportError(err);
       console.log(err);
+    }
+  } catch (error) {
+    err = error;
+    // if (this.report_errors) {
+    //   return this.listener.reportError(err);
+    // }
+    console.log(err, err.stack);
+  }
+}
+
+this.Runtime.prototype.drawCall = function() {
+  var err;
+  try {
+    this.screen.initDraw();
+    this.screen.updateInterface();
+    this.vm.call("draw");
+    //this.reportWarnings();
+    if (this.vm.error_info != null) {
+      err = this.vm.error_info;
+      err.type = "draw";
+      //return this.listener.reportError(err);
+      return console.log(err);
     }
   } catch (error) {
     err = error;

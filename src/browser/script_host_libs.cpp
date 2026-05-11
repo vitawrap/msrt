@@ -64,8 +64,6 @@ namespace browser {
         JS_CFUNC_MAGIC_DEF("resize", 0, ScreenProto_simple, 4),
         JS_CFUNC_MAGIC_DEF("setColor", 1, ScreenProto_colorArg, 0),
         JS_CFUNC_MAGIC_DEF("clear", 1, ScreenProto_colorArg, 1),
-        JS_CFUNC_DEF("getInterface", 0, Proto_notImplemetedQuiet),
-        JS_CFUNC_DEF("updateInterface", 0, Proto_notImplemeted),
     };
 
     static JSValue constructScreen(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv) {
@@ -154,8 +152,7 @@ namespace browser {
     static JSValue RuntimeProto_simple(JSContext *ctx, JSValueConst self, int argc, JSValueConst *argv, int magic) {
         Runtime* runtime = opaqueToObject<Runtime>(self);
         switch (magic) {
-            case 0: runtime->exit(); break;
-            case 1: runtime->drawCall(); break;
+            case 1: runtime->exit(); break;
             case 2: runtime->start(); break;
             case 3: runtime->startReady(); break;
             case 4: runtime->checkStartReady(); break;
@@ -173,8 +170,7 @@ namespace browser {
 
     static JSCFunctionListEntry defineRuntime[] = {
         JS_CGETSET_DEF("screen", RuntimeProto_screen, nullptr),
-        JS_CFUNC_MAGIC_DEF("exit", 0, RuntimeProto_simple, 0),
-        JS_CFUNC_MAGIC_DEF("drawCall", 0, RuntimeProto_simple, 1),
+        JS_CFUNC_MAGIC_DEF("exit", 0, RuntimeProto_simple, 1),
         JS_CFUNC_MAGIC_DEF("start", 0, RuntimeProto_simple, 2),
         JS_CFUNC_MAGIC_DEF("startReady", 0, RuntimeProto_simple,3),
         JS_CFUNC_MAGIC_DEF("checkStartReady", 0, RuntimeProto_simple, 4),

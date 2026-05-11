@@ -32,10 +32,6 @@ namespace browser {
         timerStep.invoke(); // call into script
     }
 
-    void Runtime::drawCall() {
-
-    }
-
     void Runtime::updateControls() {
 
     }
