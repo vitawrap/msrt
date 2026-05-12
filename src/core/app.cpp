@@ -50,6 +50,9 @@ namespace ms {
         if (m_project.open(filename)) {
             LOG_MSGF("opened project %s\n", filename);
             LOG_MSGF("project name: %s\n", m_project.getSettings().title.c_str());
+
+            // do project setup tasks
+            m_project.buildAtlas();
             return true;
         }
         return false;

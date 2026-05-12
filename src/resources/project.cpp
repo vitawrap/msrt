@@ -53,6 +53,11 @@ namespace res {
                         m_scripts.emplace(path, res.as<Script>());
                         LOG_MSGF("Adding script %s\n", path.c_str());
                     }
+                    // and also if it's a sprite (track for atlasing)
+                    else if (path.compare(0, 8, "sprites/") == 0) {
+                        m_sprites.emplace(path, res.as<Image>());
+                        LOG_MSGF("Adding sprite %s\n", path.c_str());
+                    }
                 }
             }
 
@@ -62,7 +67,11 @@ namespace res {
     }
 
     void Project::buildAtlas() {
+        std::vector<const Image*> imagePtrs;
+        for (const auto [_, imageRef] : m_sprites)
+            imagePtrs.push_back(imageRef.operator->());
         
+        m_atlas = Image::createAtlas(imagePtrs.data(), imagePtrs.size(), "p_atlas");
     }
 
     void Project::close()

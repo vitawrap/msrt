@@ -24,6 +24,8 @@ namespace res {
             res::ResourceHandle<res::Image>
         > m_sprites;
 
+        ResourceHandle<Image> m_atlas;
+
     private:
         Settings m_settings;
 
@@ -34,6 +36,9 @@ namespace res {
         io::ZipArchive m_files;
 
     public:
+        Project():
+            m_atlas{nullptr}
+        {}
 
         bool open(char const* filename);
 
