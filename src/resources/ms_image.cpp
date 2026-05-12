@@ -39,7 +39,10 @@ namespace res {
         if (IsImageValid(image)) {
             PlatformImage* pImage = new PlatformImage;
             memcpy((void*)pImage, &image, sizeof(PlatformImage));
-            return new Image(reinterpret_cast<void*>(pImage));
+
+            Image* resImage = new Image(reinterpret_cast<void*>(pImage));
+            resImage->m_path = file->path();
+            return resImage;
         }
         return nullptr;
     }
