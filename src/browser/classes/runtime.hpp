@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/events.hpp"
+#include "core/robin_hood.hpp"
 
 namespace ms {
 namespace browser {
@@ -29,9 +30,18 @@ namespace browser {
         Screen* m_screen;
 
         bool m_started;
+
+        robin_hood::unordered_map<
+            std::string, std::string
+        > m_spriteNameMap;
+
+        void mapSpriteNames();
     
     public:
         Runtime();
+
+        /** Get sprite path from name, for drawing */
+        std::string getSpritePath(std::string const& path) const;
 
         /** Must only be called by script constructor */
         void setScreen(Screen* screen) { m_screen = screen; }
