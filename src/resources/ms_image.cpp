@@ -32,10 +32,10 @@ namespace res {
     };
 
     Image::~Image() {
-        PlatformImage& image = *reinterpret_cast<PlatformImage*>(m_internalImage);
-        if (IsImageValid(image)) {
-            UnloadImage(image);
-            delete &image;
+        PlatformImage* image = reinterpret_cast<PlatformImage*>(m_internalImage);
+        if (IsImageValid(*image)) {
+            UnloadImage(*image);
+            delete image;
             m_internalImage = nullptr;
         }
     }
