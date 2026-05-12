@@ -56,6 +56,21 @@ namespace browser {
         MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
     }
 
+    static JSValue ScreenProto_drawSprite(JSContext* ctx, JSValueConst self, int argc, JSValueConst *argv) {
+        auto* screen = opaqueToObject<Screen>(self);
+        if (argc < 5)
+            return JS_ThrowTypeError(ctx, "drawSprite expects 5 arguments, %d given.", argc);
+        
+        char const* sprite = JS_ToCString(ctx, argv[0]);
+        double x; JS_ToFloat64(ctx, &x, argv[1]);
+        double y; JS_ToFloat64(ctx, &y, argv[2]);
+        double w; JS_ToFloat64(ctx, &w, argv[3]);
+        double h; JS_ToFloat64(ctx, &h, argv[4]);
+        screen->drawSprite(sprite, x, y, w, h);
+        JS_FreeCString(ctx, sprite);
+        MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
+    }
+
     static JSCFunctionListEntry defineScreen[] = {
         JS_CFUNC_MAGIC_DEF("startControl", 0, ScreenProto_simple, 0),
         JS_CFUNC_MAGIC_DEF("initContext", 0, ScreenProto_simple, 1),
@@ -64,6 +79,7 @@ namespace browser {
         JS_CFUNC_MAGIC_DEF("resize", 0, ScreenProto_simple, 4),
         JS_CFUNC_MAGIC_DEF("setColor", 1, ScreenProto_colorArg, 0),
         JS_CFUNC_MAGIC_DEF("clear", 1, ScreenProto_colorArg, 1),
+        JS_CFUNC_DEF("drawSprite", 5, ScreenProto_drawSprite),
     };
 
     static JSValue constructScreen(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv) {

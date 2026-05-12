@@ -1,6 +1,7 @@
 #include "screen.hpp"
 #include "core/app.hpp"
 #include "resources/resource_manager.hpp"
+#include "resources/ms_image.hpp"
 #include <algorithm>
 
 namespace ms {
@@ -110,7 +111,23 @@ namespace browser {
     }
 
     void Screen::drawSprite(std::string const& name, float x, float y, float w, float h) {
+        int frameNum = 0;
+        size_t pFrame = name.rfind('.');
+        if (pFrame != std::string::npos) {
+            /** TODO: Frames from zip + json */
+            auto frameStr = name.substr(pFrame + 1);
+            frameNum = atoi(frameStr.c_str());
+        }
         
+        std::string path = getRuntime()->getSpritePath(name);
+        if (path.empty()) return;
+        auto* project = Application::get()->getProject();
+        auto atlas = project->getSpriteAtlas();
+        DEBUG_ASSERT(atlas.operator->() && atlas->isAtlas());
+
+        res::Image::AtlasRect r;
+        if (atlas->findAtlasRect(path, r))
+            m_canvas->drawQuad((atlas->toTexture()).operator->(), r.x, r.y, r.width, r.height,  x, y, w, h);
     }
 
     uint32_t Screen::stringToColor(char const* str) {
