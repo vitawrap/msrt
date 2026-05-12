@@ -2,8 +2,13 @@
 
 #include <stdint.h>
 #include "canvas_rc.hpp"
+#include "resources/gpu_texture.hpp"
 
 namespace ms {
+namespace res {
+    class GPUTexture;
+}
+
 namespace gfx {
 
     struct CanvasEngine;
@@ -44,6 +49,8 @@ namespace gfx {
         void setFillColor(uint32_t OxAABBGGRR);
         void clearWithColor(uint32_t OxAABBGGRR);
         void clear();
+        void drawQuad(res::GPUTexture* hwTex, float x, float y, float w, float h);
+        void drawQuad(res::GPUTexture* hwTex, float sx, float sy, float sw, float sh, float x, float y, float w, float h);
     };
 
 }

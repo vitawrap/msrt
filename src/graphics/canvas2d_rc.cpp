@@ -121,6 +121,18 @@ namespace gfx {
         transform(cosf(radians), sinf(radians), -sinf(radians), cosf(radians), 0.0, 0.0);
     }
 
+    void CanvasRC2D::drawQuad(res::GPUTexture* hwTex, float x, float y, float w, float h) {
+        drawQuad(hwTex, 0, 0, hwTex->getWidth(), hwTex->getHeight(), x, y, w, h);
+    }
+
+    void CanvasRC2D::drawQuad(res::GPUTexture* hwTex, float sx, float sy, float sw, float sh, float x, float y, float w, float h) {
+        Rectangle src{ sx, sy, sw, sh };
+        Rectangle dst{ x, y, w, h };
+        Vector2 origin{ w * .5f, h * .5f }; // microstudio uses the center as the origin
+        Texture2D* rlTex = reinterpret_cast<Texture2D*>(hwTex->getPlatformTexture());
+        DrawTexturePro(*rlTex, src, dst, origin, 0.f, WHITE);
+    }
+
     void CanvasRC2D::setStrokeColor(uint32_t OxAABBGGRR) {
         m_engine->strokeColor = *(Color*)&OxAABBGGRR;
     }
