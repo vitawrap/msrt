@@ -1,5 +1,6 @@
 #include "ms_image.hpp"
 #include "core/util.hpp"
+#include "resources/gpu_texture.hpp"
 
 #include <raylib.h>
 #include <memory.h>
@@ -150,6 +151,32 @@ namespace res {
 
         // failed...
         return ResourceHandle<Image>{nullptr};
+    }
+
+    ResourceHandle<GPUTexture> Image::toTexture(bool recreate) const {
+        ResourceManager* rMan = ResourceManager::get();
+        std::string key = m_path + ".gpu";
+        
+        auto res = rMan->getCached<GPUTexture>(key.c_str());
+        if (res.operator->()) {
+            if (recreate)
+                res->update(this);
+            return res;
+        }
+        
+        Texture2D hwTex = LoadTextureFromImage(*(PlatformImage*) getPlatformImage());
+        if (IsTextureValid(hwTex)) {
+            Texture2D* pTex = new Texture2D(hwTex);
+            GPUTexture* gpuTex = new GPUTexture(reinterpret_cast<void*>(pTex));
+            return rMan->cacheResource<GPUTexture>(key.c_str(), gpuTex);
+        }
+        return ResourceHandle<GPUTexture>{nullptr};
+    }
+
+    void Image::updateGPUTexture(GPUTexture* hwTex) const {
+        auto* pImage = (PlatformImage*) getPlatformImage();
+        Texture2D* rlt = reinterpret_cast<Texture2D*>(hwTex->getPlatformTexture());
+        UpdateTexture(*rlt, pImage->data);
     }
 }
 }

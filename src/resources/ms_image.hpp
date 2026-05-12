@@ -1,5 +1,6 @@
 #pragma once
 
+#include "resources/gpu_texture.hpp"
 #include "resources/resource.hpp"
 #include "resource_manager.hpp"
 #include "core/robin_hood.hpp"
@@ -9,6 +10,7 @@ namespace ms {
 namespace res {
 
     class Image : public Resource {
+        friend GPUTexture;
     public:
         struct AtlasRect {
             int x, y, width, height;
@@ -26,6 +28,8 @@ namespace res {
         Image(void* image):
             m_internalImage(image)
         {}
+
+        void updateGPUTexture(GPUTexture* hwTex) const;
     public:
         ~Image();
 
@@ -50,6 +54,9 @@ namespace res {
             }
             return false;
         }
+
+        /** Create (or find a cached) GPU texture from image */
+        ResourceHandle<GPUTexture> toTexture(bool recreate = false) const;
 
         DECLARE_LOADER;
     };
