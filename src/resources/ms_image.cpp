@@ -46,6 +46,20 @@ namespace res {
         }
         return nullptr;
     }
+
+    size_t Image::getWidth() const {
+        PlatformImage& image = *reinterpret_cast<PlatformImage*>(m_internalImage);
+        if (IsImageValid(image))
+            return image.width;
+        return 0;
+    }
+
+    size_t Image::getHeight() const {
+        PlatformImage& image = *reinterpret_cast<PlatformImage*>(m_internalImage);
+        if (IsImageValid(image))
+            return image.height;
+        return 0;
+    }
 }
 }
 

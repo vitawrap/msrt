@@ -22,6 +22,9 @@ namespace res {
         /** Get ptr to image data as defined by platform library */
         void* getPlatformImage() const { return m_internalImage; }
 
+        size_t getWidth() const;
+        size_t getHeight() const;
+
         DECLARE_LOADER;
     };
 
