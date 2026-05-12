@@ -52,6 +52,12 @@ namespace res {
         /** Get map of loaded scripts */
         decltype(m_scripts) const& getScriptMap() const { return m_scripts; }
 
+        /** Get map of loaded sprites */
+        decltype(m_sprites) const& getSpriteMap() const { return m_sprites; }
+
+        /** Get atlas constructed with the sprites from this project */
+        ResourceHandle<Image> getSpriteAtlas() const { return m_atlas; }
+
         /** Build atlas out of project sprites */
         void buildAtlas();
     };
