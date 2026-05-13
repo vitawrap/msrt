@@ -54,6 +54,9 @@ namespace browser {
         /** Draw a sprite frame on screen */
         void drawSprite(std::string const& name, float x, float y, float w, float h);
 
+        /** Draw a filled rectangle */
+        void fillRect(float x, float y, float w, float h);
+
         /** Resize canvas and virtual viewport */
         void resize();
 

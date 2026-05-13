@@ -191,6 +191,10 @@ namespace browser {
         }
     }
 
+    void Screen::fillRect(float x, float y, float w, float h) {
+        m_canvas->fillRect(x, y, w, h);
+    }
+
     uint32_t Screen::stringToColor(char const* str) {
         int r, g, b;
         if (sscanf(str, "rgb(%d ,%d ,%d)", &r, &g, &b) == 3) {

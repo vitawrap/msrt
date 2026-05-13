@@ -33,18 +33,24 @@ namespace browser {
         MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
     }
 
+    static inline bool JSValueToScreenColor(JSContext* ctx, Screen* screen, JSValue cVal, uint32_t& color) {
+        if (JS_IsString(cVal)) {
+            char const* colorStr = JS_ToCString(ctx, cVal);
+            color = screen->stringToColor(colorStr);
+            JS_FreeCString(ctx, colorStr);
+        } else if (JS_IsNumber(cVal) && (JS_ToUint32(ctx, &color, cVal) == 0)) {
+            color = screen->decimalToColor(color);
+        } else
+            return false;
+        return true;
+    }
+
     static JSValue ScreenProto_colorArg(JSContext* ctx, JSValueConst self, int argc, JSValueConst *argv, int magic) {
         auto* screen = opaqueToObject<Screen>(self);
         uint32_t color = 0x0;
         if (argc) {
             JSValue const& cVal = argv[0];
-            if (JS_IsString(cVal)) {
-                char const* colorStr = JS_ToCString(ctx, cVal);
-                color = screen->stringToColor(colorStr);
-                JS_FreeCString(ctx, colorStr);
-            } else if (JS_IsNumber(cVal) && (JS_ToUint32(ctx, &color, cVal) == 0)) {
-                color = screen->decimalToColor(color);
-            } else {
+            if (!JSValueToScreenColor(ctx, screen, cVal, color)) {
                 const char* names[] = {"setColor", "clear"};
                 return JS_ThrowTypeError(ctx, "%s: Cannot get color from argument", names[magic]); 
             }
@@ -52,6 +58,22 @@ namespace browser {
         switch (magic) {
             case 0: screen->setColor(color); break;
             case 1: screen->clear(color); break;
+        }
+        MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
+    }
+
+    static JSValue ScreenProto_fillRect(JSContext* ctx, JSValueConst self, int argc, JSValueConst *argv) {
+        auto* screen = opaqueToObject<Screen>(self);
+        if (argc >= 4) {
+            double x; JS_ToFloat64(ctx, &x, argv[1]);
+            double y; JS_ToFloat64(ctx, &y, argv[2]);
+            double w; JS_ToFloat64(ctx, &w, argv[3]);
+            double h; JS_ToFloat64(ctx, &h, argv[4]);
+            uint32_t color = screen->getColor();
+            if (argc >= 5 && !JSValueToScreenColor(ctx, screen, argv[4], color))
+                return JS_ThrowTypeError(ctx, "%s: Cannot parse color.", "fillRect");
+            screen->setColor(color);
+            screen->fillRect(x, y, w, h);
         }
         MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
     }
@@ -87,7 +109,9 @@ namespace browser {
         JS_CFUNC_MAGIC_DEF("resize", 0, ScreenProto_simple, 4),
         JS_CFUNC_MAGIC_DEF("setColor", 1, ScreenProto_colorArg, 0),
         JS_CFUNC_MAGIC_DEF("clear", 1, ScreenProto_colorArg, 1),
+        JS_CFUNC_DEF("fillRect", 5, ScreenProto_fillRect),
         JS_CFUNC_DEF("drawSprite", 5, ScreenProto_drawSprite),
+        JS_CFUNC_DEF("drawText", 5, Proto_notImplemetedQuiet),
         JS_CFUNC_DEF("setDrawAnchor", 2, ScreenProto_setDrawAnchor),
     };
 
