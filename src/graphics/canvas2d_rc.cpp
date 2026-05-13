@@ -31,7 +31,9 @@ namespace gfx {
     CanvasRC2D::CanvasRC2D() :
         m_window(nullptr),
         m_windowId(0),
-        m_engine(nullptr)
+        m_engine(nullptr),
+        m_drawAnchorX(0.5),
+        m_drawAnchorY(0.5)
     {}
 
     void CanvasRC2D::init(platform::IWindowManager* wm, int wid) {
@@ -157,7 +159,7 @@ namespace gfx {
     void CanvasRC2D::drawQuad(res::GPUTexture* hwTex, float sx, float sy, float sw, float sh, float x, float y, float w, float h) {
         Rectangle src{ sx, sy, sw, sh };
         Rectangle dst{ x, y, w, h };
-        Vector2 origin{ w * .5f, h * .5f }; // microstudio uses the center as the origin
+        Vector2 origin{ w * m_drawAnchorX, h * m_drawAnchorY }; // microstudio uses the center as the origin
         Texture2D* rlTex = reinterpret_cast<Texture2D*>(hwTex->getPlatformTexture());
         DrawTexturePro(*rlTex, src, dst, origin, 0.f, WHITE);
     }
@@ -168,6 +170,11 @@ namespace gfx {
 
     void CanvasRC2D::setFillColor(uint32_t OxAABBGGRR) {
         m_engine->fillColor = *(Color*)&OxAABBGGRR;
+    }
+
+    void CanvasRC2D::setDrawAnchors(float ratioX, float ratioY) {
+        m_drawAnchorX = ratioX;
+        m_drawAnchorY = ratioY;
     }
 
     void CanvasRC2D::clear() {

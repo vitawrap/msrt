@@ -23,6 +23,9 @@ namespace gfx {
         /** Virtual render dimensions */
         float m_width, m_height;
 
+        /** Drawing anchor */
+        float m_drawAnchorX, m_drawAnchorY;
+
     public:
         CanvasRC2D();
         ~CanvasRC2D() { free(); }
@@ -57,6 +60,7 @@ namespace gfx {
         void setFillColor(uint32_t OxAABBGGRR);
         void clearWithColor(uint32_t OxAABBGGRR);
         void clear();
+        void setDrawAnchors(float ratioX, float ratioY);
         void drawQuad(res::GPUTexture* hwTex, float x, float y, float w, float h);
         void drawQuad(res::GPUTexture* hwTex, float sx, float sy, float sw, float sh, float x, float y, float w, float h);
     };
