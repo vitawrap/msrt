@@ -3,6 +3,7 @@
 #include <list>
 #include <raylib.h>
 #include <raymath.h>
+#include <rlgl.h>
 
 namespace ms {
 namespace gfx {
@@ -102,6 +103,11 @@ namespace gfx {
 
     void CanvasRC2D::beginFrame() {
         BeginTextureMode(m_engine->renderTexture);
+
+        // have to use rlgl here, because Camera2D is weirdly restrictive.
+        rlLoadIdentity();
+        rlMultMatrixf(MatrixToFloat(m_engine->transform));
+
         ClearBackground(BLACK); // default microscript clear color is black
     }
 
