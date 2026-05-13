@@ -159,6 +159,8 @@ namespace browser {
     void Screen::setDrawAnchor(float x, float y) {
         m_anchorX = x;
         m_anchorY = y;
+        // replicate microstudio's behavior
+        m_canvas->setDrawAnchors(.5 + (x * .5), .5 + (y * .5));
     }
 
     void Screen::drawSprite(std::string const& name, float x, float y, float w, float h) {
