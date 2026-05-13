@@ -119,6 +119,12 @@ namespace gfx {
         Rectangle dst{ 0, 0, (float)m_window->getWindowWidth(), (float)m_window->getWindowHeight()};
         BeginDrawing();
         DrawTexturePro(m_engine->renderTexture.texture, src, dst, Vector2{0,0}, 0.f, WHITE);
+        
+        // draw an FPS counter over everything
+        char fpsText[64];
+        snprintf(fpsText, 64, "%d FPS", GetFPS());
+        DrawText(fpsText, 8, 8, 20, WHITE);
+        
         EndDrawing();
     }
 
