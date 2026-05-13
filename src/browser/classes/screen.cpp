@@ -43,12 +43,56 @@ namespace browser {
     }
 
     void Screen::resize() {
+        auto* wm = Application::get()->getWindowManager();
+        wm->selectWindow(0);
+        float cw = wm->getWindowWidth();
+        float ch = wm->getWindowHeight();
+        float ratio = 1.f, w = 640, h = 480;
         auto arType = m_runtime->getAspectRatio();
         float arValue = Runtime::getRatioFor(arType);
         bool min = arType > Runtime::AR_MinValues;
         if (arType != Runtime::AR_Unknown) {
-
+            if (min) {
+                switch (m_runtime->getOrientation()) {
+                default_orient_min:
+                    if (ch > cw) {
+                    case Runtime::Portrait:
+                        ratio = std::max(ratio, ch / cw);
+                        break;
+                    } else {
+                    case Runtime::Landscape:
+                        ratio = std::max(ratio, cw / ch);
+                        break;
+                    }
+                    default:
+                        goto default_orient_min;
+                }
+            }
+            float r = 0.f;
+            switch (m_runtime->getOrientation()) {
+            default_orient:
+                if (cw > ch) {
+                case Runtime::Portrait:
+                    r = std::min(cw / ratio, ch) / ch;
+                    w = ch * r * ratio;
+                    h = ch * r;
+                    break;
+                } else {
+                case Runtime::Landscape:
+                    r = std::min(cw, ch / ratio) / cw;
+                    w = cw * r;
+                    h = cw * r * ratio;
+                    break;
+                }
+                default:
+                    goto default_orient;
+            }
+        } else {
+            w = cw;
+            h = ch;
         }
+        if (m_canvas && m_canvas->isReady())
+            m_canvas->resize(w * ratio, h * ratio);
         initContext();
     }
 
