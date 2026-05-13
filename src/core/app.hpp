@@ -2,6 +2,7 @@
 
 #include "browser/context.hpp"
 #include "platform/windowing.hpp"
+#include "platform/input.hpp"
 #include "resources/project.hpp"
 
 namespace ms {
@@ -16,6 +17,7 @@ namespace ms {
         res::Project m_project;
         browser::Context m_browser;
         platform::WindowManager m_wm;
+        platform::InputManager m_input;
         bool m_programExit;
 
         void init();
@@ -27,6 +29,8 @@ namespace ms {
         }
     public:
         platform::WindowManager* getWindowManager() { return &m_wm; }
+
+        platform::InputManager* getInputManager() { return &m_input; }
 
         /**
          * @brief Load project from file

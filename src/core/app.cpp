@@ -104,6 +104,9 @@ namespace ms {
                 // poll window manager events
                 m_wm.pollWindowEvents();
 
+                // poll input events
+                m_input.pollEvents();
+
                 // run all async script jobs
                 m_browser.getScriptHost()->flushJobs();
 
