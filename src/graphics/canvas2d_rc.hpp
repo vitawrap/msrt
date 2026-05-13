@@ -19,6 +19,9 @@ namespace gfx {
 
         /** Renderer-specific storage */
         CanvasEngine* m_engine;
+        
+        /** Virtual render dimensions */
+        float m_width, m_height;
 
     public:
         CanvasRC2D();
@@ -39,6 +42,8 @@ namespace gfx {
 
         void beginFrame() override;
         void submitFrame() override;
+
+        void resize(float w, float h) override;
 
         /* Canvas2D operations */
 

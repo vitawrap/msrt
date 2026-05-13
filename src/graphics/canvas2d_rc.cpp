@@ -20,6 +20,7 @@ namespace gfx {
      * @brief This holds all of the raylib-specific data not exposed in class header
      */
     struct CanvasEngine {
+        RenderTexture renderTexture;
         Matrix transform; // camera transform
         Color fillColor;
         Color strokeColor; 
@@ -38,16 +39,21 @@ namespace gfx {
         if ((wm->getWindowCount() > wid) && wm->selectWindow(wid)) {
             m_window = wm;
             m_windowId = wid;
+            m_width = wm->getWindowWidth();
+            m_height = wm->getWindowHeight();
             m_engine = new CanvasEngine{};
 
             m_engine->transform = MatrixIdentity();
             m_engine->strokeColor = BLACK;
             m_engine->fillColor = BLACK;
+            m_engine->renderTexture = LoadRenderTexture(m_width, m_height);
         }
     }
 
     void CanvasRC2D::free() {
         if (m_engine) {
+            if (IsRenderTextureValid(m_engine->renderTexture))
+                UnloadRenderTexture(m_engine->renderTexture);
             delete m_engine;
             m_engine = nullptr;
         }
@@ -93,11 +99,18 @@ namespace gfx {
     }
 
     void CanvasRC2D::beginFrame() {
-        BeginDrawing();
+        BeginTextureMode(m_engine->renderTexture);
         ClearBackground(BLACK); // default microscript clear color is black
     }
 
     void CanvasRC2D::submitFrame() {
+        EndTextureMode();
+        // render RT on screen
+        m_window->selectWindow(m_windowId);
+        Rectangle src{ 0, 0, m_width, -m_height };
+        Rectangle dst{ 0, 0, (float)m_window->getWindowWidth(), (float)m_window->getWindowHeight()};
+        BeginDrawing();
+        DrawTexturePro(m_engine->renderTexture.texture, src, dst, Vector2{0,0}, 0.f, WHITE);
         EndDrawing();
     }
 
@@ -107,6 +120,14 @@ namespace gfx {
 
     int CanvasRC2D::getWindowID() const {
         return m_windowId;
+    }
+
+    void CanvasRC2D::resize(float w, float h) {
+        m_width = w;
+        m_height = h;
+        if (IsRenderTextureValid(m_engine->renderTexture))
+            UnloadRenderTexture(m_engine->renderTexture);
+        m_engine->renderTexture = LoadRenderTexture(w, h);
     }
 
     void CanvasRC2D::transform(float a, float b, float c, float d, float e, float f) {

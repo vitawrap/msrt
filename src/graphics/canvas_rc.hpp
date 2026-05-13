@@ -30,6 +30,8 @@ namespace gfx {
 
         virtual void beginFrame() = 0;
         virtual void submitFrame() = 0;
+
+        virtual void resize(float w, float h) = 0;
     };
 
 }
