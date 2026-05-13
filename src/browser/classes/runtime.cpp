@@ -9,12 +9,28 @@ namespace browser {
 
     Runtime::Runtime():
         m_screen(nullptr),
-        m_started(false)
+        m_started(false),
+        m_input(nullptr),
+        m_isTouching(false),
+        m_inputPointerHandler(0)
     {}
 
     void Runtime::startReady() {
+        // hook into input manager
+        m_input = Application::get()->getInputManager();
+        DEBUG_ASSERT(m_input);
+        m_inputPointerHandler = m_input->pointer.connect([this](auto pi) {
+            m_isTouching = Application::get()->getInputManager()->isPointerPressed();
+        }).id;
+
         m_started = true;
         startVM.invoke(); // call into script
+    }
+
+    Runtime::~Runtime() {
+        if (m_input) {
+            m_input->pointer.disconnect(m_inputPointerHandler);
+        }
     }
 
     void Runtime::checkStartReady() {
@@ -54,7 +70,8 @@ namespace browser {
     }
 
     void Runtime::updateControls() {
-
+        // update from inputmanager events
+        updatedControls.invoke(); // call into script
     }
 
     void Runtime::exit() {
