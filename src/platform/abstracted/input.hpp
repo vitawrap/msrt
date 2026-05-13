@@ -16,7 +16,8 @@ namespace platform {
         /** Poll all input events */
         void pollEvents() override;
         
-        
+        /** Are ANY pointing devices/buttons/touches currently down? */
+        bool isPointerPressed() const { return m_pointersPressed.size(); }
     };
 
 }

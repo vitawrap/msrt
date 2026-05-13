@@ -145,7 +145,10 @@ namespace browser {
     static JSValue constructRuntime(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv) {
         JSValue rtValue = constructObject<Runtime, classId_Runtime>(ctx, new_target, argc, argv);
         Runtime* rt = opaqueToObject<Runtime>(rtValue);
+        // fields injected into other JS objects
         JS_SetPropertyStr(ctx, rtValue, "update_memory", JS_NewObject(ctx));
+        JS_SetPropertyStr(ctx, rtValue, "touch", JS_NewObject(ctx));
+        // script hooks
         rt->startVM.connect([ctx, rtValue]() {
             JSTempVal startFn = JS_GetPropertyStr(ctx, rtValue, "__startReady");
             JSTempVal ret = JS_Call(ctx, startFn, rtValue, 0, nullptr);
@@ -153,6 +156,11 @@ namespace browser {
         rt->timerStep.connect([ctx, rtValue]() {
             JSTempVal startFn = JS_GetPropertyStr(ctx, rtValue, "__timer");
             JSTempVal ret = JS_Call(ctx, startFn, rtValue, 0, nullptr);
+        });
+        rt->updatedControls.connect([ctx, rtValue]() {
+            Runtime* rt = opaqueToObject<Runtime>(rtValue);
+            JSTempVal touch = JS_GetPropertyStr(ctx, rtValue, "touch");
+            JS_SetPropertyStr(ctx, touch, "touching", JS_NewBool(ctx, rt->isTouching()));
         });
         JSValue screen = constructScreen(ctx, JS_UNDEFINED, 1, &rtValue);
         rt->setScreen(opaqueToObject<Screen>(screen));

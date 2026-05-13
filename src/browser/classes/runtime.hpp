@@ -2,6 +2,7 @@
 
 #include "core/events.hpp"
 #include "core/robin_hood.hpp"
+#include "platform/input.hpp"
 
 namespace ms {
 namespace browser {
@@ -36,9 +37,14 @@ namespace browser {
         > m_spriteNameMap;
 
         void mapSpriteNames();
+
+        platform::InputManager* m_input;
+        bool m_isTouching;
+        int m_inputPointerHandler;
     
     public:
         Runtime();
+        ~Runtime();
 
         /** Get sprite path from name, for drawing */
         std::string getSpritePath(std::string const& path) const;
@@ -72,9 +78,14 @@ namespace browser {
         /** Exit runtime */
         void exit();
 
+        /* INPUT */
+
+        bool isTouching() const { return m_isTouching; }
+
     public:
         Event<> startVM;
         Event<> timerStep;
+        Event<> updatedControls;
     };
 
     float Runtime::getRatioFor(AspectRatio enumval)  {
