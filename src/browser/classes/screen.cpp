@@ -20,6 +20,8 @@ namespace browser {
         m_objectDegrees(0.f),
         m_objectScaleX(1.f),
         m_objectScaleY(1.f),
+        m_anchorX(0.f),
+        m_anchorY(0.f),
         m_lineWidth(1.f),
         m_screenTransform(false)
     {}
@@ -152,6 +154,11 @@ namespace browser {
     void Screen::clear(uint32_t color) {
         if (!m_canvas->isReady()) return;
         m_canvas->clearWithColor(ARGBtoABGR(color));
+    }
+
+    void Screen::setDrawAnchor(float x, float y) {
+        m_anchorX = x;
+        m_anchorY = y;
     }
 
     void Screen::drawSprite(std::string const& name, float x, float y, float w, float h) {

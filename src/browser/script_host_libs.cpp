@@ -71,6 +71,14 @@ namespace browser {
         MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
     }
 
+    static JSValue ScreenProto_setDrawAnchor(JSContext* ctx, JSValueConst self, int argc, JSValueConst *argv) {
+        auto* screen = opaqueToObject<Screen>(self);
+        double x; JS_ToFloat64(ctx, &x, argv[0]);
+        double y; JS_ToFloat64(ctx, &y, argv[1]);
+        screen->setDrawAnchor(x, y);
+        MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
+    }
+
     static JSCFunctionListEntry defineScreen[] = {
         JS_CFUNC_MAGIC_DEF("startControl", 0, ScreenProto_simple, 0),
         JS_CFUNC_MAGIC_DEF("initContext", 0, ScreenProto_simple, 1),
@@ -80,6 +88,7 @@ namespace browser {
         JS_CFUNC_MAGIC_DEF("setColor", 1, ScreenProto_colorArg, 0),
         JS_CFUNC_MAGIC_DEF("clear", 1, ScreenProto_colorArg, 1),
         JS_CFUNC_DEF("drawSprite", 5, ScreenProto_drawSprite),
+        JS_CFUNC_DEF("setDrawAnchor", 2, ScreenProto_setDrawAnchor),
     };
 
     static JSValue constructScreen(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv) {

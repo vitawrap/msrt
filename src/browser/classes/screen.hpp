@@ -27,6 +27,8 @@ namespace browser {
         float m_transX, m_transY, m_scaleX, m_scaleY, m_degrees;
         /** Object transform values */
         float m_objectScaleX, m_objectScaleY, m_objectDegrees;
+        /** Draw anchor */
+        float m_anchorX, m_anchorY;
     
     public:
         Screen();
@@ -51,6 +53,9 @@ namespace browser {
 
         /** Resize canvas and virtual viewport */
         void resize();
+
+        /** Set draw anchor */
+        void setDrawAnchor(float x, float y);
 
         /** ? */
         void initDraw();
