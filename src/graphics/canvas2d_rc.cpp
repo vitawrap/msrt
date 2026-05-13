@@ -141,7 +141,7 @@ namespace gfx {
     }
 
     void CanvasRC2D::translate(float x, float y) {
-        transform(0.0, 0.0, 0.0, 0.0, x, y);
+        transform(1.0, 0.0, 0.0, 1.0, x, y);
     }
 
     void CanvasRC2D::scale(float w, float h) {
