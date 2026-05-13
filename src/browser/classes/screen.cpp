@@ -37,9 +37,9 @@ namespace browser {
         }
         if (!m_canvas->isReady()) return;
         m_canvas->push();
-        m_canvas->translate(m_canvas->getWidth() >> 1, m_canvas->getHeight() >> 1);
         float ratio = std::min(m_canvas->getWidth() / 200, m_canvas->getHeight() / 200);
         m_canvas->scale(ratio, ratio);
+        m_canvas->translate(m_canvas->getWidth() * .5f, m_canvas->getHeight() * .5f);
         m_width = m_canvas->getWidth() / ratio;
         m_height = m_canvas->getHeight() / ratio;
     }
@@ -179,8 +179,16 @@ namespace browser {
         DEBUG_ASSERT(atlas.operator->() && atlas->isAtlas());
 
         res::Image::AtlasRect r;
-        if (atlas->findAtlasRect(path, r))
-            m_canvas->drawQuad((atlas->toTexture()).operator->(), r.x, r.y, r.width, r.height,  x, y, w, h);
+        if (atlas->findAtlasRect(path, r)) {
+            if (initDrawOp(x, -y)) {
+                m_canvas->drawQuad((atlas->toTexture()).operator->(), r.x, r.y, r.width, r.height,
+                0.f, 0.f, w, h);
+                closeDrawOp();
+            } else {
+                m_canvas->drawQuad((atlas->toTexture()).operator->(), r.x, r.y, r.width, r.height,
+                x, y, w, h);
+            }
+        }
     }
 
     uint32_t Screen::stringToColor(char const* str) {
