@@ -101,6 +101,14 @@ namespace gfx {
         EndDrawing();
     }
 
+    platform::IWindowManager* CanvasRC2D::getWindowManager() const {
+        return m_window;
+    }
+
+    int CanvasRC2D::getWindowID() const {
+        return m_windowId;
+    }
+
     void CanvasRC2D::transform(float a, float b, float c, float d, float e, float f) {
         Matrix m3x3 = { a, c, 0.0f, e,
                       b, d, 0.0f, f,

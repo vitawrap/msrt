@@ -34,6 +34,9 @@ namespace gfx {
         int getWidth() const override;
         int getHeight() const override;
 
+        platform::IWindowManager* getWindowManager() const override;
+        int getWindowID() const override;
+
         void beginFrame() override;
         void submitFrame() override;
 
