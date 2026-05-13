@@ -45,6 +45,9 @@ namespace browser {
         /** Set color state */
         void setColor(uint32_t color);
 
+        /** Get last screen color */
+        uint32_t getColor() const { return m_color; }
+
         /** Set alpha state */
         void setAlpha(int value);
 
