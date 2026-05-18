@@ -11,6 +11,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 cmake_policy(SET CMP0048 NEW) 
 cmake_policy(SET CMP0077 NEW)
 
+# release config
+add_compile_options(
+    "$<$<CONFIG:Release>:-Ofast>"
+)
+
 # find gtk for linux message boxes (or use win32 api on windows)
 if (UNIX)
     find_package(PkgConfig REQUIRED)
