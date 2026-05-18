@@ -7,14 +7,18 @@
 
 .macro embed file:req, global_name:req
     .global \global_name
+#if defined(__unix__)
     .type   \global_name, @object
+#endif
     .balign 4
 \global_name:
     .incbin "\file"
 \global_name\()_end:
 
     .global \global_name\()_size
+#if defined(__unix__)
     .type   \global_name\()_size, @object
+#endif
     .balign 4
 \global_name\()_size:
     .int    \global_name\()_end - \global_name
