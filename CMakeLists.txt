@@ -23,6 +23,7 @@ elseif(WIN32)
     set(ZLIB_LIBRARY $ENV{ZLIB_LIBRARY})
     set(ZLIB_INCLUDE_DIR $ENV{ZLIB_INCLUDE_DIR})
     add_compile_definitions(PLATFORM_NT_MESSAGEBOXES)
+    add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 endif()
 
 include(FetchContent)
@@ -92,7 +93,7 @@ set_source_files_properties(${SOURCES_ASM}
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${SOURCES_ASM})
 target_include_directories(${PROJECT_NAME} PRIVATE src include)
-target_include_directories(${PROJECT_NAME} PUBLIC "${quickjs_SOURCE_DIR}" "${minizip_SOURCE_DIR}")
+target_include_directories(${PROJECT_NAME} PUBLIC "${ZLIB_INCLUDE_DIR}" "${quickjs_SOURCE_DIR}" "${minizip_SOURCE_DIR}")
 
 target_link_libraries(${PROJECT_NAME} 
     PRIVATE 
@@ -116,7 +117,7 @@ file(GLOB_RECURSE TEST_SOURCES
 add_executable(unit_tests ${TEST_SOURCES} ${SOURCES} ${SOURCES_ASM})
 target_compile_definitions(unit_tests PRIVATE PLATFORM_NO_MAIN)
 target_include_directories(unit_tests PRIVATE src include)
-target_include_directories(unit_tests PUBLIC "${quickjs_SOURCE_DIR}" "${minizip_SOURCE_DIR}")
+target_include_directories(unit_tests PUBLIC "${ZLIB_INCLUDE_DIR}" "${quickjs_SOURCE_DIR}" "${minizip_SOURCE_DIR}")
 
 target_link_libraries(unit_tests 
     PRIVATE 
