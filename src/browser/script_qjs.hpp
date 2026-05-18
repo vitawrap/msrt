@@ -16,8 +16,10 @@
 #include <string>
 
 // QuickJS includes
-#include <cutils.h>
-#include <quickjs.h>
+extern "C" {
+    #include <cutils.h>
+    #include <quickjs.h>
+}
 
 namespace ms {
 namespace browser {

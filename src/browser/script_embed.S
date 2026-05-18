@@ -3,7 +3,11 @@
  * in executable, bypassing compiler inspection
  */
 
+#if defined(__unix__)
 .section .rodata
+#else
+.section .rdata
+#endif
 
 .macro embed file:req, global_name:req
     .global \global_name
