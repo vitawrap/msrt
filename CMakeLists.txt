@@ -20,6 +20,8 @@ if (UNIX)
         add_compile_definitions(PLATFORM_UNIX_MESSAGEBOXES)
     endif()
 elseif(WIN32)
+    set(ZLIB_LIBRARY $ENV{ZLIB_LIBRARY})
+    set(ZLIB_INCLUDE_DIR $ENV{ZLIB_INCLUDE_DIR})
     add_compile_definitions(PLATFORM_NT_MESSAGEBOXES)
 endif()
 
