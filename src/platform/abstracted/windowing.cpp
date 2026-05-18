@@ -1,5 +1,6 @@
 
 #include "core/util.hpp"
+#include "platform/abstracted/windowing.hpp"
 #include "platform/windowing.hpp"
 #include <raylib.h>
 
@@ -7,8 +8,6 @@
 /* On unix platforms, try to get GTK to show message boxes. */
 #include <gtk/gtk.h>
 static bool unixMessageBoxInitialized = false;
-#elif PLATFORM_NT_MESSAGEBOXES
-#include <Windows.h>
 #endif
 
 namespace ms {
@@ -97,14 +96,7 @@ namespace platform {
         // gtk needs its main context to run for the dialog to disappear
         while (g_main_context_iteration(nullptr, false));
 #elif PLATFORM_NT_MESSAGEBOXES
-        int winType = MB_ICONINFORMATION;
-        switch (type) {
-            case MB_WARNING: winType = MB_ICONWARNING; break;
-            case MB_ERROR: winType = MB_ICONERROR; break;
-            default: break;
-        }
-        HANDLE hWnd = (HANDLE) GetWindowHandle();
-        MessageBoxA(hWnd, message, title, MB_OK|MB_APPLMODAL|winType);
+        nt_showMessageBox(GetWindowHandle(), title, message, type);
 #endif
     }
 

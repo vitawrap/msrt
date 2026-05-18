@@ -36,3 +36,9 @@ namespace platform {
 
 } // namespace platform
 }
+
+#ifdef PLATFORM_NT_MESSAGEBOXES
+namespace ms { namespace platform {
+    extern void nt_showMessageBox(void* hwnd, char const* title, char const* message, IWindowManager::MessageBoxType);
+}}
+#endif
