@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 #include "resources/gpu_texture.hpp"
 #include "resources/resource.hpp"
 #include "resource_manager.hpp"

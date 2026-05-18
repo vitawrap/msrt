@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 #include "core/events.hpp"
 #include "core/robin_hood.hpp"
 #include "platform/input.hpp"

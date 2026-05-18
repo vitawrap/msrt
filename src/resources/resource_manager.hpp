@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 #include "core/robin_hood.hpp"
 #include "resource.hpp"
 #include "core/iterable_stack.hpp"

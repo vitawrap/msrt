@@ -1,5 +1,7 @@
 #include "canvas2d_rc.hpp"
 
+#include <stdio.h>
+
 #include <list>
 #include <raylib.h>
 #include <raymath.h>
