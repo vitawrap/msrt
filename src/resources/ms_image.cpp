@@ -57,7 +57,7 @@ namespace res {
         const auto path = file->path();
         const auto pext = path.extension();
 
-        PlatformImage image = LoadImageFromMemory(pext.c_str(), fdata, fsize);
+        PlatformImage image = LoadImageFromMemory(pext.u8string().c_str(), fdata, fsize);
         delete[] fdata;
 
         if (IsImageValid(image)) {
@@ -65,7 +65,7 @@ namespace res {
             memcpy((void*)pImage, &image, sizeof(PlatformImage));
 
             Image* resImage = new Image(reinterpret_cast<void*>(pImage));
-            resImage->m_path = file->path();
+            resImage->m_path = file->path().string();
             return resImage;
         }
         return nullptr;

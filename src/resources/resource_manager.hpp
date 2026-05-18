@@ -169,11 +169,12 @@ namespace res {
         template<typename TResource>
         ResourceHandle<TResource> loadResource(io::File* file)
         {
-            auto cached = getCached<TResource>(file->path().c_str());
+            auto filePath = file->path().u8string();
+            auto cached = getCached<TResource>(filePath.c_str());
             if (cached) return cached;
 
-            Resource* res = createFromHandler(file->path().c_str(), file);
-            return validateResource<TResource>(res, file->path().c_str());
+            Resource* res = createFromHandler(filePath.c_str(), file);
+            return validateResource<TResource>(res, filePath.c_str());
         }
 
         auto loadResourceOpaque(io::File* file)

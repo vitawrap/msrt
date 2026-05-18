@@ -107,9 +107,9 @@ namespace io {
     #ifdef PLATFORM_NT
         FILE* ptr = nullptr;
         s_status = (int) fopen_s(&ptr, filename, "rb");
-        if (s_status != CFile::OK)
+        if (s_status != File::OK)
             return TFile(nullptr);
-        return TFile(new CFile((TFileHandle) ptr, filename));
+        return TFile(new FSFile((TFileHandle) ptr, filename));
     #else
         FILE* ptr = fopen(filename, "rb");
         if (!ptr) {

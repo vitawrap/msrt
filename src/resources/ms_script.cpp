@@ -11,7 +11,7 @@ namespace res {
         std::string text = file->readString();
 
         Script* script = new Script;
-        script->m_path = file->path();
+        script->m_path = file->path().u8string();
         script->m_text = text;
         return script;
     }
