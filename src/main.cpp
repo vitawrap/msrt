@@ -4,6 +4,7 @@
 #include "core/app.hpp"
 
 #ifdef PLATFORM_NT
+#include <Windows.h>
 #include "platform/nt/nt_utils.hpp"
 
 struct DeferFree {
@@ -14,14 +15,15 @@ struct DeferFree {
 
 // Windows needs a specific entry point to treat the app as a GUI app (with no console)
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
+{
     int argc = 0;
     char** argv = nullptr;
     ms::nt::getArgvUTF8 (pCmdLine, &argc, &argv);
     DeferFree _((void*)argv);
 #else
 int main(int argc, char* argv[])
-#endif
 {
+#endif
     auto* app = ms::Application::get();
     try {
     
@@ -33,7 +35,9 @@ int main(int argc, char* argv[])
     } catch (std::runtime_error const& err) {
         auto* wm = app->getWindowManager();
         wm->showMessageBox("Error", err.what(), ms::platform::WindowManager::MB_ERROR);
+        return 1;
     }
+    return 0;
 }
 
 #endif
