@@ -5,7 +5,7 @@
 #include "resources/gpu_texture.hpp"
 #include "resources/resource.hpp"
 #include "resource_manager.hpp"
-#include "core/robin_hood.hpp"
+#include "core/view_map.hpp"
 #include "io/file.hpp"
 
 namespace ms {
@@ -19,10 +19,7 @@ namespace res {
         };
 
     protected:
-        robin_hood::unordered_map<
-            std::string,
-            AtlasRect
-        > m_atlasRects;
+        ms::unordered_map<AtlasRect> m_atlasRects;
 
         std::string m_path;
         void* m_internalImage;
@@ -48,7 +45,7 @@ namespace res {
         static ResourceHandle<Image> createAtlas(Image const** images, size_t num, char const* atlasCacheName);
 
         bool isAtlas() const { return m_atlasRects.size(); }
-        bool findAtlasRect(std::string const& name, AtlasRect& outRect) {
+        bool findAtlasRect(std::string_view const& name, AtlasRect& outRect) {
             auto itr = m_atlasRects.find(name);
             if (itr != m_atlasRects.end()) {
                 outRect = itr->second;

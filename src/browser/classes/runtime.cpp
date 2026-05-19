@@ -38,7 +38,7 @@ namespace browser {
             startReady();
     }
 
-    std::string Runtime::getSpritePath(const std::string& name) const {
+    std::string_view Runtime::getSpritePath(const std::string& name) const {
         auto itr = m_spriteNameMap.find(name);
         if (itr != m_spriteNameMap.cend())
             return itr->second;

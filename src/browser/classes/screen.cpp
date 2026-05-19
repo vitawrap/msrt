@@ -1,8 +1,7 @@
 #include "screen.hpp"
 #include "core/app.hpp"
-#include "resources/resource_manager.hpp"
-#include "resources/ms_image.hpp"
 #include <algorithm>
+#include <string_view>
 
 namespace ms {
 namespace browser {
@@ -177,7 +176,7 @@ namespace browser {
             frameNum = atoi(frameStr.c_str());
         }
         
-        std::string path = getRuntime()->getSpritePath(name);
+        std::string_view path = getRuntime()->getSpritePath(name);
         if (path.empty()) return;
 
         res::Image::AtlasRect r;
