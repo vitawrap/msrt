@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #include "core/events.hpp"
-#include "core/robin_hood.hpp"
+#include "core/view_map.hpp"
 #include "platform/input.hpp"
 
 namespace ms {
@@ -34,9 +34,7 @@ namespace browser {
 
         bool m_started;
 
-        robin_hood::unordered_map<
-            std::string, std::string
-        > m_spriteNameMap;
+        ms::unordered_map<std::string> m_spriteNameMap;
 
         void mapSpriteNames();
 
@@ -49,7 +47,7 @@ namespace browser {
         ~Runtime();
 
         /** Get sprite path from name, for drawing */
-        std::string_view getSpritePath(std::string const& path) const;
+        std::string_view getSpritePath(std::string_view const& path) const;
 
         /** Must only be called by script constructor */
         void setScreen(Screen* screen) { m_screen = screen; }
