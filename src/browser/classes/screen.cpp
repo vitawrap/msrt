@@ -42,6 +42,11 @@ namespace browser {
         m_canvas->translate(m_canvas->getWidth() * .5f, m_canvas->getHeight() * .5f);
         m_width = m_canvas->getWidth() / ratio;
         m_height = m_canvas->getHeight() / ratio;
+
+        // keep reference to main sprite atlas
+        auto* project = Application::get()->getProject();
+        m_atlas = project->getSpriteAtlas();
+        DEBUG_ASSERT(m_atlas.operator->() && m_atlas->isAtlas());
     }
 
     void Screen::resize() {
@@ -174,18 +179,15 @@ namespace browser {
         
         std::string path = getRuntime()->getSpritePath(name);
         if (path.empty()) return;
-        auto* project = Application::get()->getProject();
-        auto atlas = project->getSpriteAtlas();
-        DEBUG_ASSERT(atlas.operator->() && atlas->isAtlas());
 
         res::Image::AtlasRect r;
-        if (atlas->findAtlasRect(path, r)) {
+        if (m_atlas->findAtlasRect(path, r)) {
             if (initDrawOp(x, -y)) {
-                m_canvas->drawQuad((atlas->toTexture()).operator->(), r.x, r.y, r.width, r.height,
+                m_canvas->drawQuad((m_atlas->toTexture()).operator->(), r.x, r.y, r.width, r.height,
                 0.f, 0.f, w, h);
                 closeDrawOp();
             } else {
-                m_canvas->drawQuad((atlas->toTexture()).operator->(), r.x, r.y, r.width, r.height,
+                m_canvas->drawQuad((m_atlas->toTexture()).operator->(), r.x, r.y, r.width, r.height,
                 x, y, w, h);
             }
         }

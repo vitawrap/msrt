@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include "runtime.hpp"
 #include "graphics/canvas2d_rc.hpp"
+#include "resources/resource_manager.hpp"
+#include "resources/ms_image.hpp"
 
 namespace ms {
 namespace browser {
@@ -29,6 +31,9 @@ namespace browser {
         float m_objectScaleX, m_objectScaleY, m_objectDegrees;
         /** Draw anchor */
         float m_anchorX, m_anchorY;
+
+        /** Main atlas for drawing */
+        res::ResourceHandle<res::Image> m_atlas;
     
     public:
         Screen();
