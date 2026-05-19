@@ -167,7 +167,7 @@ namespace browser {
         m_canvas->setDrawAnchors(.5 + (x * .5), .5 + (y * .5));
     }
 
-    void Screen::drawSprite(std::string_view const& name, float x, float y, float w, float h) {
+    void Screen::drawSprite(std::string_view name, float x, float y, float w, float h) {
         int frameNum = 0;
         size_t pFrame = name.rfind('.');
         if (pFrame != std::string::npos) {

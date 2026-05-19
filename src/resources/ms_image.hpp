@@ -45,7 +45,7 @@ namespace res {
         static ResourceHandle<Image> createAtlas(Image const** images, size_t num, char const* atlasCacheName);
 
         bool isAtlas() const { return m_atlasRects.size(); }
-        bool findAtlasRect(std::string_view const& name, AtlasRect& outRect) {
+        bool findAtlasRect(std::string_view name, AtlasRect& outRect) {
             auto itr = m_atlasRects.find(name);
             if (itr != m_atlasRects.end()) {
                 outRect = itr->second;

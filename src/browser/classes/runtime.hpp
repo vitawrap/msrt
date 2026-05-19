@@ -47,7 +47,7 @@ namespace browser {
         ~Runtime();
 
         /** Get sprite path from name, for drawing */
-        std::string_view getSpritePath(std::string_view const& path) const;
+        std::string_view getSpritePath(std::string_view path) const;
 
         /** Must only be called by script constructor */
         void setScreen(Screen* screen) { m_screen = screen; }

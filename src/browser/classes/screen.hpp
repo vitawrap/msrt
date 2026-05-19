@@ -57,7 +57,7 @@ namespace browser {
         void setAlpha(int value);
 
         /** Draw a sprite frame on screen */
-        void drawSprite(std::string_view const& name, float x, float y, float w, float h);
+        void drawSprite(std::string_view name, float x, float y, float w, float h);
 
         /** Draw a filled rectangle */
         void fillRect(float x, float y, float w, float h);
