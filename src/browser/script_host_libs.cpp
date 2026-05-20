@@ -78,6 +78,23 @@ namespace browser {
         MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
     }
 
+    static JSValue ScreenProto_drawText(JSContext* ctx, JSValueConst self, int argc, JSValueConst *argv) {
+        auto* screen = opaqueToObject<Screen>(self);
+        if (argc >= 4) {
+            char const* text = JS_ToCString(ctx, argv[0]);
+            double x; JS_ToFloat64(ctx, &x, argv[1]);
+            double y; JS_ToFloat64(ctx, &y, argv[2]);
+            double s; JS_ToFloat64(ctx, &s, argv[3]);
+            uint32_t color = screen->getColor();
+            if (argc >= 5 && !JSValueToScreenColor(ctx, screen, argv[4], color))
+                return JS_ThrowTypeError(ctx, "%s: Cannot parse color.", "drawText");
+            screen->setColor(color);
+            screen->drawText(text, x, y, s);
+            JS_FreeCString(ctx, text);
+        }
+        MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
+    }
+
     static JSValue ScreenProto_drawSprite(JSContext* ctx, JSValueConst self, int argc, JSValueConst *argv) {
         auto* screen = opaqueToObject<Screen>(self);
         if (argc < 5)
@@ -110,8 +127,8 @@ namespace browser {
         JS_CFUNC_MAGIC_DEF("setColor", 1, ScreenProto_colorArg, 0),
         JS_CFUNC_MAGIC_DEF("clear", 1, ScreenProto_colorArg, 1),
         JS_CFUNC_DEF("fillRect", 5, ScreenProto_fillRect),
+        JS_CFUNC_DEF("drawText", 5, ScreenProto_drawText),
         JS_CFUNC_DEF("drawSprite", 5, ScreenProto_drawSprite),
-        JS_CFUNC_DEF("drawText", 5, Proto_notImplemetedQuiet),
         JS_CFUNC_DEF("setDrawAnchor", 2, ScreenProto_setDrawAnchor),
     };
 

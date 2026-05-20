@@ -196,6 +196,10 @@ namespace browser {
         m_canvas->fillRect(x, y, w, h);
     }
 
+    void Screen::drawText(char const* text, float x, float y, float sz) {
+        m_canvas->drawText(text, x, y, static_cast<int>(sz));
+    }
+
     uint32_t Screen::stringToColor(char const* str) {
         int r, g, b;
         if (sscanf(str, "rgb(%d ,%d ,%d)", &r, &g, &b) == 3) {

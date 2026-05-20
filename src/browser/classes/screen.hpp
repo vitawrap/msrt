@@ -62,6 +62,9 @@ namespace browser {
         /** Draw a filled rectangle */
         void fillRect(float x, float y, float w, float h);
 
+        /** Draw centered text on screen */
+        void drawText(char const* text, float x, float y, float sz);
+
         /** Resize canvas and virtual viewport */
         void resize();
 
