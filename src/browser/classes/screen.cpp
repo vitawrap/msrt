@@ -142,7 +142,7 @@ namespace browser {
     }
 
     void Screen::setColor(uint32_t color) {
-        m_color = color;
+        m_color = (m_color & 0xFF000000) | (color & 0xFFFFFF);
         if (!m_canvas->isReady()) return;
         m_canvas->setFillColor(ARGBtoABGR(m_color));
         m_canvas->setStrokeColor(ARGBtoABGR(m_color));
