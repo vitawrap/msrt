@@ -41,7 +41,7 @@ namespace browser {
         } else if (JS_IsNumber(cVal) && (JS_ToUint32(ctx, &color, cVal) == 0)) {
             color = screen->decimalToColor(color);
         } else
-            return false;
+            return JS_IsUndefined(cVal); // allow undefined: it means we keep the old value
         return true;
     }
 
