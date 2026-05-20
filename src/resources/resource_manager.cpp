@@ -53,7 +53,7 @@ namespace res {
 
             // do sanity checks before trying to load from disk
             if (!assetPath.has_extension()) {
-                // TODO: Log "Path has no extension, can't determine resource type"
+                LOG_MSGF("Path %s has no extension, can't determine resource type!\n", assetPath.c_str());
                 return nullptr;
             }
 
