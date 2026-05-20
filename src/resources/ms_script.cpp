@@ -9,9 +9,10 @@ namespace res {
             return nullptr;
 
         std::string text = file->readString();
+        auto filePath = file->path();
 
         Script* script = new Script;
-        script->m_path = file->path().u8string();
+        script->m_path = reinterpret_cast<char const*>(filePath.u8string().c_str());
         script->m_text = text;
         return script;
     }

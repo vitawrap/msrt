@@ -57,7 +57,7 @@ namespace res {
         const auto path = file->path();
         const auto pext = path.extension();
 
-        PlatformImage image = LoadImageFromMemory(pext.u8string().c_str(), fdata, fsize);
+        PlatformImage image = LoadImageFromMemory(reinterpret_cast<char const*>(pext.u8string().c_str()), fdata, fsize);
         delete[] fdata;
 
         if (IsImageValid(image)) {

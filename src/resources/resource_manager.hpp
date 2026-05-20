@@ -5,6 +5,7 @@
 #include "core/robin_hood.hpp"
 #include "resource.hpp"
 #include "core/iterable_stack.hpp"
+#include "core/view_map.hpp"
 #include "io/file.hpp"
 #include "io/log.hpp"
 
@@ -103,7 +104,7 @@ namespace res {
         /**
          * Resource handler (ext -> loader function) map
          */
-        robin_hood::unordered_map<std::string, TLoadingHandler> m_handlers;
+        ms::unordered_map<TLoadingHandler> m_handlers;
 
         Resource* createFromHandler(std::string const& path, io::File* fp);
         Resource* loadResourceInternal(char const* filename, std::shared_ptr<Resource>* cached, bool noOverrides);
@@ -118,12 +119,12 @@ namespace res {
         void purge();
 
         template <typename TResource>
-        ResourceHandle<TResource> validateResource(Resource* res, char const* filename) {
+        ResourceHandle<TResource> validateResource(Resource* res, std::string_view filename) {
             TResource* tres = dynamic_cast<TResource*>(res);
             if (tres == nullptr) {
                 if (res != nullptr)
                     releaseResource(res);
-                LOG_MSGF("Loading resource at \"%s\" failed!\n", filename);
+                LOG_MSGF("Loading resource at \"%s\" failed!\n", filename.data());
                 return ResourceHandle<TResource>{nullptr};
             }
             // Returning inserted shared_ptr should give a clean ref with only 1 grab.
@@ -169,11 +170,11 @@ namespace res {
         template<typename TResource>
         ResourceHandle<TResource> loadResource(io::File* file)
         {
-            auto filePath = file->path().u8string();
-            auto cached = getCached<TResource>(filePath.c_str());
+            auto filePath = file->path().string();
+            auto cached = getCached<TResource>(filePath);
             if (cached) return cached;
 
-            Resource* res = createFromHandler(filePath.c_str(), file);
+            Resource* res = createFromHandler(filePath, file);
             return validateResource<TResource>(res, filePath.c_str());
         }
 
@@ -191,7 +192,7 @@ namespace res {
          * Get cached resource at path (null ptr if unknown)
          */
         template<typename TResource>
-        ResourceHandle<TResource> getCached(char const* filename) const
+        ResourceHandle<TResource> getCached(std::string_view filename) const
         {
             // Try finding cached resource with this path (as atomic operation)
             m_resourceLock.lock();

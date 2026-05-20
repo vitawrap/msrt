@@ -21,8 +21,8 @@ namespace res {
         // small workaround because std::filesystem::path only retrieves the last extension component.
         // Yes, this currently also catches dotfiles, that'll also need fixing. :)
         auto const name = path;
-        char const* ext = strchr(name.c_str(), '.');
-        auto const& handler = m_handlers.find(ext? ext : "");
+        auto ext = name.rfind('.');
+        auto const& handler = m_handlers.find(ext == std::string::npos? "" : name.substr(ext));
         if (handler == m_handlers.end())
             return nullptr; // can't continue here, if we don't have a handler it's really bad.
 
@@ -59,13 +59,13 @@ namespace res {
 
             // If the file doesn't exist, just bail and try next path
             auto const pathString = assetPath.u8string();
-            if (io::FileSystem::exists(pathString.c_str()))
+            if (io::FileSystem::exists(reinterpret_cast<const char*>(pathString.data())))
             {
-                auto fp = io::FileSystem::openForRead(pathString.c_str());
+                auto fp = io::FileSystem::openForRead(reinterpret_cast<const char*>(pathString.data()));
                 if (!fp.get())
                     continue;
                     
-                return createFromHandler(assetPath.filename().u8string(), fp.get());
+                return createFromHandler(assetPath.filename().string(), fp.get());
             }
         }
         return nullptr; // None of the path modifiers matched a valid file...
