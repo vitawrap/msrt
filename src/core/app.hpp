@@ -32,6 +32,8 @@ namespace ms {
 
         platform::InputManager* getInputManager() { return &m_input; }
 
+        void setWindowIcon();
+
         /**
          * @brief Load project from file
          * @param filename The path to the archive

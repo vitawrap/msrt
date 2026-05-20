@@ -80,6 +80,12 @@ namespace ms {
         m_browser.free();
     }
 
+    void Application::setWindowIcon() {
+        auto icon = m_project.getIcon();
+        if (icon)
+            m_wm.setWindowIcon(icon.operator->());
+    }
+
     int Application::run() {
         // at this point the project should be loaded (externally or internally)
         if (!m_project.isOpen()) {
@@ -91,6 +97,8 @@ namespace ms {
         (void)EventQueue::get();
 
         if (m_wm.createWindow(m_project.getSettings().title.c_str()) >= 0) {
+            // set icon (createWindow auto-selects the new window)
+            setWindowIcon();
 
             // start up browser and script layer
             m_browser.init();
