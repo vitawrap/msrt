@@ -88,7 +88,7 @@ namespace res {
          * Paths to resource root. (Modified by resource packs)
          * The default asset directory is always at the bottom of the stack.
          */
-        CIterableStack<std::string, std::vector<std::string>> m_pathMods;
+        ms::stack<std::string, std::vector<std::string>> m_pathMods;
 
         /**
          * Resource storage (making use of filesystem::path hash specialization)
