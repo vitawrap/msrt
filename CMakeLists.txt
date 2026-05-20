@@ -13,8 +13,9 @@ cmake_policy(SET CMP0077 NEW)
 
 # release config
 add_compile_options(
-    "$<$<CONFIG:Release>:-Ofast>"
-    "$<$<CONFIG:Release>:-fno-stack-protector>"
+    "$<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>:-O3>"
+    "$<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>:-ffast-math>"
+    "$<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>:-fno-stack-protector>"
 )
 
 # find gtk for linux message boxes (or use win32 api on windows)
