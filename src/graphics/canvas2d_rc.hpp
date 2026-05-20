@@ -65,7 +65,7 @@ namespace gfx {
         void setDrawAnchors(float ratioX, float ratioY);
         void drawQuad(res::GPUTexture* hwTex, float x, float y, float w, float h);
         void drawQuad(res::GPUTexture* hwTex, float sx, float sy, float sw, float sh, float x, float y, float w, float h);
-        void drawText(std::string_view text, float x, float y, int ftSize);
+        void drawText(std::string_view text, float x, float y, int ftSize, float deblurFactor = 1.f);
         void setFont(char const* fontFaceName);
     };
 

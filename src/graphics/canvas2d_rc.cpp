@@ -239,8 +239,8 @@ namespace gfx {
         DrawTexturePro(*rlTex, src, dst, origin, 0.f, WHITE);
     }
 
-    void CanvasRC2D::drawText(std::string_view text, float x, float y, int ftSize) {
-        if (validateFont(ftSize)) {
+    void CanvasRC2D::drawText(std::string_view text, float x, float y, int ftSize, float deblurFactor) {
+        if (validateFont(ftSize * deblurFactor)) {
             Font& ft = m_engine->font->font;
         
             Vector2 textSz = MeasureTextEx(ft, text.data(), ftSize, 0);
