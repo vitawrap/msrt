@@ -1,5 +1,6 @@
 
 #include "core/util.hpp"
+#include "resources/ms_image.hpp"
 #include "platform/abstracted/windowing.hpp"
 #include "platform/windowing.hpp"
 #include <raylib.h>
@@ -36,6 +37,14 @@ namespace platform {
             return -1;
         }
         return 0;
+    }
+
+    void WindowManager::setWindowIcon(res::Image const* image) {
+        if (m_windowSelected) {
+            ::Image* rImage = reinterpret_cast<::Image*>(image->getPlatformImage());
+            if (IsImageValid(*rImage))
+                SetWindowIcon(*rImage);
+        }
     }
 
     void WindowManager::setWindowSize(int w, int h) {

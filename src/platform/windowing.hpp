@@ -4,6 +4,10 @@
 #include "core/events.hpp"
 
 namespace ms {
+namespace res {
+    class Image;
+}
+
 namespace platform {
 
     class IWindowManager {
@@ -36,7 +40,10 @@ namespace platform {
          */
         virtual int createWindow(char const* title = "") = 0;
 
-        // TODO: void setWindowIcon(ms::graphics::Image& const image);
+        /**
+         * Change the window icon to an internal image resource
+         */
+        virtual void setWindowIcon(res::Image const* image) = 0;
 
         /**
          * Set the selected window's client size

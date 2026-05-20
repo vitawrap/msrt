@@ -22,6 +22,7 @@ namespace platform {
         int getWindowCount() const override { return m_hasWindow; }
         bool selectWindow(int i) override { return m_windowSelected = (i == 0); }
 
+        void setWindowIcon(res::Image const* image) override;
         int createWindow(char const* title) override;
         void setWindowSize(int w, int h) override;
         void destroyWindow() override;
