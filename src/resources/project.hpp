@@ -25,6 +25,7 @@ namespace res {
         > m_sprites;
 
         ResourceHandle<Image> m_atlas;
+        ResourceHandle<Image> m_icon;
 
     private:
         Settings m_settings;
@@ -57,6 +58,9 @@ namespace res {
 
         /** Get atlas constructed with the sprites from this project */
         ResourceHandle<Image> getSpriteAtlas() const { return m_atlas; }
+
+        /** Get sprite defined as the project icon */
+        ResourceHandle<Image> getIcon() const { return m_icon; }
 
         /** Build atlas out of project sprites */
         void buildAtlas();

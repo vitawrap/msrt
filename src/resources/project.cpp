@@ -57,6 +57,10 @@ namespace res {
                     else if (path.compare(0, 8, "sprites/") == 0) {
                         m_sprites.emplace(path, res.as<Image>());
                         LOG_MSGF("Adding sprite %s\n", path.c_str());
+
+                        // keep reference to icon
+                        if (path == "sprites/icon.png")
+                            m_icon = res.as<Image>();
                     }
                 }
             }
