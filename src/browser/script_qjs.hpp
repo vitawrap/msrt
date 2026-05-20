@@ -187,4 +187,7 @@ namespace browser {
 }
 }
 
+/* Retrieve a script entry in script_embed.S */
+#define SCRIPT_RESOLVE_EMBED(global_name) STATIC_RESOLVE_EMBED(__script_##global_name)
+
 #endif

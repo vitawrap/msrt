@@ -80,11 +80,3 @@ namespace browser {
 
 }
 }
-
-/* Retrieve a script entry in script_embed.s */
-#define SCRIPT_RESOLVE_EMBED(global_name) STATIC_RESOLVE_EMBED(__script_##global_name)
-
-#define STATIC_RESOLVE_EMBED(global_name) \
-extern "C" const char global_name[]; extern "C" const unsigned global_name##_size; \
-namespace embed { static const char* global_name = ::global_name; \
-static const unsigned global_name##_size = ::global_name##_size; }

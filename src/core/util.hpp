@@ -106,5 +106,9 @@ namespace ms {
     }
 }
 
-
 #define SCOPE_LOCK(mtx) std::scoped_lock scopedlock(mtx)
+
+#define STATIC_RESOLVE_EMBED(global_name) \
+extern "C" const char global_name[]; extern "C" const unsigned global_name##_size; \
+namespace embed { static const char* global_name = ::global_name; \
+static const unsigned global_name##_size = ::global_name##_size; }
