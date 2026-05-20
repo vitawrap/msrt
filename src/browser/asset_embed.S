@@ -29,6 +29,8 @@
 .endm
 
 /* all file embeds go here */
+
+/* SCRIPTS */
 embed "assets/play.js", "__script_play_js"
 embed "assets/compiler.js", "__script_compiler_js"
 embed "assets/parser.js", "__script_parser_js"
@@ -41,3 +43,6 @@ embed "assets/tokenizer.js", "__script_tokenizer_js"
 embed "assets/transpiler.js", "__script_transpiler_js"
 
 embed "assets/patch.js", "__script_patch_js"
+
+/* FONTS */
+embed "assets/bitcell.ttf", "__font_bitcell_ttf"
