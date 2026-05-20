@@ -11,6 +11,7 @@ The **MSRT** is an attempt to create a native platform for the **microStudio** w
 * Minizip
 * rectpack2D
 * robin_hood.h
+* snmalloc
 * GTK3 on Linux *(not included, as to abide by LGPL-2.1)*
 
 ## Building

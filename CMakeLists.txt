@@ -57,6 +57,16 @@ FetchContent_Declare(
   GIT_TAG        aee7fbddf118d9363575af96310c29fa747d70c0 # master as of april 2026
 )
 
+# for snmalloc, force it to override os allocator symbols, this is apparently risky on windows
+set(SNMALLOC_STATIC_LIBRARY_PREFIX "" CACHE STRING "Remove prefix to override global allocator")
+
+FetchContent_Declare(
+  snmalloc
+  GIT_REPOSITORY https://github.com/microsoft/snmalloc.git
+  GIT_TAG        48fd18a3c9baaeb89205c654e12765ff3c5ff902 # master as of may 2026
+)
+
+
 # this is horrible, yet necessary for cjson and raylib to work
 macro(add_custom_target _target)
     if(NOT "${_target}" STREQUAL "uninstall")
@@ -64,7 +74,7 @@ macro(add_custom_target _target)
     endif()
 endmacro()
 
-FetchContent_MakeAvailable(minizip raylib quickjs)
+FetchContent_MakeAvailable(minizip raylib quickjs snmalloc)
 
 # quickjs needs manual setup
 set(QJS_LIB ${quickjs_SOURCE_DIR}/libquickjs.a)
@@ -104,6 +114,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC "${ZLIB_INCLUDE_DIR}" "${quick
 
 target_link_libraries(${PROJECT_NAME} 
     PRIVATE 
+        snmallocshim-static
         raylib
         minizip
         ${QJS_LIB}
@@ -128,6 +139,7 @@ target_include_directories(unit_tests PUBLIC "${ZLIB_INCLUDE_DIR}" "${quickjs_SO
 
 target_link_libraries(unit_tests 
     PRIVATE 
+        snmallocshim-static
         raylib
         minizip
         ${QJS_LIB}
