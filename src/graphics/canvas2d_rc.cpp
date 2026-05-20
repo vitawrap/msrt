@@ -10,6 +10,8 @@
 
 FONT_RESOLVE_EMBED(bitcell_ttf)
 
+#define MSFONT_DEFNAME "BitCell"
+
 namespace ms {
 namespace gfx {
 
@@ -96,8 +98,8 @@ namespace gfx {
      */
     bool CanvasRC2D::validateFont(int ftSize) {
         if (!m_engine->font) {
-            if (m_engine->fontName.empty())
-                m_engine->fontName = "BitCell";
+            if (m_engine->fontName.empty()) failsafe_default_font:
+                m_engine->fontName = MSFONT_DEFNAME;
 
             char ftKey[64];
             snprintf(ftKey, 64, "%s:%d", m_engine->fontName.c_str(), ftSize);
@@ -108,10 +110,11 @@ namespace gfx {
                 return true;
             } else {
                 /** TODO: move away from loading specific fonts hardcoded here */
-                if (m_engine->fontName == "BitCell") {
+                if (m_engine->fontName == MSFONT_DEFNAME) {
                     Font font = LoadFontFromMemory(".ttf", reinterpret_cast<const unsigned char*>(embed::__font_bitcell_ttf),
                     embed::__font_bitcell_ttf_size, ftSize, nullptr, 0);
-                    ftCache.emplace(ftKey, std::move(font));
+                    if (IsFontValid(font))
+                        ftCache.emplace(ftKey, std::move(font));
                 }
 
                 // try one last time with the fonts we just loaded
@@ -119,6 +122,10 @@ namespace gfx {
                     m_engine->font = &(ftCache.at(ftKey));
                     return true;
                 }
+
+                // still nothing? do a roundtrip with the default font...
+                if (m_engine->fontName != MSFONT_DEFNAME)
+                    goto failsafe_default_font;
             }
             return false;
         }
