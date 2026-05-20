@@ -85,14 +85,14 @@ file(GLOB_RECURSE SOURCES_ASM
 
 set_property(SOURCE ${SOURCES_ASM} APPEND PROPERTY COMPILE_OPTIONS "-I${CMAKE_SOURCE_DIR}")
 
-# tell cmake that ASM sources depend on JS scripts
+# tell cmake that ASM sources depend on assets/JS scripts
 
-file(GLOB_RECURSE SOURCES_JS
-    "js_scripts/*.js"
+file(GLOB_RECURSE BIN_ASSETS
+    "assets/*"
 )
 
 set_source_files_properties(${SOURCES_ASM}
-    PROPERTIES OBJECT_DEPENDS "${SOURCES_JS}"
+    PROPERTIES OBJECT_DEPENDS "${BIN_ASSETS}"
 )
 
 # main executable
