@@ -26,6 +26,8 @@ namespace gfx {
         /** Drawing anchor */
         float m_drawAnchorX, m_drawAnchorY;
 
+        bool validateFont(int ftSize);
+
     public:
         CanvasRC2D();
         ~CanvasRC2D() { free(); }
@@ -63,7 +65,12 @@ namespace gfx {
         void setDrawAnchors(float ratioX, float ratioY);
         void drawQuad(res::GPUTexture* hwTex, float x, float y, float w, float h);
         void drawQuad(res::GPUTexture* hwTex, float sx, float sy, float sw, float sh, float x, float y, float w, float h);
+        void drawText(std::string_view text, float x, float y, int ftSize);
+        void setFont(char const* fontFaceName);
     };
 
 }
 }
+
+/* Retrieve a font entry in script_embed.S */
+#define FONT_RESOLVE_EMBED(global_name) STATIC_RESOLVE_EMBED(__font_##global_name)

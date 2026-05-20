@@ -1,4 +1,5 @@
 #include "canvas2d_rc.hpp"
+#include "core/view_map.hpp"
 
 #include <stdio.h>
 
@@ -7,16 +8,31 @@
 #include <raymath.h>
 #include <rlgl.h>
 
+FONT_RESOLVE_EMBED(bitcell_ttf)
+
 namespace ms {
 namespace gfx {
 
     static_assert(sizeof(Color) == sizeof(uint32_t), "Size of color must equate to int color, for bit casting.");
+
+    struct CanvasFont {
+        Font font;
+
+        ~CanvasFont() {
+            if (IsFontValid(font)) UnloadFont(font);
+        }
+
+        CanvasFont(Font&& font):
+            font(std::move(font))
+        {}
+    };
 
     struct CanvasState {
         double lineWidth;
         Matrix transform;
         Color fillColor;
         Color strokeColor;
+        CanvasFont* font;
     };
 
     /**
@@ -26,9 +42,12 @@ namespace gfx {
         RenderTexture renderTexture;
         Matrix transform; // camera transform
         Color fillColor;
-        Color strokeColor; 
+        Color strokeColor;
+        CanvasFont* font;
+        std::string fontName;
 
         std::list<CanvasState> states;
+        ms::unordered_map<CanvasFont> loadedFonts;
     };
 
     CanvasRC2D::CanvasRC2D() :
@@ -52,6 +71,7 @@ namespace gfx {
             m_engine->strokeColor = BLACK;
             m_engine->fillColor = BLACK;
             m_engine->renderTexture = LoadRenderTexture(m_width, m_height);
+            m_engine->font = nullptr;
         }
     }
 
@@ -62,6 +82,47 @@ namespace gfx {
             delete m_engine;
             m_engine = nullptr;
         }
+    }
+
+    void CanvasRC2D::setFont(const char* fontFaceName) {
+        m_engine->fontName = fontFaceName;
+        m_engine->font = nullptr;
+    }
+
+    /**
+     * validateFont is the only mutator of the loadedFonts map, so it is the only function that
+     * can assign a direct ptr into the loadedFonts map, knowing it will not get invalidated.
+     * (Unless other methods mutating the map are careful enough to set m_engine->font to null!)
+     */
+    bool CanvasRC2D::validateFont(int ftSize) {
+        if (!m_engine->font) {
+            if (m_engine->fontName.empty())
+                m_engine->fontName = "BitCell";
+
+            char ftKey[64];
+            snprintf(ftKey, 64, "%s:%d", m_engine->fontName.c_str(), ftSize);
+
+            auto& ftCache = m_engine->loadedFonts;
+            if (ftCache.contains(ftKey)) { // not as cheap as .find, but avoids a try catch...
+                m_engine->font = &(ftCache.at(ftKey));
+                return true;
+            } else {
+                /** TODO: move away from loading specific fonts hardcoded here */
+                if (m_engine->fontName == "BitCell") {
+                    Font font = LoadFontFromMemory(".ttf", reinterpret_cast<const unsigned char*>(embed::__font_bitcell_ttf),
+                    embed::__font_bitcell_ttf_size, ftSize, nullptr, 0);
+                    ftCache.emplace(ftKey, std::move(font));
+                }
+
+                // try one last time with the fonts we just loaded
+                if (ftCache.contains(ftKey)) {
+                    m_engine->font = &(ftCache.at(ftKey));
+                    return true;
+                }
+            }
+            return false;
+        }
+        return true;
     }
 
     void CanvasRC2D::push() {
@@ -176,6 +237,16 @@ namespace gfx {
         Vector2 origin{ w * m_drawAnchorX, h * m_drawAnchorY }; // microstudio uses the center as the origin
         Texture2D* rlTex = reinterpret_cast<Texture2D*>(hwTex->getPlatformTexture());
         DrawTexturePro(*rlTex, src, dst, origin, 0.f, WHITE);
+    }
+
+    void CanvasRC2D::drawText(std::string_view text, float x, float y, int ftSize) {
+        if (validateFont(ftSize)) {
+            Font& ft = m_engine->font->font;
+        
+            Vector2 textSz = MeasureTextEx(ft, text.data(), ftSize, 0);
+            Vector2 origin{ (textSz.x * -.5f) - x, (textSz.y * -.5f) - y };
+            DrawTextEx(m_engine->font->font, text.data(), origin, ftSize, 0, m_engine->fillColor);
+        }
     }
 
     void CanvasRC2D::setStrokeColor(uint32_t OxAABBGGRR) {
