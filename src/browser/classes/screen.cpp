@@ -22,6 +22,7 @@ namespace browser {
         m_anchorX(0.f),
         m_anchorY(0.f),
         m_lineWidth(1.f),
+        m_ratio(1.f),
         m_screenTransform(false)
     {}
 
@@ -41,6 +42,7 @@ namespace browser {
         m_canvas->translate(m_canvas->getWidth() * .5f, m_canvas->getHeight() * .5f);
         m_width = m_canvas->getWidth() / ratio;
         m_height = m_canvas->getHeight() / ratio;
+        m_ratio = ratio;
 
         // keep reference to main sprite atlas
         auto* project = Application::get()->getProject();
@@ -197,7 +199,7 @@ namespace browser {
     }
 
     void Screen::drawText(char const* text, float x, float y, float sz) {
-        m_canvas->drawText(text, x, y, static_cast<int>(sz));
+        m_canvas->drawText(text, x, y, static_cast<int>(sz), m_ratio);
     }
 
     uint32_t Screen::stringToColor(char const* str) {

@@ -32,6 +32,9 @@ namespace browser {
         /** Draw anchor */
         float m_anchorX, m_anchorY;
 
+        /** Keep the scaling ratio saved */
+        float m_ratio;
+
         /** Main atlas for drawing */
         res::ResourceHandle<res::Image> m_atlas;
     
