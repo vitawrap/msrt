@@ -131,6 +131,7 @@ namespace ms {
             }
 
             m_wm.destroyWindow();
+            unloadProject();
             this->free();
             return 0;
         }
