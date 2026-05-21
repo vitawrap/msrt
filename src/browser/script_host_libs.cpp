@@ -10,6 +10,15 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wc99-designator"
 
+#ifdef QUICKJS_NG
+#define QJS_NEWCLASSID_CT(ct, clid) JS_NewClassID(JS_GetRuntime(ct), clid)
+#define QJS_NEWCLASSID_RT(rt, clid) JS_NewClassID(rt, clid)
+#define countof(a) (sizeof(a) / sizeof(a[0]))
+#else
+#define QJS_NEWCLASSID_CT(ct, clid) JS_NewClassID(clid)
+#define QJS_NEWCLASSID_RT(rt, clid) JS_NewClassID(clid)
+#endif
+
 /**
  * All of those methods assume JSTempVal scoping was set up.
  */
@@ -164,7 +173,7 @@ namespace browser {
 
     static void installScreen(JSContext* ctx) {
         JSClassDef cdef{ .class_name = "Screen", .finalizer = destructScreen, .gc_mark = gcMarkScreen };
-        JS_NewClassID(&classId_Screen);
+        QJS_NEWCLASSID_CT(ctx, &classId_Screen);
         JS_NewClass(JS_GetRuntime(ctx), classId_Screen, &cdef);
         JSValue proto = JS_NewObject(ctx);
         JS_SetPropertyFunctionList(ctx, proto, defineScreen, countof(defineScreen));
@@ -254,7 +263,7 @@ namespace browser {
 
     static void installRuntime(JSContext* ctx) {
         JSClassDef cdef{ .class_name = "Runtime", .finalizer = destructRuntime, .gc_mark = gcMarkRuntime };
-        JS_NewClassID(&classId_Runtime);
+        QJS_NEWCLASSID_CT(ctx, &classId_Runtime);
         JS_NewClass(JS_GetRuntime(ctx), classId_Runtime, &cdef);
         JSValue proto = JS_NewObject(ctx);
         JS_SetPropertyFunctionList(ctx, proto, defineRuntime, countof(defineRuntime));
@@ -317,7 +326,7 @@ namespace browser {
 
     static void installPlayer(JSContext* ctx) {
         JSClassDef cdef{ .class_name = "Player", .finalizer = destructPlayer, .gc_mark = gcMarkPlayer };
-        JS_NewClassID(&classId_Player);
+        QJS_NEWCLASSID_CT(ctx, &classId_Player);
         JS_NewClass(JS_GetRuntime(ctx), classId_Player, &cdef);
         JSValue proto = JS_NewObject(ctx);
         JS_SetPropertyFunctionList(ctx, proto, definePlayer, countof(definePlayer));

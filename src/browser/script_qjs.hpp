@@ -17,7 +17,6 @@
 
 // QuickJS includes
 extern "C" {
-    #include <cutils.h>
     #include <quickjs.h>
 }
 

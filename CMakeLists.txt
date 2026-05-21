@@ -47,8 +47,8 @@ FetchContent_Declare(
 
 FetchContent_Declare(
   quickjs
-  GIT_REPOSITORY https://github.com/bellard/quickjs.git
-  GIT_TAG        d7ae12ae71dfd6ab2997527d295014a8996fa0f9 # master as of april 2026
+  GIT_REPOSITORY https://github.com/quickjs-ng/quickjs.git
+  GIT_TAG        v0.14.0 # latest release: april 2026
 )
 
 FetchContent_Declare(
@@ -77,13 +77,13 @@ endmacro()
 FetchContent_MakeAvailable(minizip raylib quickjs snmalloc)
 
 # quickjs needs manual setup
-set(QJS_LIB ${quickjs_SOURCE_DIR}/libquickjs.a)
-add_custom_command(OUTPUT ${QJS_LIB}
-    COMMAND make
-    WORKING_DIRECTORY ${quickjs_SOURCE_DIR}
-    COMMENT "Building QuickJS from Makefile..."
-)
-add_custom_target(quickjs_build DEPENDS ${QJS_LIB})
+# set(QJS_LIB ${quickjs_SOURCE_DIR}/libquickjs.a)
+# add_custom_command(OUTPUT ${QJS_LIB}
+#     COMMAND make
+#     WORKING_DIRECTORY ${quickjs_SOURCE_DIR}
+#     COMMENT "Building QuickJS from Makefile..."
+# )
+# add_custom_target(quickjs_build DEPENDS ${QJS_LIB})
 
 file(GLOB_RECURSE SOURCES 
     "src/*.cpp" 
@@ -117,7 +117,7 @@ target_link_libraries(${PROJECT_NAME}
         snmallocshim-static
         raylib
         minizip
-        ${QJS_LIB}
+        qjs
         ${MESSAGEBOX_LIB}
 )
 
@@ -142,7 +142,7 @@ target_link_libraries(unit_tests
         snmallocshim-static
         raylib
         minizip
-        ${QJS_LIB}
+        qjs
         ${MESSAGEBOX_LIB}
 )
 

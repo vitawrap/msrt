@@ -35,7 +35,7 @@ namespace browser {
         if (! js->context) {
             throw ScriptEngineException("QuickJS: Cannot create context for runtime!");
         }
-#ifdef NDEBUG
+#if defined(NDEBUG) && !defined(QUICKJS_NG)
         // try to have a better memory footprint in release mode
         JS_SetStripInfo(js->runtime, JS_STRIP_DEBUG | JS_STRIP_SOURCE);
 #endif
