@@ -18,6 +18,9 @@ SCRIPT_RESOLVE_EMBED(token_js)
 SCRIPT_RESOLVE_EMBED(tokenizer_js)
 SCRIPT_RESOLVE_EMBED(transpiler_js)
 
+/* JavaScript runner script list */
+SCRIPT_RESOLVE_EMBED(js_runner_js)
+
 namespace ms {
 namespace browser {
 
@@ -106,18 +109,27 @@ namespace browser {
 
     #define EVAL_STATIC_SCRIPT(global_name) evalScript(std::string(embed::__script_##global_name, embed::__script_##global_name##_size), #global_name)
 
-    void ScriptHost::installRuntime() {
+    void ScriptHost::installRuntime(res::Project::Language lang) {
         try {
-            EVAL_STATIC_SCRIPT(play_js);
-            EVAL_STATIC_SCRIPT(compiler_js);
-            EVAL_STATIC_SCRIPT(parser_js);
-            EVAL_STATIC_SCRIPT(processor_js);
-            EVAL_STATIC_SCRIPT(program_js);
-            EVAL_STATIC_SCRIPT(routine_js);
-            EVAL_STATIC_SCRIPT(runner_js);
-            EVAL_STATIC_SCRIPT(token_js);
-            EVAL_STATIC_SCRIPT(tokenizer_js);
-            EVAL_STATIC_SCRIPT(transpiler_js);
+            EVAL_STATIC_SCRIPT(play_js); // play.js is required for all languages
+            switch (lang) {
+                case res::Project::L_MicroscriptV2:
+                    EVAL_STATIC_SCRIPT(compiler_js);
+                    EVAL_STATIC_SCRIPT(parser_js);
+                    EVAL_STATIC_SCRIPT(processor_js);
+                    EVAL_STATIC_SCRIPT(program_js);
+                    EVAL_STATIC_SCRIPT(routine_js);
+                    EVAL_STATIC_SCRIPT(runner_js);
+                    EVAL_STATIC_SCRIPT(token_js);
+                    EVAL_STATIC_SCRIPT(tokenizer_js);
+                    EVAL_STATIC_SCRIPT(transpiler_js);
+                    break;
+                case res::Project::L_JavaScript:
+                    EVAL_STATIC_SCRIPT(js_runner_js);
+                    break;
+                default:
+                    LOG_MSGF("Script language with ID %d is not known.\n", lang);
+            }
         } catch (ScriptEngineException const& see) {
             LOG_MSGF("[SCRIPT ENGINE] %s\n", see.what());
         } catch (ScriptException const& se) {

@@ -30,7 +30,7 @@
 
 /* all file embeds go here */
 
-/* SCRIPTS */
+/* MSv2 SCRIPTS */
 embed "assets/play.js", "__script_play_js"
 embed "assets/compiler.js", "__script_compiler_js"
 embed "assets/parser.js", "__script_parser_js"
@@ -42,6 +42,10 @@ embed "assets/token.js", "__script_token_js"
 embed "assets/tokenizer.js", "__script_tokenizer_js"
 embed "assets/transpiler.js", "__script_transpiler_js"
 
+/* JS SCRIPTS */
+embed "assets/js_runner.js", "__script_js_runner_js"
+
+/* PATCH SCRIPT */
 embed "assets/patch.js", "__script_patch_js"
 
 /* FONTS */

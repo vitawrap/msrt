@@ -104,7 +104,7 @@ namespace ms {
 
             // start up browser and script layer
             m_browser.init();
-            m_browser.getScriptHost()->installRuntime();
+            m_browser.getScriptHost()->installRuntime(m_project.getLanguageEnum());
             m_browser.getScriptHost()->onLoaded();
 
             // main event loop

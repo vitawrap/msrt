@@ -14,6 +14,13 @@ namespace res {
             std::string title;
             std::string orientation;
             std::string aspect;
+            std::string language;
+        };
+
+        enum Language {
+            L_Unknown,
+            L_MicroscriptV2,
+            L_JavaScript,
         };
 
         robin_hood::unordered_map<
@@ -66,6 +73,19 @@ namespace res {
 
         /** Build atlas out of project sprites */
         void buildAtlas();
+
+        /** Check if project language is JS (ECMAScript) */
+        bool isLanguageJS() const { return m_settings.language == "javascript"; }
+
+        /** Check if project language is MSv2 (Microscript v2) */
+        bool isLanguageMSv2() const { return m_settings.language == "microscript_v2"; }
+
+        /** Test language as enum value */
+        Language getLanguageEnum() const {
+            if (isLanguageMSv2()) return L_MicroscriptV2;
+            if (isLanguageJS()) return L_JavaScript;
+            return L_Unknown;
+        }
     };
 
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdexcept>
+#include "resources/project.hpp"
 
 #ifdef _SCRIPT_QJS_HPP_
 #error "script_qjs.hpp should not be included here!"
@@ -65,7 +66,7 @@ namespace browser {
         /**
          * Install microstudio runtime onto the script engine
          */
-        void installRuntime();
+        void installRuntime(res::Project::Language lang = res::Project::L_MicroscriptV2);
 
         /**
          * Replace evaluated script classes with C++ equivalents

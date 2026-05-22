@@ -24,6 +24,7 @@ namespace res {
                     m_settings.title        = (char const*) root["title"];
                     m_settings.aspect       = (char const*) root["aspect"];
                     m_settings.orientation  = (char const*) root["orientation"];
+                    m_settings.language     = (char const*) root["language"];
                     
                 } catch (io::CJSONError& jsErr) {
                     LOG_MSGF("JSON Error: %s when reading out project.json for \"%s\".\n", jsErr.what(), filename);
@@ -44,22 +45,27 @@ namespace res {
                 }
                 std::filesystem::path filename(path);
 
+                // for languages other than microscript, remap their ext to .ms as expected by player.
+                if (filename.extension() == ".js") {
+                    filename.replace_extension(".ms");
+                }
+
                 // directory entries have no ext, check if we caught a directory
                 if (cache_asset && filename.has_extension()) {
                     size_t fileSize = 0;
                     auto bufHandle = m_files.readFile(path.c_str(), fileSize);
-                    io::MemFile file(path.c_str(), bufHandle.get(), fileSize);
+                    io::MemFile file(filename.c_str(), bufHandle.get(), fileSize);
                     auto res = ResourceManager::get()->loadResourceOpaque(&file);
 
                     // if it's a script file, track it
                     if (filename.extension() == ".ms") {
-                        m_scripts.emplace(path, res.as<Script>());
-                        LOG_MSGF("Adding script %s\n", path.c_str());
+                        m_scripts.emplace(filename, res.as<Script>());
+                        LOG_MSGF("Adding script %s\n", filename.c_str());
                     }
                     // and also if it's a sprite (track for atlasing)
                     else if (path.compare(0, 8, "sprites/") == 0) {
-                        m_sprites.emplace(path, res.as<Image>());
-                        LOG_MSGF("Adding sprite %s\n", path.c_str());
+                        m_sprites.emplace(filename, res.as<Image>());
+                        LOG_MSGF("Adding sprite %s\n", filename.c_str());
 
                         // keep reference to icon
                         if (path == "sprites/icon.png")
