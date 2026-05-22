@@ -47,12 +47,13 @@ namespace platform {
         }
     }
 
-    void WindowManager::setWindowSize(int w, int h) {
+    void WindowManager::setWindowSize(int w, int h, bool invokeEvent) {
         m_windowWidth = w;
         m_windowHeight = h;
         if (m_windowSelected) {
             SetWindowSize(w, h);
-            resized.invoke(0, w, h);
+            if (invokeEvent)
+                resized.invoke(0, w, h);
         }
     }
 

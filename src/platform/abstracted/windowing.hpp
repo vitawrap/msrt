@@ -24,7 +24,7 @@ namespace platform {
 
         void setWindowIcon(res::Image const* image) override;
         int createWindow(char const* title) override;
-        void setWindowSize(int w, int h) override;
+        void setWindowSize(int w, int h, bool invokeEvent = true) override;
         void destroyWindow() override;
 
         int getWindowWidth() const override;

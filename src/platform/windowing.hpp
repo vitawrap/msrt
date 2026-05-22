@@ -48,7 +48,7 @@ namespace platform {
         /**
          * Set the selected window's client size
          */
-        virtual void setWindowSize(int w, int h) = 0;
+        virtual void setWindowSize(int w, int h, bool invokeEvent = true) = 0;
 
         virtual int getWindowWidth() const = 0;
         virtual int getWindowHeight() const = 0;
