@@ -34,7 +34,7 @@ namespace gfx {
         Matrix transform;
         Color fillColor;
         Color strokeColor;
-        CanvasFont* font;
+        std::string fontName;
     };
 
     /**
@@ -138,6 +138,7 @@ namespace gfx {
         state.transform     = m_engine->transform;
         state.fillColor     = m_engine->fillColor;
         state.strokeColor   = m_engine->strokeColor;
+        state.fontName      = m_engine->fontName;
     }
 
     bool CanvasRC2D::pop() {
@@ -147,6 +148,8 @@ namespace gfx {
         m_engine->transform     = state.transform;
         m_engine->fillColor     = state.fillColor;
         m_engine->strokeColor   = state.strokeColor;
+        m_engine->fontName      = state.fontName;
+        m_engine->font          = nullptr;
         m_engine->states.pop_back();
         return true;
     }
