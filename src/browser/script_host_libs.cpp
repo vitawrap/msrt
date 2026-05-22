@@ -74,10 +74,10 @@ namespace browser {
     static JSValue ScreenProto_fillRect(JSContext* ctx, JSValueConst self, int argc, JSValueConst *argv) {
         auto* screen = opaqueToObject<Screen>(self);
         if (argc >= 4) {
-            double x; JS_ToFloat64(ctx, &x, argv[1]);
-            double y; JS_ToFloat64(ctx, &y, argv[2]);
-            double w; JS_ToFloat64(ctx, &w, argv[3]);
-            double h; JS_ToFloat64(ctx, &h, argv[4]);
+            double x; JS_ToFloat64(ctx, &x, argv[0]);
+            double y; JS_ToFloat64(ctx, &y, argv[1]);
+            double w; JS_ToFloat64(ctx, &w, argv[2]);
+            double h; JS_ToFloat64(ctx, &h, argv[3]);
             uint32_t color = screen->getColor();
             if (argc >= 5 && !JSValueToScreenColor(ctx, screen, argv[4], color))
                 return JS_ThrowTypeError(ctx, "%s: Cannot parse color.", "fillRect");

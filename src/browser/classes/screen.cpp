@@ -195,7 +195,7 @@ namespace browser {
     }
 
     void Screen::fillRect(float x, float y, float w, float h) {
-        m_canvas->fillRect(x, y, w, h);
+        m_canvas->fillRect(x - (w * .5f), -y - (h * .5f), w, h);
     }
 
     void Screen::drawText(char const* text, float x, float y, float sz) {
