@@ -89,7 +89,9 @@ namespace ms {
     int Application::run() {
         // at this point the project should be loaded (externally or internally)
         if (!m_project.isOpen()) {
-            LOG_MSG("No project loaded in runtime! Aborting.");
+            m_wm.showMessageBox("microStudioRT Error",
+                "No project loaded in runtime! Usage:\n$ msrt <path-to-zip-export>", platform::IWindowManager::MB_ERROR);
+            LOG_MSG("No project loaded in runtime! Aborting.\n");
             return 1;
         }
 
