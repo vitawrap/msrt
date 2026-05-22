@@ -251,7 +251,7 @@ namespace gfx {
             Font& ft = m_engine->font->font;
         
             Vector2 textSz = MeasureTextEx(ft, text.data(), ftSize, 0);
-            Vector2 origin{ (textSz.x * -.5f) - x, (textSz.y * -.5f) - y };
+            Vector2 origin{ (textSz.x * -.5f) + x, (textSz.y * -.5f) - y };
             DrawTextEx(m_engine->font->font, text.data(), origin, ftSize, 0, m_engine->fillColor);
         }
     }
