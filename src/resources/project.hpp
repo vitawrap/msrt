@@ -12,6 +12,8 @@ namespace res {
     public:
         struct Settings {
             std::string title;
+            std::string orientation;
+            std::string aspect;
         };
 
         robin_hood::unordered_map<

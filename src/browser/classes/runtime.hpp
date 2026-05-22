@@ -13,8 +13,8 @@ namespace browser {
 
     class Runtime {
     public:
-    enum Orientation {
-        Landscape,
+        enum Orientation {
+            Landscape,
             Portrait
         } m_orientation;
         enum AspectRatio {

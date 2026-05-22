@@ -21,9 +21,12 @@ namespace res {
                 try {
                     io::CJSON json;
                     auto root = json.parse(text.c_str());
-                    m_settings.title = (char const*) root["title"];
+                    m_settings.title        = (char const*) root["title"];
+                    m_settings.aspect       = (char const*) root["aspect"];
+                    m_settings.orientation  = (char const*) root["orientation"];
                     
                 } catch (io::CJSONError& jsErr) {
+                    LOG_MSGF("JSON Error: %s when reading out project.json for \"%s\".\n", jsErr.what(), filename);
                     return false;
                 }
             }

@@ -99,6 +99,7 @@ namespace browser {
             w = cw;
             h = ch;
         }
+        wm->setWindowSize(w, h, false); // we might come from a window event
         if (m_canvas && m_canvas->isReady())
             m_canvas->resize(w * ratio, h * ratio);
         initContext();

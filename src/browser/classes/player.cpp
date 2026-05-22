@@ -40,6 +40,7 @@ namespace browser {
         resize();
         if (m_runtime)
             m_runtime->start();
+        resize(); // resize a second time so it catches up on aspect and orientation...
     }
 
     void Player::resize() {

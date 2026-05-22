@@ -15,7 +15,25 @@ namespace browser {
         m_inputPointerHandler(0)
     {}
 
+    static Runtime::AspectRatio strToAspectRatio(std::string_view aspect) {
+        if (aspect == "free") return Runtime::AR_Unknown;
+        if (aspect == "4x3") return Runtime::AR_4x3;
+        if (aspect == "16x9") return Runtime::AR_16x9;
+        if (aspect == "2x1") return Runtime::AR_2x1;
+        if (aspect == "1x1") return Runtime::AR_1x1;
+        if (aspect == ">4x3") return Runtime::AR_M4x3;
+        if (aspect == ">16x9") return Runtime::AR_M16x9;
+        if (aspect == ">2x1") return Runtime::AR_M2x1;
+        if (aspect == ">1x1") return Runtime::AR_M1x1;
+        return Runtime::AR_Unknown;
+    }
+
     void Runtime::startReady() {
+        // get view info from project
+        auto& settings = Application::get()->getProject()->getSettings();
+        m_orientation = settings.orientation == "landscape"? Landscape : Portrait;
+        m_aspect = strToAspectRatio(settings.aspect);
+
         // hook into input manager
         m_input = Application::get()->getInputManager();
         DEBUG_ASSERT(m_input);
