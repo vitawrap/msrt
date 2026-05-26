@@ -1,5 +1,5 @@
 #include "script_host.hpp"
-#include "core/util.hpp"
+#include <ms/core/util.hpp>
 #include "io/log.hpp"
 #include "script_qjs.hpp"
 

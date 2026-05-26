@@ -2,10 +2,10 @@
 
 #include <chrono>
 #include <thread>
+#include <ms/core/util.hpp>
 
 #include "core/events.hpp"
 #include "io/log.hpp"
-#include "core/util.hpp"
 #include "resources/project.hpp"
 #include "resources/resource_manager.hpp"
 #include "resources/audio_stream_mp3.hpp"

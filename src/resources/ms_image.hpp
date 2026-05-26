@@ -5,7 +5,7 @@
 #include "resources/gpu_texture.hpp"
 #include "resources/resource.hpp"
 #include "resource_manager.hpp"
-#include "core/view_map.hpp"
+#include <ms/core/view_map.hpp>
 #include "io/file.hpp"
 
 namespace ms {

@@ -1,5 +1,5 @@
 #include "ms_image.hpp"
-#include "core/util.hpp"
+#include <ms/core/util.hpp>
 #include "resources/gpu_texture.hpp"
 
 #include <raylib.h>

@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #include "core/events.hpp"
-#include "core/view_map.hpp"
+#include <ms/core/view_map.hpp>
 #include "platform/input.hpp"
 
 namespace ms {

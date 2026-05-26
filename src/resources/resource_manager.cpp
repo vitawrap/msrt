@@ -1,5 +1,5 @@
 #include "resource_manager.hpp"
-#include "core/util.hpp"
+#include <ms/core/util.hpp>
 #include "resource.hpp"
 #include <stdio.h>
 #include <string.h>

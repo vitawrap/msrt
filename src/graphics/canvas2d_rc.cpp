@@ -1,5 +1,5 @@
 #include "canvas2d_rc.hpp"
-#include "core/view_map.hpp"
+#include <ms/core/view_map.hpp>
 
 #include <stdio.h>
 

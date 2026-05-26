@@ -1,5 +1,5 @@
 
-#include "core/util.hpp"
+#include <ms/core/util.hpp>
 #include "resources/ms_image.hpp"
 #include "platform/abstracted/windowing.hpp"
 #include "platform/windowing.hpp"

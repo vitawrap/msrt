@@ -1,11 +1,11 @@
 #pragma once
 
 #include <stdint.h>
+#include <ms/core/robin_hood.hpp>
+#include <ms/core/iterable_stack.hpp>
+#include <ms/core/view_map.hpp>
 
-#include "core/robin_hood.hpp"
 #include "resource.hpp"
-#include "core/iterable_stack.hpp"
-#include "core/view_map.hpp"
 #include "io/file.hpp"
 #include "io/log.hpp"
 
