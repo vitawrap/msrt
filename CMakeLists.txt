@@ -106,8 +106,10 @@ set_source_files_properties(${SOURCES_ASM}
     PROPERTIES OBJECT_DEPENDS "${BIN_ASSETS}"
 )
 
-# main executable
+# add VM library
+add_subdirectory(lib/msvm build_msvm)
 
+# main executable
 add_executable(${PROJECT_NAME} ${SOURCES} ${SOURCES_ASM})
 target_include_directories(${PROJECT_NAME} PRIVATE src include)
 target_include_directories(${PROJECT_NAME} PUBLIC "${ZLIB_INCLUDE_DIR}" "${quickjs_SOURCE_DIR}" "${minizip_SOURCE_DIR}")
@@ -118,6 +120,7 @@ target_link_libraries(${PROJECT_NAME}
         raylib
         minizip
         qjs
+        msvm
         ${MESSAGEBOX_LIB}
 )
 

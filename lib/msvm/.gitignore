@@ -1,0 +1,4 @@
+# ignore generated parser and lexer files
+src/ast/parser.hh
+src/ast/parser.cc
+src/ast/lexer.h
