@@ -15,17 +15,22 @@ namespace res {
         friend GPUTexture;
     public:
         struct AtlasRect {
-            int x, y, width, height;
+            int x, y;
+            short width, height;
+            short fps, nframes;
         };
 
     protected:
         ms::unordered_map<AtlasRect> m_atlasRects;
 
         std::string m_path;
+        int m_frameCount, m_fps;
         void* m_internalImage;
 
         Image(void* image):
-            m_internalImage(image)
+            m_internalImage(image),
+            m_frameCount(1),
+            m_fps(0)
         {}
 
         void updateGPUTexture(GPUTexture* hwTex) const;
@@ -53,6 +58,15 @@ namespace res {
             }
             return false;
         }
+
+        /** Set spritesheet info for this image */
+        void setVSheetInfo(int nframes, int nfps) {
+            m_frameCount = nframes;
+            m_fps = nfps;
+        }
+
+        int getFrameCount() const { return m_frameCount; }
+        int getFPS() const { return m_fps; }
 
         /** Create (or find a cached) GPU texture from image */
         ResourceHandle<GPUTexture> toTexture(bool recreate = false) const;

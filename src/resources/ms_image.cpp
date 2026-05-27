@@ -139,9 +139,13 @@ namespace res {
                     ImageDraw(&bin, *(PlatformImage*)(rect.image->getPlatformImage()), srcRect, dstRect, WHITE);
 
                     // add to image resource atlas rectangles
-                    resImage->m_atlasRects[rect.image->getPath()] = AtlasRect{rpRect.x, rpRect.y, rpRect.w, rpRect.h};
+                    short nframes = static_cast<short>(rect.image->getFrameCount()); // basically: number of vertical splits
+                    short fps = static_cast<short>(rect.image->getFPS());
+                    resImage->m_atlasRects[rect.image->getPath()] = AtlasRect{
+                        rpRect.x, rpRect.y, (short)rpRect.w, (short)rpRect.h, fps, nframes
+                    };
                 }
-                //ExportImage(bin, "./atlas.png"); // debug atlas creation
+                ExportImage(bin, "./atlas.png"); // debug atlas creation
 
                 // do not unload bin Image, it gets transferred into pImage.
                 memcpy((void*)pImage, &bin, sizeof(PlatformImage));
