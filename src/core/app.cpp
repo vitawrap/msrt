@@ -21,7 +21,7 @@ namespace ms {
 
         double now() {
             const auto end = std::chrono::steady_clock::now();
-            return (end - ProcessStart).count();
+            return std::chrono::duration_cast<std::chrono::microseconds>(end - ProcessStart).count() * 0.000001;
         }
 
         double frameNow() {
@@ -110,6 +110,8 @@ namespace ms {
             // main event loop
             while (! m_wm.closeRequested()) {
                 if (m_programExit) break;
+                // advance time
+                Time::updateFrameNow();
 
                 // poll window manager events
                 m_wm.pollWindowEvents();
