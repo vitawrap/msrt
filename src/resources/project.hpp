@@ -10,11 +10,18 @@ namespace res {
 
     class Project {
     public:
+        struct SpriteSheet {
+            std::string filename;
+            int nframes;
+            int nfps;
+        };
+    
         struct Settings {
             std::string title;
             std::string orientation;
             std::string aspect;
             std::string language;
+            std::vector<SpriteSheet> spritesheets;
         };
 
         enum Language {
@@ -44,6 +51,8 @@ namespace res {
          * query the project for any asset at runtime.
          */
         io::ZipArchive m_files;
+
+        SpriteSheet const* findSheetInfo(std::string_view path) const;
 
     public:
         Project():

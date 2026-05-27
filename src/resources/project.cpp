@@ -6,6 +6,16 @@
 namespace ms {
 namespace res {
 
+    Project::SpriteSheet const* Project::findSheetInfo(std::string_view path) const {
+        auto& sheets = m_settings.spritesheets;
+        auto ret = std::find_if(sheets.begin(), sheets.end(), [path](SpriteSheet const& v) {
+            return v.filename == path;
+        });
+        if (ret == sheets.cend())
+            return nullptr;
+        return ret.base();
+    }
+
     bool Project::open(char const *filename)
     {
         close();
@@ -25,6 +35,35 @@ namespace res {
                     m_settings.aspect       = (char const*) root["aspect"];
                     m_settings.orientation  = (char const*) root["orientation"];
                     m_settings.language     = (char const*) root["language"];
+
+                    auto files = root["files"]; io::CJSONNode file;
+                    CJSONNode_forEach(file, files) {
+                        std::filesystem::path key(file->string);
+                        if (key.extension() == ".png") {
+                            io::CJSONNode props;
+                            CJSONNode_forEach(props, file) {
+                                if (strcmp(props->string, "properties") == 0) {
+                                    bool isSheet = false;
+                                    SpriteSheet sinfo;
+
+                                    io::CJSONNode prop;
+                                    CJSONNode_forEach(prop, props) {
+                                        if (strcmp(prop->string, "frames") == 0) {
+                                            if ((sinfo.nframes = prop->valueint) > 1)
+                                                isSheet = true;
+                                        }
+                                        if (strcmp(prop->string, "fps") == 0)
+                                            sinfo.nfps = prop->valueint;
+                                    }
+        
+                                    if (isSheet) {
+                                        sinfo.filename = key;
+                                        m_settings.spritesheets.push_back(sinfo);
+                                    }
+                                }
+                            }
+                        }
+                    }
                     
                 } catch (io::CJSONError& jsErr) {
                     LOG_MSGF("JSON Error: %s when reading out project.json for \"%s\".\n", jsErr.what(), filename);
@@ -66,6 +105,10 @@ namespace res {
                     else if (path.compare(0, 8, "sprites/") == 0) {
                         m_sprites.emplace(filename, res.as<Image>());
                         LOG_MSGF("Adding sprite %s\n", filename.c_str());
+
+                        // can we get spritesheet info from it?
+                        if (SpriteSheet const* sinfo = findSheetInfo(filename.string()))
+                            res.as<Image>()->setVSheetInfo(sinfo->nframes, sinfo->nfps);
 
                         // keep reference to icon
                         if (path == "sprites/icon.png")
