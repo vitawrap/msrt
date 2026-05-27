@@ -23,7 +23,7 @@ set(PARSER_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/src/ast/parser.cc)
 
 # Set up flex/bison
 flex_target(Lexer ${FLEX_INPUT} ${LEXER_HEADER})
-bison_target(Parser ${BISON_INPUT} ${PARSER_SOURCE})
+bison_target(Parser ${BISON_INPUT} ${PARSER_SOURCE} COMPILE_FLAGS "-Wcounterexamples")
 
 add_library(${PROJECT_NAME} STATIC ${FLEX_Lexer_OUTPUTS} ${BISON_Parser_OUTPUTS} ${SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE src ../../include)
