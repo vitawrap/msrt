@@ -145,7 +145,7 @@ namespace res {
                         rpRect.x, rpRect.y, (short)rpRect.w, (short)rpRect.h, fps, nframes
                     };
                 }
-                ExportImage(bin, "./atlas.png"); // debug atlas creation
+                //ExportImage(bin, "./atlas.png"); // debug atlas creation
 
                 // do not unload bin Image, it gets transferred into pImage.
                 memcpy((void*)pImage, &bin, sizeof(PlatformImage));
