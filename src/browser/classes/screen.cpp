@@ -171,12 +171,12 @@ namespace browser {
     }
 
     void Screen::drawSprite(std::string_view name, float x, float y, float w, float h) {
-        int frameNum = 0;
+        int frameNum = -1;
         size_t pFrame = name.rfind('.');
         if (pFrame != std::string::npos) {
-            /** TODO: Frames from zip + json */
             auto frameStr = name.substr(pFrame + 1);
             frameNum = atoi(frameStr.data());
+            name = name.substr(0, pFrame); // fix up name for getSpritePath...
         }
         
         std::string_view path = getRuntime()->getSpritePath(name);
@@ -184,6 +184,14 @@ namespace browser {
 
         res::Image::AtlasRect r;
         if (m_atlas->findAtlasRect(path, r)) {
+            // pick a frame if we have to draw an animated sprite
+            if (r.nframes > 1) {
+                r.height /= r.nframes;
+                r.y += frameNum >= 0? r.height * (frameNum % r.nframes) : 
+                    r.height * (static_cast<long long>(Time::frameNow() * r.fps) % r.nframes);
+            }
+
+            // finally, draw
             if (initDrawOp(x, -y)) {
                 m_canvas->drawQuad((m_atlas->toTexture()).operator->(), r.x, r.y, r.width, r.height,
                 0.f, 0.f, w, h);
