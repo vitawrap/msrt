@@ -143,6 +143,26 @@ this.Screen.prototype.updateInterface = function() {
   return this.interface.height = this.height;
 }
 
+// extra function to expose sprites but short sprite management back to the C++ side
+this.Runtime.prototype.__addSprite = function(path, fps, fcount, width, height) {
+  if (this.sprites === undefined) { this.sprites = {}; }
+  let fpsField = fps;
+  let fcountField = fcount;
+  let setFPS = (fps) => { this.__spriteSetFPS(path, fps); };
+  let setFrame = (frame) => { this.__spriteSetFrame(path, frame); }
+  let getFrame = () => { return this.__spriteGetFrame(path); }
+  const name = path.match(/(?<=sprites\/)([^\t\n\r .]+)/g);
+  this.sprites[name] = {
+    setFPS: setFPS,
+    setFrame: setFrame,
+    getFrame: getFrame,
+    width: width,
+    height: height,
+    name: name,
+    ready: 1
+  };
+}
+
 // add script methods to prototype
 this.Runtime.prototype.__startReady = function() {
   var err, file, global, init, j, len1, lib, meta, namespace, ref, ref1, src;

@@ -91,6 +91,7 @@ namespace browser {
         Event<> startVM;
         Event<> timerStep;
         Event<> updatedControls;
+        Event<std::string_view, res::Image const*> spriteMapped;
     };
 
     float Runtime::getRatioFor(AspectRatio enumval)  {

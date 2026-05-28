@@ -204,13 +204,22 @@ namespace browser {
             JSTempVal ret = JS_Call(ctx, startFn, rtValue, 0, nullptr);
         });
         rt->timerStep.connect([ctx, rtValue]() {
-            JSTempVal startFn = JS_GetPropertyStr(ctx, rtValue, "__timer");
-            JSTempVal ret = JS_Call(ctx, startFn, rtValue, 0, nullptr);
+            JSTempVal stepFn = JS_GetPropertyStr(ctx, rtValue, "__timer");
+            JSTempVal ret = JS_Call(ctx, stepFn, rtValue, 0, nullptr);
         });
         rt->updatedControls.connect([ctx, rtValue]() {
             Runtime* rt = opaqueToObject<Runtime>(rtValue);
             JSTempVal touch = JS_GetPropertyStr(ctx, rtValue, "touch");
             JS_SetPropertyStr(ctx, touch, "touching", JS_NewBool(ctx, rt->isTouching()));
+        });
+        rt->spriteMapped.connect([ctx, rtValue](std::string_view path, res::Image const* img) {
+            JSTempVal sprFn = JS_GetPropertyStr(ctx, rtValue, "__addSprite");
+            JSTempVal argv[] = {
+                JS_NewStringLen(ctx, path.data(), path.length()),
+                JS_NewNumber(ctx, img->getFPS()), JS_NewNumber(ctx, img->getFrameCount()),
+                JS_NewNumber(ctx, img->getWidth()), JS_NewNumber(ctx, img->getHeight()),
+            };
+            JSTempVal ret = JS_Call(ctx, sprFn, rtValue, countof(argv), (JSValue*)argv);
         });
         JSValue screen = constructScreen(ctx, JS_UNDEFINED, 1, &rtValue);
         rt->setScreen(opaqueToObject<Screen>(screen));
@@ -245,6 +254,27 @@ namespace browser {
         MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
     }
 
+    // Runtime.__spriteSetFPS(path: string, fps: number) OR Runtime.__spriteSetFrame(path: string, frame: number)
+    static JSValue RuntimeProto_spriteAnim(JSContext *ctx, JSValueConst self, int argc, JSValueConst *argv, int magic) {
+        Runtime* runtime = opaqueToObject<Runtime>(self);
+        char const* path = JS_ToCString(ctx, argv[0]);
+        res::ResourceHandle<res::Image> image = runtime->getSpriteImage(path);
+        JS_FreeCString(ctx, path);
+        if (magic == 2) {
+            int frame = image->getAnimCurrentFrame();
+            return JS_NewInt32(ctx, frame);
+        }
+        double num = 0.0; JS_ToFloat64(ctx, &num, argv[1]);
+        switch (magic) {
+            case 0: {
+                auto screen = runtime->getScreen();
+                screen->getAtlas()->setAtlasImageFPS(image, num);
+            } break;
+            case 1: image->setAnimTimeOffset(Time::frameNow() - (num / image->getFPS())); break;
+        }
+        MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
+    }
+
     static void gcMarkRuntime(JSRuntime* rt, JSValueConst self, JS_MarkFunc markFunc) {
         Runtime* runtime = opaqueToObject<Runtime>(self);
         if (Screen* screen = runtime->getScreen())
@@ -259,6 +289,11 @@ namespace browser {
         JS_CFUNC_MAGIC_DEF("checkStartReady", 0, RuntimeProto_simple, 4),
         JS_CFUNC_MAGIC_DEF("timer", 0, RuntimeProto_simple, 5),
         JS_CFUNC_MAGIC_DEF("updateControls", 0, RuntimeProto_simple, 6),
+
+        // extra functions for classes not exposed to JS
+        JS_CFUNC_MAGIC_DEF("__spriteSetFPS", 2, RuntimeProto_spriteAnim, 0),
+        JS_CFUNC_MAGIC_DEF("__spriteSetFrame", 2, RuntimeProto_spriteAnim, 1),
+        JS_CFUNC_MAGIC_DEF("__spriteGetFrame", 1, RuntimeProto_spriteAnim, 2),
     };
 
     static void installRuntime(JSContext* ctx) {

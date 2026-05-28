@@ -79,6 +79,9 @@ namespace browser {
             sscanf(pathStr.c_str(), "sprites/%255[^.]s", stemBuffer);
             m_spriteNameMap.emplace(stemBuffer, pathStr);
             m_spriteImageMap.emplace(pathStr, res);
+
+            // give script realm initial sprite info
+            spriteMapped.invoke(pathStr, res.operator->());
         }
     }
 
