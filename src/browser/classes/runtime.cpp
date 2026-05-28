@@ -63,14 +63,22 @@ namespace browser {
         return "";
     }
 
+    res::ResourceHandle<res::Image> Runtime::getSpriteImage(std::string_view path) const {
+        auto itr = m_spriteImageMap.find(path);
+        if (itr != m_spriteImageMap.cend())
+            return itr->second;
+        return res::ResourceHandle<res::Image>{nullptr};
+    }
+
     void Runtime::mapSpriteNames() {
         // remap sprite resource names to sprite paths for use in screen commands
         auto* project = Application::get()->getProject();
         auto const& sprMap = project->getSpriteMap();
-        for (const auto& [pathStr, _] : sprMap) {
+        for (const auto& [pathStr, res] : sprMap) {
             char stemBuffer[256] = {0}; // frankly easier than std for such tasks
             sscanf(pathStr.c_str(), "sprites/%255[^.]s", stemBuffer);
             m_spriteNameMap.emplace(stemBuffer, pathStr);
+            m_spriteImageMap.emplace(pathStr, res);
         }
     }
 

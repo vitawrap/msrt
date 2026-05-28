@@ -191,7 +191,7 @@ namespace browser {
                     r.y += r.height * (frameNum % r.nframes);
                 else {
                     // slightly more expensive process when we have to check if the user defined a current frame
-                    auto img = res::ResourceManager::get()->getCached<res::Image>(path);
+                    auto img = getRuntime()->getSpriteImage(path);
                     double animTime = Time::frameNow() - img->getAnimTimeOffset();
                     r.y += r.height * (static_cast<long long>(animTime * r.fps) % r.nframes);
                 }

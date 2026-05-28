@@ -5,6 +5,7 @@
 #include "core/events.hpp"
 #include <ms/core/view_map.hpp>
 #include "platform/input.hpp"
+#include "resources/ms_image.hpp"
 
 namespace ms {
 namespace browser {
@@ -35,6 +36,7 @@ namespace browser {
         bool m_started;
 
         ms::unordered_map<std::string> m_spriteNameMap;
+        ms::unordered_map<res::ResourceHandle<res::Image>> m_spriteImageMap;
 
         void mapSpriteNames();
 
@@ -48,6 +50,9 @@ namespace browser {
 
         /** Get sprite path from name, for drawing */
         std::string_view getSpritePath(std::string_view path) const;
+
+        /** Get sprite image from path, for drawing */
+        res::ResourceHandle<res::Image> getSpriteImage(std::string_view path) const;
 
         /** Must only be called by script constructor */
         void setScreen(Screen* screen) { m_screen = screen; }
