@@ -97,6 +97,9 @@ namespace browser {
         
         /** Get the runtime controlling this screen */
         Runtime* getRuntime() const { return m_runtime; }
+
+        /** Get reference to sprite atlas */
+        auto getAtlas() const { return m_atlas; }
     };
 
 }
