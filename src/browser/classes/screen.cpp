@@ -187,8 +187,14 @@ namespace browser {
             // pick a frame if we have to draw an animated sprite
             if (r.nframes > 1) {
                 r.height /= r.nframes;
-                r.y += frameNum >= 0? r.height * (frameNum % r.nframes) : 
-                    r.height * (static_cast<long long>(Time::frameNow() * r.fps) % r.nframes);
+                if (frameNum >= 0)
+                    r.y += r.height * (frameNum % r.nframes);
+                else {
+                    // slightly more expensive process when we have to check if the user defined a current frame
+                    auto img = res::ResourceManager::get()->getCached<res::Image>(path);
+                    double animTime = Time::frameNow() - img->getAnimTimeOffset();
+                    r.y += r.height * (static_cast<long long>(animTime * r.fps) % r.nframes);
+                }
             }
 
             // finally, draw

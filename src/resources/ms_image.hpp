@@ -25,10 +25,12 @@ namespace res {
 
         std::string m_path;
         int m_frameCount, m_fps;
+        double m_animTimeOffset;
         void* m_internalImage;
 
         Image(void* image):
             m_internalImage(image),
+            m_animTimeOffset(0.0),
             m_frameCount(1),
             m_fps(0)
         {}
@@ -67,6 +69,9 @@ namespace res {
 
         int getFrameCount() const { return m_frameCount; }
         int getFPS() const { return m_fps; }
+
+        void setAnimTimeOffset(double start) { m_animTimeOffset = start; }
+        double getAnimTimeOffset() const { return m_animTimeOffset; }
 
         /** Create (or find a cached) GPU texture from image */
         ResourceHandle<GPUTexture> toTexture(bool recreate = false) const;
