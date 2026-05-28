@@ -214,12 +214,11 @@ namespace browser {
         });
         rt->spriteMapped.connect([ctx, rtValue](std::string_view path, res::Image const* img) {
             JSTempVal sprFn = JS_GetPropertyStr(ctx, rtValue, "__addSprite");
-            JSTempVal argv[] = {
+            std::array<JSTempVal, 5> argv = {
                 JS_NewStringLen(ctx, path.data(), path.length()),
                 JS_NewNumber(ctx, img->getFPS()), JS_NewNumber(ctx, img->getFrameCount()),
-                JS_NewNumber(ctx, img->getWidth()), JS_NewNumber(ctx, img->getHeight()),
-            };
-            JSTempVal ret = JS_Call(ctx, sprFn, rtValue, countof(argv), (JSValue*)argv);
+                JS_NewNumber(ctx, img->getWidth()), JS_NewNumber(ctx, img->getHeight())};
+            JSTempVal ret = JS_Call(ctx, sprFn, rtValue, argv.size(), reinterpret_cast<JSValue*>(argv.data()));
         });
         JSValue screen = constructScreen(ctx, JS_UNDEFINED, 1, &rtValue);
         rt->setScreen(opaqueToObject<Screen>(screen));
@@ -339,10 +338,10 @@ namespace browser {
         player->setRuntime(opaqueToObject<Runtime>(rtValue));
         player->sourceFileAdded.connect([ctx, self](std::string name, std::string text){
             JSTempVal startFn = JS_GetPropertyStr(ctx, self, "__sourceFileAdded");
-            JSTempVal values[] = {
+            std::array<JSTempVal, 2> values = {
                 JS_NewStringLen(ctx, name.c_str(), name.length()),
                 JS_NewStringLen(ctx, text.c_str(), text.length())};
-            JSTempVal ret = JS_Call(ctx, startFn, self, 2, reinterpret_cast<JSValue*>(values));
+            JSTempVal ret = JS_Call(ctx, startFn, self, values.size(), reinterpret_cast<JSValue*>(values.data()));
             MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
         });
         player->start();
