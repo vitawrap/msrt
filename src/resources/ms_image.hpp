@@ -61,6 +61,8 @@ namespace res {
             return false;
         }
 
+        void setAtlasImageFPS(ResourceHandle<Image>& image, double fps);
+
         /** Set spritesheet info for this image */
         void setVSheetInfo(int nframes, int nfps) {
             m_frameCount = nframes;

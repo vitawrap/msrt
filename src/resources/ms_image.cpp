@@ -182,6 +182,12 @@ namespace res {
         Texture2D* rlt = reinterpret_cast<Texture2D*>(hwTex->getPlatformTexture());
         UpdateTexture(*rlt, pImage->data);
     }
+
+    void Image::setAtlasImageFPS(ResourceHandle<Image>& image, double fps) {
+        if (m_atlasRects.contains(image->getPath()))
+            m_atlasRects[image->getPath()].fps = fps;
+        image->m_fps = fps;
+    }
 }
 }
 
