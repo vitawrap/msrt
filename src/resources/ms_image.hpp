@@ -74,6 +74,11 @@ namespace res {
 
         void setAnimTimeOffset(double start) { m_animTimeOffset = start; }
         double getAnimTimeOffset() const { return m_animTimeOffset; }
+        
+        int getAnimCurrentFrame() const {
+            double animTime = Time::frameNow() - getAnimTimeOffset();
+            return (static_cast<long long>(animTime * getFPS()) % getFrameCount());
+        }
 
         /** Create (or find a cached) GPU texture from image */
         ResourceHandle<GPUTexture> toTexture(bool recreate = false) const;

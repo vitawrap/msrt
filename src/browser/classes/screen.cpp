@@ -192,8 +192,7 @@ namespace browser {
                 else {
                     // slightly more expensive process when we have to check if the user defined a current frame
                     auto img = getRuntime()->getSpriteImage(path);
-                    double animTime = Time::frameNow() - img->getAnimTimeOffset();
-                    r.y += r.height * (static_cast<long long>(animTime * r.fps) % r.nframes);
+                    r.y += r.height * img->getAnimCurrentFrame();
                 }
             }
 
