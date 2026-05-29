@@ -57,7 +57,8 @@ namespace gfx {
         m_windowId(0),
         m_engine(nullptr),
         m_drawAnchorX(0.5),
-        m_drawAnchorY(0.5)
+        m_drawAnchorY(0.5),
+        m_drawing(false)
     {}
 
     void CanvasRC2D::init(platform::IWindowManager* wm, int wid) {
@@ -180,6 +181,7 @@ namespace gfx {
         // have to use rlgl here, because Camera2D is weirdly restrictive.
         rlLoadIdentity();
         rlMultMatrixf(MatrixToFloat(m_engine->transform));
+        m_drawing = true;
 
         ClearBackground(BLACK); // default microscript clear color is black
     }
@@ -199,6 +201,7 @@ namespace gfx {
         DrawText(fpsText, 8, 8, 20, WHITE);
         
         EndDrawing();
+        m_drawing = false;
     }
 
     platform::IWindowManager* CanvasRC2D::getWindowManager() const {
@@ -223,6 +226,8 @@ namespace gfx {
                       0.0f, 0.0f, 1.0f, 0.0f,
                       0.0f, 0.0f, 0.0f, 1.0f };
         m_engine->transform = MatrixMultiply(m_engine->transform, m3x3);
+        /** TODO: this is a workaround, m_engine->transform could be desynced from gl matrix. */
+        if (m_drawing) rlMultMatrixf(MatrixToFloat(m3x3));
     }
 
     void CanvasRC2D::translate(float x, float y) {
