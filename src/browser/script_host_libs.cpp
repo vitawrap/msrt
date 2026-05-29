@@ -127,6 +127,13 @@ namespace browser {
         MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
     }
 
+    static JSValue ScreenProto_setDrawRotation(JSContext* ctx, JSValueConst self, int argc, JSValueConst *argv) {
+        auto* screen = opaqueToObject<Screen>(self);
+        double deg; JS_ToFloat64(ctx, &deg, argv[0]);
+        screen->setDrawRotation(deg);
+        MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
+    }
+
     static JSCFunctionListEntry defineScreen[] = {
         JS_CFUNC_MAGIC_DEF("startControl", 0, ScreenProto_simple, 0),
         JS_CFUNC_MAGIC_DEF("initContext", 0, ScreenProto_simple, 1),
@@ -139,6 +146,7 @@ namespace browser {
         JS_CFUNC_DEF("drawText", 5, ScreenProto_drawText),
         JS_CFUNC_DEF("drawSprite", 5, ScreenProto_drawSprite),
         JS_CFUNC_DEF("setDrawAnchor", 2, ScreenProto_setDrawAnchor),
+        JS_CFUNC_DEF("setDrawRotation", 1, ScreenProto_setDrawRotation),
     };
 
     static JSValue constructScreen(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv) {

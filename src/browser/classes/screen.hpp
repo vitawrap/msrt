@@ -74,6 +74,9 @@ namespace browser {
         /** Set draw anchor */
         void setDrawAnchor(float x, float y);
 
+        /** Set draw rotation */
+        void setDrawRotation(float deg);
+
         /** ? */
         void initDraw();
 

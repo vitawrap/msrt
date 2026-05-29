@@ -6,7 +6,7 @@
 namespace ms {
 namespace browser {
 
-    constexpr float deg2rad = 57.2957795131f;
+    constexpr float deg2rad = 0.017453292519943298f;
 
     Screen::Screen() :
         m_runtime(nullptr),
@@ -168,6 +168,10 @@ namespace browser {
         m_anchorY = y;
         // replicate microstudio's behavior
         m_canvas->setDrawAnchors(.5 + (x * .5), .5 + (y * .5));
+    }
+
+    void Screen::setDrawRotation(float deg) {
+        m_objectDegrees = deg;
     }
 
     void Screen::drawSprite(std::string_view name, float x, float y, float w, float h) {
