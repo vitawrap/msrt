@@ -77,6 +77,7 @@ namespace res {
             for (const auto& path : paths) {
                 bool cache_asset = false;
                 if ((path.compare(0, 3, "ms/") == 0)
+                || (path.compare(0, 5, "maps/") == 0)
                 || (path.compare(0, 6, "music/") == 0)
                 || (path.compare(0, 7, "sounds/") == 0)
                 || (path.compare(0, 8, "sprites/") == 0)) {
@@ -113,6 +114,10 @@ namespace res {
                         // keep reference to icon
                         if (path == "sprites/icon.png")
                             m_icon = res.as<Image>();
+                    }
+                    // maps also need to be set up later
+                    else if (path.compare(0, 5, "maps/") == 0) {
+                        m_tilemaps.emplace(filename, res.as<TileMap>());
                     }
                 }
             }

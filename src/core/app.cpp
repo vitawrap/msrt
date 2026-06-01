@@ -10,6 +10,7 @@
 #include "resources/resource_manager.hpp"
 #include "resources/audio_stream_mp3.hpp"
 #include "resources/audio_stream_wav.hpp"
+#include "resources/ms_tilemap.hpp"
 
 namespace ms {
 
@@ -74,6 +75,7 @@ namespace ms {
         PRECACHE_REGISTER_EXT(".png", res::Image);
         PRECACHE_REGISTER_EXT(".wav", res::AudioStreamWAV);
         PRECACHE_REGISTER_EXT(".mp3", res::AudioStreamMP3);
+        PRECACHE_REGISTER_EXT(".json", res::TileMap);
     }
 
     void Application::free() {
