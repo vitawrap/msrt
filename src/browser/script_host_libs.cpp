@@ -42,6 +42,16 @@ namespace browser {
         MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
     }
 
+    static JSValue ScreenProto_getter(JSContext *ctx, JSValueConst self, int magic) {
+        auto* screen = opaqueToObject<Screen>(self);
+        JSValue ret = JS_UNDEFINED;
+        switch (magic) {
+            case 0: ret = JS_NewInt32(ctx, screen->getWidth()); break;
+            case 1: ret = JS_NewInt32(ctx, screen->getHeight()); break;
+        }
+        MAYBE_RETHROW_EXCEPTION_V(ctx, ret);
+    }
+
     static inline bool JSValueToScreenColor(JSContext* ctx, Screen* screen, JSValue cVal, uint32_t& color) {
         if (JS_IsString(cVal)) {
             char const* colorStr = JS_ToCString(ctx, cVal);
@@ -135,6 +145,8 @@ namespace browser {
     }
 
     static JSCFunctionListEntry defineScreen[] = {
+        JS_CGETSET_MAGIC_DEF("width", ScreenProto_getter, nullptr, 0),
+        JS_CGETSET_MAGIC_DEF("height", ScreenProto_getter, nullptr, 1),
         JS_CFUNC_MAGIC_DEF("startControl", 0, ScreenProto_simple, 0),
         JS_CFUNC_MAGIC_DEF("initContext", 0, ScreenProto_simple, 1),
         JS_CFUNC_MAGIC_DEF("initDraw", 0, ScreenProto_simple, 2),

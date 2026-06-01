@@ -103,6 +103,12 @@ namespace browser {
 
         /** Get reference to sprite atlas */
         auto getAtlas() const { return m_atlas; }
+
+        /** Get virtual render width */
+        int getWidth() const { return m_width; }
+
+        /** Get virtual render height */
+        int getHeight() const { return m_height; }
     };
 
 }
