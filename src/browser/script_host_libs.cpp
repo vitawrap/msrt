@@ -66,7 +66,7 @@ namespace browser {
 
     static JSValue ScreenProto_colorArg(JSContext* ctx, JSValueConst self, int argc, JSValueConst *argv, int magic) {
         auto* screen = opaqueToObject<Screen>(self);
-        uint32_t color = 0x0;
+        uint32_t color = 0xFF000000;
         if (argc) {
             JSValue const& cVal = argv[0];
             if (!JSValueToScreenColor(ctx, screen, cVal, color)) {
