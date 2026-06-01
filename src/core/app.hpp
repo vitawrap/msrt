@@ -20,6 +20,8 @@ namespace ms {
         platform::InputManager m_input;
         bool m_programExit;
 
+        bool m_cmdFullScreen;
+
         void init();
 
         void free();
@@ -52,6 +54,11 @@ namespace ms {
 
         browser::Context const* getBrowserContext() const { return &m_browser; }
         browser::Context* getBrowserContext() { return &m_browser; }
+
+        /**
+         * @brief CMD indicates app will start in full-screen
+         */
+        void startInFullScreen();
 
         /**
          * @brief Application lifecycle

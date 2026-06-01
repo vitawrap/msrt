@@ -66,6 +66,7 @@ namespace ms {
     }
 
     void Application::init() {
+        m_cmdFullScreen = false;
         m_programExit = false;
         Thread::setMainThread();
         io::LogDispatcher::get().addStandardOutput();
@@ -88,6 +89,10 @@ namespace ms {
             m_wm.setWindowIcon(icon.operator->());
     }
 
+    void Application::startInFullScreen() {
+        m_cmdFullScreen = true;
+    }
+
     int Application::run() {
         // at this point the project should be loaded (externally or internally)
         if (!m_project.isOpen()) {
@@ -100,7 +105,7 @@ namespace ms {
         // make sure reentance doesn't leak another instance later with threads
         (void)EventQueue::get();
 
-        if (m_wm.createWindow(m_project.getSettings().title.c_str()) >= 0) {
+        if (m_wm.createWindow(m_project.getSettings().title.c_str(), m_cmdFullScreen) >= 0) {
             // set icon (createWindow auto-selects the new window)
             setWindowIcon();
 

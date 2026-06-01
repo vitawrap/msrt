@@ -38,7 +38,7 @@ namespace platform {
          * The windowing manager shall take care of the render context.
          * @returns The new window's index
          */
-        virtual int createWindow(char const* title = "") = 0;
+        virtual int createWindow(char const* title = "", bool fullscreen = false) = 0;
 
         /**
          * Change the window icon to an internal image resource
@@ -52,6 +52,7 @@ namespace platform {
 
         virtual int getWindowWidth() const = 0;
         virtual int getWindowHeight() const = 0;
+        virtual bool isWindowFullScreen() const = 0;
 
         /** Destroy currently selected window. */
         virtual void destroyWindow() = 0;
