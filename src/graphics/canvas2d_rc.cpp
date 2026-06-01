@@ -252,7 +252,9 @@ namespace gfx {
         Rectangle dst{ x, y, w, h };
         Vector2 origin{ w * m_drawAnchorX, h - (h * m_drawAnchorY) }; // microstudio uses the center as the origin
         Texture2D* rlTex = reinterpret_cast<Texture2D*>(hwTex->getPlatformTexture());
-        DrawTexturePro(*rlTex, src, dst, origin, 0.f, WHITE);
+        Color whiteAlpha { 255, 255, 255, m_engine->fillColor.a };
+        // strangely, microstudio doesn't use the effective drawing color for sprites, just the alpha.
+        DrawTexturePro(*rlTex, src, dst, origin, 0.f, whiteAlpha);
     }
 
     void CanvasRC2D::drawText(std::string_view text, float x, float y, int ftSize, float deblurFactor) {
