@@ -187,28 +187,43 @@ namespace browser {
         if (path.empty()) return;
 
         res::Image::AtlasRect r;
-        if (m_atlas->findAtlasRect(path, r)) {
-            // pick a frame if we have to draw an animated sprite
-            if (r.nframes > 1) {
-                r.height /= r.nframes;
-                if (frameNum >= 0)
-                    r.y += r.height * (frameNum % r.nframes);
-                else {
-                    // slightly more expensive process when we have to check if the user defined a current frame
-                    auto img = getRuntime()->getSpriteImage(path);
-                    r.y += r.height * img->getAnimCurrentFrame();
-                }
+        auto texture = m_atlas->toTexture();
+        if (!m_atlas->findAtlasRect(path, r)) {
+            // if somehow the atlas doesn't have that sprite we'll have to do a lame slow swap to a separate image
+            auto image = res::ResourceManager::get()->getCached<res::Image>(path);
+            if (image) {
+                LOG_MSGF("Sprite at \"%s\" not in main atlas! Need to draw from isolated texture!\n", path.data());
+                texture = image->toTexture();
+                r.x = r.y = 0;
+                r.width = image->getWidth();
+                r.height = image->getHeight();
+                r.fps = image->getFPS();
+                r.nframes = image->getFrameCount();
+            } else {    
+                LOG_MSGF("Sprite at \"%s\" not found in atlas or loaded resources!\n", path.data());
             }
+        }
 
-            // finally, draw
-            if (initDrawOp(x, -y)) {
-                m_canvas->drawQuad((m_atlas->toTexture()).operator->(), r.x, r.y, r.width, r.height,
-                0.f, 0.f, w, h);
-                closeDrawOp();
-            } else {
-                m_canvas->drawQuad((m_atlas->toTexture()).operator->(), r.x, r.y, r.width, r.height,
-                x, -y, w, h);
+        // pick a frame if we have to draw an animated sprite
+        if (r.nframes > 1) {
+            r.height /= r.nframes;
+            if (frameNum >= 0)
+                r.y += r.height * (frameNum % r.nframes);
+            else {
+                // slightly more expensive process when we have to check if the user defined a current frame
+                auto img = getRuntime()->getSpriteImage(path);
+                r.y += r.height * img->getAnimCurrentFrame();
             }
+        }
+
+        // finally, draw
+        if (initDrawOp(x, -y)) {
+            m_canvas->drawQuad(texture.operator->(), r.x, r.y, r.width, r.height,
+            0.f, 0.f, w, h);
+            closeDrawOp();
+        } else {
+            m_canvas->drawQuad(texture.operator->(), r.x, r.y, r.width, r.height,
+            x, -y, w, h);
         }
     }
 
