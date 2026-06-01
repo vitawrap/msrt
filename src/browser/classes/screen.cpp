@@ -166,7 +166,7 @@ namespace browser {
     void Screen::setDrawAnchor(float x, float y) {
         m_anchorX = x;
         m_anchorY = y;
-        // replicate microstudio's behavior
+        // remap microstudio anchors (-1 -> 0 -> 1) to 0 -> 0.5 -> 1
         m_canvas->setDrawAnchors(.5 + (x * .5), .5 + (y * .5));
     }
 
@@ -207,13 +207,13 @@ namespace browser {
                 closeDrawOp();
             } else {
                 m_canvas->drawQuad((m_atlas->toTexture()).operator->(), r.x, r.y, r.width, r.height,
-                x, y, w, h);
+                x, -y, w, h);
             }
         }
     }
 
     void Screen::fillRect(float x, float y, float w, float h) {
-        m_canvas->fillRect(x - (w * .5f), -y - (h * .5f), w, h);
+        m_canvas->fillRect(x, y, w, h);
     }
 
     void Screen::drawText(char const* text, float x, float y, float sz) {

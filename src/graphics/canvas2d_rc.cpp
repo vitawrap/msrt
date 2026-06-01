@@ -168,11 +168,12 @@ namespace gfx {
     }
 
     void CanvasRC2D::fillRect(int x, int y, int w, int h) {
-        DrawRectangle(x, y, w, h, m_engine->fillColor);
+        //m_canvas->fillRect(x - (w * .5f), -y - (h * .5f), w, h);
+        DrawRectangle(x - (w * m_drawAnchorX), (-h * (1.f - m_drawAnchorY)) - y, w, h, m_engine->fillColor);
     }
 
     void CanvasRC2D::strokeRect(int x, int y, int w, int h) {
-        DrawRectangleLines(x, y, w, h, m_engine->strokeColor);
+        DrawRectangleLines(x - (w * m_drawAnchorX), (-h * (1.f - m_drawAnchorY)) - y, w, h, m_engine->strokeColor);
     }
 
     void CanvasRC2D::beginFrame() {
@@ -249,7 +250,7 @@ namespace gfx {
     void CanvasRC2D::drawQuad(res::GPUTexture* hwTex, float sx, float sy, float sw, float sh, float x, float y, float w, float h) {
         Rectangle src{ sx, sy, sw, sh };
         Rectangle dst{ x, y, w, h };
-        Vector2 origin{ w * m_drawAnchorX, h * m_drawAnchorY }; // microstudio uses the center as the origin
+        Vector2 origin{ w * m_drawAnchorX, h - (h * m_drawAnchorY) }; // microstudio uses the center as the origin
         Texture2D* rlTex = reinterpret_cast<Texture2D*>(hwTex->getPlatformTexture());
         DrawTexturePro(*rlTex, src, dst, origin, 0.f, WHITE);
     }
@@ -259,7 +260,7 @@ namespace gfx {
             Font& ft = m_engine->font->font;
         
             Vector2 textSz = MeasureTextEx(ft, text.data(), ftSize, 0);
-            Vector2 origin{ (textSz.x * -.5f) + x, (textSz.y * -.5f) - y };
+            Vector2 origin{ (textSz.x * -m_drawAnchorX) + x, (textSz.y * (1.f - m_drawAnchorY)) - y };
             DrawTextEx(m_engine->font->font, text.data(), origin, ftSize, 0, m_engine->fillColor);
         }
     }
