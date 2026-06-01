@@ -137,10 +137,13 @@ namespace browser {
         MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
     }
 
-    static JSValue ScreenProto_setDrawRotation(JSContext* ctx, JSValueConst self, int argc, JSValueConst *argv) {
+    static JSValue ScreenProto_setDouble1(JSContext* ctx, JSValueConst self, int argc, JSValueConst *argv, int magic) {
         auto* screen = opaqueToObject<Screen>(self);
-        double deg; JS_ToFloat64(ctx, &deg, argv[0]);
-        screen->setDrawRotation(deg);
+        double scalar; JS_ToFloat64(ctx, &scalar, argv[0]);
+        switch (magic) {
+            case 0: screen->setDrawRotation(scalar);
+            case 1: screen->setAlpha(scalar * 255.0);
+        }
         MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
     }
 
@@ -158,7 +161,8 @@ namespace browser {
         JS_CFUNC_DEF("drawText", 5, ScreenProto_drawText),
         JS_CFUNC_DEF("drawSprite", 5, ScreenProto_drawSprite),
         JS_CFUNC_DEF("setDrawAnchor", 2, ScreenProto_setDrawAnchor),
-        JS_CFUNC_DEF("setDrawRotation", 1, ScreenProto_setDrawRotation),
+        JS_CFUNC_MAGIC_DEF("setDrawRotation", 1, ScreenProto_setDouble1, 0),
+        JS_CFUNC_MAGIC_DEF("setAlpha", 1, ScreenProto_setDouble1, 1),
     };
 
     static JSValue constructScreen(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv) {
