@@ -55,8 +55,10 @@ namespace gfx {
 
         void fillRect(int x, int y, int w, int h);
         void strokeRect(int x, int y, int w, int h);
+        void drawLine(float x0, float y0, float x1, float y1);
         void transform(float a, float b, float c, float d, float e, float f); // 3x2 matrix
         void translate(float x, float y);
+        void setLineWidth(float w);
         void rotate(float radians);
         void scale(float w, float h);
         void setStrokeColor(uint32_t OxAABBGGRR);

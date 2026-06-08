@@ -45,6 +45,7 @@ namespace gfx {
         Matrix transform; // camera transform
         Color fillColor;
         Color strokeColor;
+        float lineWidth;
         CanvasFont* font;
         std::string fontName;
 
@@ -73,6 +74,7 @@ namespace gfx {
             m_engine->transform = MatrixIdentity();
             m_engine->strokeColor = BLACK;
             m_engine->fillColor = BLACK;
+            m_engine->lineWidth = 1.f;
             m_engine->renderTexture = LoadRenderTexture(m_width, m_height);
             m_engine->font = nullptr;
         }
@@ -139,6 +141,7 @@ namespace gfx {
         state.transform     = m_engine->transform;
         state.fillColor     = m_engine->fillColor;
         state.strokeColor   = m_engine->strokeColor;
+        state.lineWidth     = m_engine->lineWidth;
         state.fontName      = m_engine->fontName;
     }
 
@@ -149,6 +152,7 @@ namespace gfx {
         m_engine->transform     = state.transform;
         m_engine->fillColor     = state.fillColor;
         m_engine->strokeColor   = state.strokeColor;
+        m_engine->lineWidth     = state.lineWidth;
         m_engine->fontName      = state.fontName;
         m_engine->font          = nullptr;
         m_engine->states.pop_back();
@@ -241,6 +245,16 @@ namespace gfx {
 
     void CanvasRC2D::rotate(float radians) {
         transform(cosf(radians), sinf(radians), -sinf(radians), cosf(radians), 0.0, 0.0);
+    }
+
+    void CanvasRC2D::setLineWidth(float w) {
+        m_engine->lineWidth = w;
+    }
+
+    void CanvasRC2D::drawLine(float x0, float y0, float x1, float y1) {
+        Vector2 begin {x0, y0};
+        Vector2 end {x0, y0};
+        DrawLineEx(begin, end, m_engine->lineWidth, m_engine->strokeColor);
     }
 
     void CanvasRC2D::drawQuad(res::GPUTexture* hwTex, float x, float y, float w, float h) {
