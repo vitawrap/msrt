@@ -236,6 +236,15 @@ namespace browser {
         m_canvas->drawText(text, x, y, static_cast<int>(sz * ftBias), m_ratio);
     }
 
+    void Screen::drawLine(float x0, float y0, float x1, float y1) {
+        // anchor is not taken into account for lines
+        m_canvas->drawLine(x0, y0, x1, y1);
+    }
+
+    void Screen::setLineWidth(float w) {
+        m_canvas->setLineWidth(w);
+    }
+
     uint32_t Screen::stringToColor(char const* str) {
         int r, g, b;
         if (sscanf(str, "rgb(%d ,%d ,%d)", &r, &g, &b) == 3) {

@@ -68,6 +68,12 @@ namespace browser {
         /** Draw centered text on screen */
         void drawText(char const* text, float x, float y, float sz);
 
+        /** Draw a line */
+        void drawLine(float x0, float y0, float x1, float y1);
+
+        /** Set line width for drawLine */
+        void setLineWidth(float w);
+
         /** Resize canvas and virtual viewport */
         void resize();
 

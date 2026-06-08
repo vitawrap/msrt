@@ -81,18 +81,22 @@ namespace browser {
         MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
     }
 
-    static JSValue ScreenProto_fillRect(JSContext* ctx, JSValueConst self, int argc, JSValueConst *argv) {
+    static JSValue ScreenProto_setDouble4C(JSContext* ctx, JSValueConst self, int argc, JSValueConst *argv, int magic) {
         auto* screen = opaqueToObject<Screen>(self);
         if (argc >= 4) {
-            double x; JS_ToFloat64(ctx, &x, argv[0]);
-            double y; JS_ToFloat64(ctx, &y, argv[1]);
-            double w; JS_ToFloat64(ctx, &w, argv[2]);
-            double h; JS_ToFloat64(ctx, &h, argv[3]);
+            double d0; JS_ToFloat64(ctx, &d0, argv[0]);
+            double d1; JS_ToFloat64(ctx, &d1, argv[1]);
+            double d2; JS_ToFloat64(ctx, &d2, argv[2]);
+            double d3; JS_ToFloat64(ctx, &d3, argv[3]);
             uint32_t color = screen->getColor();
             if (argc >= 5 && !JSValueToScreenColor(ctx, screen, argv[4], color))
                 return JS_ThrowTypeError(ctx, "%s: Cannot parse color.", "fillRect");
             screen->setColor(color);
-            screen->fillRect(x, y, w, h);
+            switch (magic) {
+                case 0: screen->fillRect(d0, d1, d2, d3); break;
+                case 1: screen->drawLine(d0, d1, d2, d3); break;
+                /** TODO: drawRect, drawRound, fillRound */
+            }
         }
         MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
     }
@@ -143,6 +147,7 @@ namespace browser {
         switch (magic) {
             case 0: screen->setDrawRotation(scalar);
             case 1: screen->setAlpha(scalar * 255.0);
+            case 2: screen->setLineWidth(scalar);
         }
         MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
     }
@@ -157,12 +162,14 @@ namespace browser {
         JS_CFUNC_MAGIC_DEF("resize", 0, ScreenProto_simple, 4),
         JS_CFUNC_MAGIC_DEF("setColor", 1, ScreenProto_colorArg, 0),
         JS_CFUNC_MAGIC_DEF("clear", 1, ScreenProto_colorArg, 1),
-        JS_CFUNC_DEF("fillRect", 5, ScreenProto_fillRect),
+        JS_CFUNC_MAGIC_DEF("fillRect", 5, ScreenProto_setDouble4C, 0),
+        JS_CFUNC_MAGIC_DEF("drawLine", 5, ScreenProto_setDouble4C, 1),
         JS_CFUNC_DEF("drawText", 5, ScreenProto_drawText),
         JS_CFUNC_DEF("drawSprite", 5, ScreenProto_drawSprite),
         JS_CFUNC_DEF("setDrawAnchor", 2, ScreenProto_setDrawAnchor),
         JS_CFUNC_MAGIC_DEF("setDrawRotation", 1, ScreenProto_setDouble1, 0),
         JS_CFUNC_MAGIC_DEF("setAlpha", 1, ScreenProto_setDouble1, 1),
+        JS_CFUNC_MAGIC_DEF("setLineWidth", 1, ScreenProto_setDouble1, 2),
     };
 
     static JSValue constructScreen(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv) {
