@@ -252,8 +252,8 @@ namespace gfx {
     }
 
     void CanvasRC2D::drawLine(float x0, float y0, float x1, float y1) {
-        Vector2 begin {x0, y0};
-        Vector2 end {x0, y0};
+        Vector2 begin {x0, -y0};
+        Vector2 end {x1, -y1};
         DrawLineEx(begin, end, m_engine->lineWidth, m_engine->strokeColor);
     }
 
