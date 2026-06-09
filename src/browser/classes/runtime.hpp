@@ -41,8 +41,16 @@ namespace browser {
         void mapSpriteNames();
 
         platform::InputManager* m_input;
-        bool m_isTouching;
         int m_inputPointerHandler;
+
+        struct {
+            short x, y;
+            bool isTouching  : 1;
+            bool isPressed   : 1;
+            bool isReleased  : 1;
+            bool isPressedFrame : 1;
+            bool isReleasedFrame : 1;
+        } m_touch;
     
     public:
         Runtime();
@@ -85,7 +93,11 @@ namespace browser {
 
         /* INPUT */
 
-        bool isTouching() const { return m_isTouching; }
+        bool isTouching() const { return m_touch.isTouching; }
+        bool isTouchPressed() const { return m_touch.isPressedFrame; }
+        bool isTouchReleased() const { return m_touch.isReleasedFrame; }
+        short getTouchX() const { return m_touch.x; }
+        short getTouchY() const { return m_touch.y; }
 
     public:
         Event<> startVM;

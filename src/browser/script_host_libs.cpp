@@ -239,9 +239,9 @@ namespace browser {
             JSTempVal ret = JS_Call(ctx, stepFn, rtValue, 0, nullptr);
         });
         rt->updatedControls.connect([ctx, rtValue]() {
-            Runtime* rt = opaqueToObject<Runtime>(rtValue);
-            JSTempVal touch = JS_GetPropertyStr(ctx, rtValue, "touch");
-            JS_SetPropertyStr(ctx, touch, "touching", JS_NewBool(ctx, rt->isTouching()));
+            //Runtime* rt = opaqueToObject<Runtime>(rtValue);
+            //JSTempVal touch = JS_GetPropertyStr(ctx, rtValue, "touch");
+            //JS_SetPropertyStr(ctx, touch, "touching", JS_NewBool(ctx, rt->isTouching()));
         });
         rt->spriteMapped.connect([ctx, rtValue](std::string_view path, res::Image const* img) {
             JSTempVal sprFn = JS_GetPropertyStr(ctx, rtValue, "__addSprite");
@@ -284,6 +284,19 @@ namespace browser {
         MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
     }
 
+    static JSValue RuntimeProto_getter(JSContext *ctx, JSValueConst self, int magic) {
+        Runtime* runtime = opaqueToObject<Runtime>(self);
+        JSValue retVal = JS_UNDEFINED;
+        switch (magic) {
+            case 0: retVal = JS_NewBool(ctx, runtime->isTouching()); break;
+            case 1: retVal = JS_NewBool(ctx, runtime->isTouchPressed()); break;
+            case 2: retVal = JS_NewBool(ctx, runtime->isTouchReleased()); break;
+            case 3: retVal = JS_NewInt32(ctx, runtime->getTouchX()); break;
+            case 4: retVal = JS_NewInt32(ctx, runtime->getTouchY()); break;
+        }
+        MAYBE_RETHROW_EXCEPTION_V(ctx, retVal);
+    }
+
     // Runtime.__spriteSetFPS(path: string, fps: number) OR Runtime.__spriteSetFrame(path: string, frame: number)
     static JSValue RuntimeProto_spriteAnim(JSContext *ctx, JSValueConst self, int argc, JSValueConst *argv, int magic) {
         Runtime* runtime = opaqueToObject<Runtime>(self);
@@ -321,6 +334,11 @@ namespace browser {
         JS_CFUNC_MAGIC_DEF("updateControls", 0, RuntimeProto_simple, 6),
 
         // extra functions for classes not exposed to JS
+        JS_CGETSET_MAGIC_DEF("__touchTouching", RuntimeProto_getter, nullptr, 0),
+        JS_CGETSET_MAGIC_DEF("__touchPressed", RuntimeProto_getter, nullptr, 1),
+        JS_CGETSET_MAGIC_DEF("__touchReleased", RuntimeProto_getter, nullptr, 2),
+        JS_CGETSET_MAGIC_DEF("__touchX", RuntimeProto_getter, nullptr, 3),
+        JS_CGETSET_MAGIC_DEF("__touchY", RuntimeProto_getter, nullptr, 4),
         JS_CFUNC_MAGIC_DEF("__spriteSetFPS", 2, RuntimeProto_spriteAnim, 0),
         JS_CFUNC_MAGIC_DEF("__spriteSetFrame", 2, RuntimeProto_spriteAnim, 1),
         JS_CFUNC_MAGIC_DEF("__spriteGetFrame", 1, RuntimeProto_spriteAnim, 2),

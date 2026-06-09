@@ -11,9 +11,13 @@ namespace browser {
         m_screen(nullptr),
         m_started(false),
         m_input(nullptr),
-        m_isTouching(false),
         m_inputPointerHandler(0)
-    {}
+    {
+        m_touch.isPressed = false;
+        m_touch.isReleased = false;
+        m_touch.isTouching = false;
+        m_touch.x = m_touch.y = 0;
+    }
 
     static Runtime::AspectRatio strToAspectRatio(std::string_view aspect) {
         if (aspect == "free") return Runtime::AR_Unknown;
@@ -38,7 +42,14 @@ namespace browser {
         m_input = Application::get()->getInputManager();
         DEBUG_ASSERT(m_input);
         m_inputPointerHandler = m_input->pointer.connect([this](auto pi) {
-            m_isTouching = Application::get()->getInputManager()->isPointerPressed();
+            m_touch.isTouching = Application::get()->getInputManager()->isPointerPressed();
+            if (m_touch.isTouching) {
+                m_touch.x = pi.x;
+                m_touch.y = pi.y;
+                m_touch.isPressed = true;
+            } else {
+                m_touch.isReleased = true;
+            }
         }).id;
 
         m_started = true;
@@ -101,6 +112,11 @@ namespace browser {
     void Runtime::updateControls() {
         // update from inputmanager events
         updatedControls.invoke(); // call into script
+        
+        m_touch.isPressedFrame = m_touch.isPressed;
+        m_touch.isReleasedFrame = m_touch.isReleased;
+        m_touch.isPressed = false;
+        m_touch.isReleased = false;
     }
 
     void Runtime::exit() {

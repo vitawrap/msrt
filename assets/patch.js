@@ -163,6 +163,19 @@ this.Runtime.prototype.__addSprite = function(path, fps, fcount, width, height) 
   };
 }
 
+// touch interface short circuits to runtime native getters
+this.Touch = class {
+  constructor(runtime) {
+    this.runtime = runtime;
+  }
+
+  get touching() { return this.runtime.__touchTouching; }
+  get release() { return this.runtime.__touchReleased; }
+  get press() { return this.runtime.__touchPressed; }
+  get x() { return this.runtime.__touchX; }
+  get y() { return this.runtime.__touchY; }
+}
+
 // add script methods to prototype
 this.Runtime.prototype.__startReady = function() {
   var err, file, global, init, j, len1, lib, meta, namespace, ref, ref1, src;
@@ -185,7 +198,7 @@ this.Runtime.prototype.__startReady = function() {
     assets: this.assets,
     //asset_manager: this.asset_manager.getInterface(),
     maps: this.maps,
-    touch: this.touch,
+    touch: new Touch(this),
     mouse: this.mouse,
     fonts: window.fonts,
     //Sound: Sound.createSoundClass(this.audio),
