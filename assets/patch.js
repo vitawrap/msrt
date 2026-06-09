@@ -176,6 +176,29 @@ this.Touch = class {
   get y() { return this.runtime.__touchY; }
 }
 
+// keyboard interface short circuits to runtime native functions
+this.Keyboard = function(runtime) {
+  let pressHandler = {
+    get(target, prop, receiver) {
+      return runtime.__keyPress(target);
+    }
+  };
+  let pressProxy = new Proxy({}, pressHandler);
+
+  let ki = class KeyboardInternal {
+    get press() { return pressProxy; }
+  };
+  
+  let proxy = {
+    get(target, prop, receiver) {
+      if (prop === 'press')
+        return Reflect.get(...arguments);
+      return runtime.__keyDown(target);
+    }
+  };
+  return new Proxy(new ki, proxy);
+}
+
 // add script methods to prototype
 this.Runtime.prototype.__startReady = function() {
   var err, file, global, init, j, len1, lib, meta, namespace, ref, ref1, src;
