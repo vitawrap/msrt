@@ -11,8 +11,11 @@ namespace platform {
         struct KeyInfo {
             int keyCode;
             bool pressed;
+            char const* name;
+            char const* print;
 
-            KeyInfo(int kc, bool p) : keyCode(kc), pressed(p) {}
+            KeyInfo(int kc, char const* name, char const* print, bool p) :
+                keyCode(kc), name(name), print(print), pressed(p) {}
         };
 
         enum PointerDevice {
