@@ -293,6 +293,12 @@ namespace browser {
             case 2: retVal = JS_NewBool(ctx, runtime->isTouchReleased()); break;
             case 3: retVal = JS_NewInt32(ctx, runtime->getTouchX()); break;
             case 4: retVal = JS_NewInt32(ctx, runtime->getTouchY()); break;
+            case 5: {
+                JSValue keys[runtime->keyCount()]; int count = 0;
+                for (auto k = runtime->keysBegin(); k != runtime->keysEnd(); ++k)
+                    keys[count++] = JS_NewString(ctx, k->first);
+                retVal = JS_NewArrayFrom(ctx, count, keys);
+            } 
         }
         MAYBE_RETHROW_EXCEPTION_V(ctx, retVal);
     }
@@ -316,6 +322,22 @@ namespace browser {
             case 1: image->setAnimTimeOffset(Time::frameNow() - (num / image->getFPS())); break;
         }
         MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
+    }
+
+    static JSValue RuntimeProto_keyQuery(JSContext *ctx, JSValueConst self, int argc, JSValueConst *argv, int magic) {
+        Runtime* runtime = opaqueToObject<Runtime>(self);
+        JSValue retValue = JS_FALSE;
+        if (argc >= 1) {
+            char const* str = JS_ToCString(ctx, argv[0]);
+            switch (magic) {
+                case 0: retValue = JS_NewBool(ctx, runtime->isKeyDown(str));
+                case 1: retValue = JS_NewBool(ctx, runtime->isKeyUp(str));
+                case 2: retValue = JS_NewBool(ctx, runtime->isKeyPressed(str));
+                case 3: retValue = JS_NewBool(ctx, runtime->isKeyReleased(str));
+            }
+            JS_FreeCString(ctx, str);
+        }
+        MAYBE_RETHROW_EXCEPTION_V(ctx, retValue);
     }
 
     static void gcMarkRuntime(JSRuntime* rt, JSValueConst self, JS_MarkFunc markFunc) {
@@ -342,6 +364,11 @@ namespace browser {
         JS_CFUNC_MAGIC_DEF("__spriteSetFPS", 2, RuntimeProto_spriteAnim, 0),
         JS_CFUNC_MAGIC_DEF("__spriteSetFrame", 2, RuntimeProto_spriteAnim, 1),
         JS_CFUNC_MAGIC_DEF("__spriteGetFrame", 1, RuntimeProto_spriteAnim, 2),
+        JS_CFUNC_MAGIC_DEF("__keyboardKeyDown", 1, RuntimeProto_keyQuery, 0),
+        JS_CFUNC_MAGIC_DEF("__keyboardKeyUp", 1, RuntimeProto_keyQuery, 1),
+        JS_CFUNC_MAGIC_DEF("__keyboardKeyPress", 1, RuntimeProto_keyQuery, 2),
+        JS_CFUNC_MAGIC_DEF("__keyboardKeyRelease", 1, RuntimeProto_keyQuery, 3),
+        JS_CGETSET_MAGIC_DEF("__keyboardKeys", RuntimeProto_getter, nullptr, 5),
     };
 
     static void installRuntime(JSContext* ctx) {

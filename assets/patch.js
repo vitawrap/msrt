@@ -178,25 +178,40 @@ this.Touch = class {
 
 // keyboard interface short circuits to runtime native functions
 this.Keyboard = function(runtime) {
+  let dummy = {};
+
   let pressHandler = {
     get(target, prop, receiver) {
-      return runtime.__keyPress(target);
+      return runtime.__keyboardKeyPress(prop.toLowerCase());
     }
   };
-  let pressProxy = new Proxy({}, pressHandler);
+  let pressProxy = new Proxy(dummy, pressHandler);
+
+  let releaseHandler = {
+    get(target, prop, receiver) {
+      return runtime.__keyboardKeyRelease(prop.toLowerCase());
+    }
+  };
+  let releaseProxy = new Proxy(dummy, releaseHandler);
 
   let ki = class KeyboardInternal {
-    get press() { return pressProxy; }
-  };
-  
-  let proxy = {
-    get(target, prop, receiver) {
-      if (prop === 'press')
-        return Reflect.get(...arguments);
-      return runtime.__keyDown(target);
+    constructor() {
+      this.press = pressProxy;
+      this.release = releaseProxy;
     }
   };
-  return new Proxy(new ki, proxy);
+  
+  let handler = {
+    get(target, prop, receiver) {
+      if (prop === 'press' || prop === 'release')
+        return Reflect.get(...arguments);
+      return runtime.__keyboardKeyDown(prop.toLowerCase());
+    },
+    ownKeys(target) {
+      return [...Object.keys(target), ...runtime.__keyboardKeys];
+    }
+  };
+  return new Proxy(new ki, handler);
 }
 
 // add script methods to prototype
@@ -213,7 +228,7 @@ this.Runtime.prototype.__startReady = function() {
   global = {
     screen: this.screen.getInterface(),
     //audio: this.audio.getInterface(),
-    //keyboard: this.keyboard.keyboard,
+    keyboard: new Keyboard(this),
     //gamepad: this.gamepad.status,
     sprites: this.sprites,
     sounds: this.sounds,

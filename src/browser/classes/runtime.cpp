@@ -11,7 +11,8 @@ namespace browser {
         m_screen(nullptr),
         m_started(false),
         m_input(nullptr),
-        m_inputPointerHandler(0)
+        m_inputPointerHandler(0),
+        m_inputKeyHandler(0)
     {
         m_touch.isPressed = false;
         m_touch.isReleased = false;
@@ -51,6 +52,17 @@ namespace browser {
                 m_touch.isReleased = true;
             }
         }).id;
+        m_inputKeyHandler = m_input->key.connect([this](auto ki) {
+            if (ki.pressed) {
+                LOG_MSGF("Key pressed: %s\n", ki.name);
+                if (ki.name) m_keys.current.emplace(ki.name, KS_PRESS);
+                if (ki.print) m_keys.current.emplace(ki.print, KS_PRESS);
+            }
+            else {
+                if (ki.name) m_keys.current.emplace(ki.name, KS_RELEASE);
+                if (ki.print) m_keys.current.emplace(ki.print, KS_RELEASE);
+            }
+        }).id;
 
         m_started = true;
         startVM.invoke(); // call into script
@@ -59,6 +71,7 @@ namespace browser {
     Runtime::~Runtime() {
         if (m_input) {
             m_input->pointer.disconnect(m_inputPointerHandler);
+            m_input->key.disconnect(m_inputKeyHandler);
         }
     }
 
@@ -117,6 +130,15 @@ namespace browser {
         m_touch.isReleasedFrame = m_touch.isReleased;
         m_touch.isPressed = false;
         m_touch.isReleased = false;
+
+        m_keys.frame = m_keys.current;
+        for (auto& [k, ks] : m_keys.frame) {
+            if (ks == KS_RELEASE) {
+                m_keys.current.erase(k);
+            } else if (ks == KS_PRESS) {
+                m_keys.current[k] = KS_DOWN;
+            }
+        }
     }
 
     void Runtime::exit() {
