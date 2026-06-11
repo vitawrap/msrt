@@ -208,7 +208,10 @@ this.Keyboard = function(runtime) {
       return runtime.__keyboardKeyDown(prop.toLowerCase());
     },
     ownKeys(target) {
-      return [...Object.keys(target), ...runtime.__keyboardKeys];
+      for (const prop of Object.getOwnPropertyNames(target)) delete target[prop];
+      for (const prop of runtime.__keyboardKeys) target[prop] = 1;
+      target.press = pressProxy; target.release = releaseProxy;
+      return Object.keys(target);
     }
   };
   return new Proxy(new ki, handler);
@@ -228,7 +231,7 @@ this.Runtime.prototype.__startReady = function() {
   global = {
     screen: this.screen.getInterface(),
     //audio: this.audio.getInterface(),
-    keyboard: new Keyboard(this),
+    keyboard: Keyboard(this),
     //gamepad: this.gamepad.status,
     sprites: this.sprites,
     sounds: this.sounds,
