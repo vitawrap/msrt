@@ -296,7 +296,7 @@ namespace browser {
             case 5: {
                 JSValue keys[runtime->keyCount()]; int count = 0;
                 for (auto k = runtime->keysBegin(); k != runtime->keysEnd(); ++k)
-                    keys[count++] = JS_NewString(ctx, k->first);
+                    keys[count++] = JS_NewString(ctx, k->first.data());
                 retVal = JS_NewArrayFrom(ctx, count, keys);
             } 
         }

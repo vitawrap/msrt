@@ -23,6 +23,6 @@ namespace ms {
      * @brief Static string hash set
      * Hash set with heterogeneous lookup for static strings (no storage).
      */
-    using unordered_set_static = robin_hood::unordered_set<char const*, StaticStringHash, std::equal_to<>>;
+    using unordered_set_static = robin_hood::unordered_set<std::string_view, StaticStringHash, std::equal_to<>>;
 
 }
