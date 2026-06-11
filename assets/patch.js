@@ -164,7 +164,7 @@ this.Runtime.prototype.__addSprite = function(path, fps, fcount, width, height) 
 }
 
 // touch interface short circuits to runtime native getters
-this.Touch = class {
+this.TouchDevice = class {
   constructor(runtime) {
     this.runtime = runtime;
   }
@@ -174,6 +174,15 @@ this.Touch = class {
   get press() { return this.runtime.__touchPressed; }
   get x() { return this.runtime.__touchX; }
   get y() { return this.runtime.__touchY; }
+}
+
+// mouse is also partially automated by touch in the native engine
+this.Mouse = class extends TouchDevice {
+  constructor(runtime) {
+    super(runtime);
+  }
+
+  get pressed() { return this.touching; }
 }
 
 // keyboard interface short circuits to runtime native functions
@@ -239,8 +248,8 @@ this.Runtime.prototype.__startReady = function() {
     assets: this.assets,
     //asset_manager: this.asset_manager.getInterface(),
     maps: this.maps,
-    touch: new Touch(this),
-    mouse: this.mouse,
+    touch: new TouchDevice(this),
+    mouse: new Mouse(this),
     fonts: window.fonts,
     //Sound: Sound.createSoundClass(this.audio),
     //Image: msImage,
