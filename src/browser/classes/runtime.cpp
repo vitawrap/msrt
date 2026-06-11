@@ -54,13 +54,12 @@ namespace browser {
         }).id;
         m_inputKeyHandler = m_input->key.connect([this](auto ki) {
             if (ki.pressed) {
-                LOG_MSGF("Key pressed: %s\n", ki.name);
                 if (ki.name) m_keys.current.emplace(ki.name, KS_PRESS);
                 if (ki.print) m_keys.current.emplace(ki.print, KS_PRESS);
             }
             else {
-                if (ki.name) m_keys.current.emplace(ki.name, KS_RELEASE);
-                if (ki.print) m_keys.current.emplace(ki.print, KS_RELEASE);
+                if (ki.name) m_keys.current[ki.name] = KS_RELEASE;
+                if (ki.print) m_keys.current[ki.print] = KS_RELEASE;
             }
         }).id;
 
