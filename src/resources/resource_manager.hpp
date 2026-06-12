@@ -99,7 +99,7 @@ namespace res {
         /**
          * Atomic lock for resource map
          */
-        mutable std::mutex m_resourceLock;
+        mutable std::recursive_mutex m_resourceLock;
 
         /**
          * Resource handler (ext -> loader function) map
@@ -131,8 +131,8 @@ namespace res {
             auto ref = std::shared_ptr<Resource>(res);
             m_resourceLock.lock();
             m_resources.emplace(filename, ref);
-            m_resourceLock.unlock();
             ref->initialize(this);
+            m_resourceLock.unlock();
             return ResourceHandle<TResource>{ref};
         }
 
@@ -197,10 +197,11 @@ namespace res {
             // Try finding cached resource with this path (as atomic operation)
             m_resourceLock.lock();
             auto const res = m_resources.find(filename);
-            m_resourceLock.unlock();
             if (res != m_resources.end()) {
+                m_resourceLock.unlock();
                 return ResourceHandle<TResource>{(*res).second};
             }
+            m_resourceLock.unlock();
             return ResourceHandle<TResource>{nullptr};
         }
 

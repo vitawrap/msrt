@@ -11,9 +11,14 @@ namespace browser {
         m_screen(nullptr),
         m_started(false),
         m_input(nullptr),
-        m_isTouching(false),
-        m_inputPointerHandler(0)
-    {}
+        m_inputPointerHandler(0),
+        m_inputKeyHandler(0)
+    {
+        m_touch.isPressed = false;
+        m_touch.isReleased = false;
+        m_touch.isTouching = false;
+        m_touch.x = m_touch.y = 0;
+    }
 
     static Runtime::AspectRatio strToAspectRatio(std::string_view aspect) {
         if (aspect == "free") return Runtime::AR_Unknown;
@@ -38,7 +43,24 @@ namespace browser {
         m_input = Application::get()->getInputManager();
         DEBUG_ASSERT(m_input);
         m_inputPointerHandler = m_input->pointer.connect([this](auto pi) {
-            m_isTouching = Application::get()->getInputManager()->isPointerPressed();
+            m_touch.isTouching = Application::get()->getInputManager()->isPointerPressed();
+            if (m_touch.isTouching) {
+                m_touch.x = pi.x;
+                m_touch.y = pi.y;
+                m_touch.isPressed = true;
+            } else {
+                m_touch.isReleased = true;
+            }
+        }).id;
+        m_inputKeyHandler = m_input->key.connect([this](auto ki) {
+            if (ki.pressed) {
+                if (ki.name) m_keys.current.emplace(ki.name, KS_PRESS);
+                if (ki.print) m_keys.current.emplace(ki.print, KS_PRESS);
+            }
+            else {
+                if (ki.name) m_keys.current[ki.name] = KS_RELEASE;
+                if (ki.print) m_keys.current[ki.print] = KS_RELEASE;
+            }
         }).id;
 
         m_started = true;
@@ -48,6 +70,7 @@ namespace browser {
     Runtime::~Runtime() {
         if (m_input) {
             m_input->pointer.disconnect(m_inputPointerHandler);
+            m_input->key.disconnect(m_inputKeyHandler);
         }
     }
 
@@ -63,14 +86,25 @@ namespace browser {
         return "";
     }
 
+    res::ResourceHandle<res::Image> Runtime::getSpriteImage(std::string_view path) const {
+        auto itr = m_spriteImageMap.find(path);
+        if (itr != m_spriteImageMap.cend())
+            return itr->second;
+        return res::ResourceHandle<res::Image>{nullptr};
+    }
+
     void Runtime::mapSpriteNames() {
         // remap sprite resource names to sprite paths for use in screen commands
         auto* project = Application::get()->getProject();
         auto const& sprMap = project->getSpriteMap();
-        for (const auto& [pathStr, _] : sprMap) {
+        for (const auto& [pathStr, res] : sprMap) {
             char stemBuffer[256] = {0}; // frankly easier than std for such tasks
             sscanf(pathStr.c_str(), "sprites/%255[^.]s", stemBuffer);
             m_spriteNameMap.emplace(stemBuffer, pathStr);
+            m_spriteImageMap.emplace(pathStr, res);
+
+            // give script realm initial sprite info
+            spriteMapped.invoke(pathStr, res.operator->());
         }
     }
 
@@ -90,6 +124,20 @@ namespace browser {
     void Runtime::updateControls() {
         // update from inputmanager events
         updatedControls.invoke(); // call into script
+        
+        m_touch.isPressedFrame = m_touch.isPressed;
+        m_touch.isReleasedFrame = m_touch.isReleased;
+        m_touch.isPressed = false;
+        m_touch.isReleased = false;
+
+        m_keys.frame = m_keys.current;
+        for (auto& [k, ks] : m_keys.frame) {
+            if (ks == KS_RELEASE) {
+                m_keys.current.erase(k);
+            } else if (ks == KS_PRESS) {
+                m_keys.current[k] = KS_DOWN;
+            }
+        }
     }
 
     void Runtime::exit() {

@@ -6,7 +6,7 @@
 namespace ms {
 namespace browser {
 
-    constexpr float deg2rad = 57.2957795131f;
+    constexpr float deg2rad = 0.017453292519943298f;
 
     Screen::Screen() :
         m_runtime(nullptr),
@@ -166,42 +166,83 @@ namespace browser {
     void Screen::setDrawAnchor(float x, float y) {
         m_anchorX = x;
         m_anchorY = y;
-        // replicate microstudio's behavior
+        // remap microstudio anchors (-1 -> 0 -> 1) to 0 -> 0.5 -> 1
         m_canvas->setDrawAnchors(.5 + (x * .5), .5 + (y * .5));
     }
 
+    void Screen::setDrawRotation(float deg) {
+        m_objectDegrees = deg;
+    }
+
     void Screen::drawSprite(std::string_view name, float x, float y, float w, float h) {
-        int frameNum = 0;
+        int frameNum = -1;
         size_t pFrame = name.rfind('.');
         if (pFrame != std::string::npos) {
-            /** TODO: Frames from zip + json */
             auto frameStr = name.substr(pFrame + 1);
             frameNum = atoi(frameStr.data());
+            name = name.substr(0, pFrame); // fix up name for getSpritePath...
         }
         
         std::string_view path = getRuntime()->getSpritePath(name);
         if (path.empty()) return;
 
         res::Image::AtlasRect r;
-        if (m_atlas->findAtlasRect(path, r)) {
-            if (initDrawOp(x, -y)) {
-                m_canvas->drawQuad((m_atlas->toTexture()).operator->(), r.x, r.y, r.width, r.height,
-                0.f, 0.f, w, h);
-                closeDrawOp();
-            } else {
-                m_canvas->drawQuad((m_atlas->toTexture()).operator->(), r.x, r.y, r.width, r.height,
-                x, y, w, h);
+        auto texture = m_atlas->toTexture();
+        if (!m_atlas->findAtlasRect(path, r)) {
+            // if somehow the atlas doesn't have that sprite we'll have to do a lame slow swap to a separate image
+            auto image = res::ResourceManager::get()->getCached<res::Image>(path);
+            if (image) {
+                LOG_MSGF("Sprite at \"%s\" not in main atlas! Need to draw from isolated texture!\n", path.data());
+                texture = image->toTexture();
+                r.x = r.y = 0;
+                r.width = image->getWidth();
+                r.height = image->getHeight();
+                r.fps = image->getFPS();
+                r.nframes = image->getFrameCount();
+            } else {    
+                LOG_MSGF("Sprite at \"%s\" not found in atlas or loaded resources!\n", path.data());
             }
+        }
+
+        // pick a frame if we have to draw an animated sprite
+        if (r.nframes > 1) {
+            r.height /= r.nframes;
+            if (frameNum >= 0)
+                r.y += r.height * (frameNum % r.nframes);
+            else {
+                // slightly more expensive process when we have to check if the user defined a current frame
+                auto img = getRuntime()->getSpriteImage(path);
+                r.y += r.height * img->getAnimCurrentFrame();
+            }
+        }
+
+        // finally, draw
+        if (initDrawOp(x, -y)) {
+            m_canvas->drawQuad(texture.operator->(), r.x, r.y, r.width, r.height,
+            0.f, 0.f, w, h);
+            closeDrawOp();
+        } else {
+            m_canvas->drawQuad(texture.operator->(), r.x, r.y, r.width, r.height,
+            x, -y, w, h);
         }
     }
 
     void Screen::fillRect(float x, float y, float w, float h) {
-        m_canvas->fillRect(x - (w * .5f), -y - (h * .5f), w, h);
+        m_canvas->fillRect(x, y, w, h);
     }
 
     void Screen::drawText(char const* text, float x, float y, float sz) {
         const float ftBias = 1.2f; // artificially match ms' font render size (honestly just eyeball work)
         m_canvas->drawText(text, x, y, static_cast<int>(sz * ftBias), m_ratio);
+    }
+
+    void Screen::drawLine(float x0, float y0, float x1, float y1) {
+        // anchor is not taken into account for lines
+        m_canvas->drawLine(x0, y0, x1, y1);
+    }
+
+    void Screen::setLineWidth(float w) {
+        m_canvas->setLineWidth(w);
     }
 
     uint32_t Screen::stringToColor(char const* str) {

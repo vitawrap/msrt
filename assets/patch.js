@@ -143,6 +143,89 @@ this.Screen.prototype.updateInterface = function() {
   return this.interface.height = this.height;
 }
 
+// extra function to expose sprites but short sprite management back to the C++ side
+this.Runtime.prototype.__addSprite = function(path, fps, fcount, width, height) {
+  if (this.sprites === undefined) { this.sprites = {}; }
+  let fpsField = fps;
+  let fcountField = fcount;
+  let setFPS = (fps) => { this.__spriteSetFPS(path, fps); };
+  let setFrame = (frame) => { this.__spriteSetFrame(path, frame); }
+  let getFrame = () => { return this.__spriteGetFrame(path); }
+  const name = path.match(/(?<=sprites\/)([^\t\n\r .]+)/g);
+  this.sprites[name] = {
+    setFPS: setFPS,
+    setFrame: setFrame,
+    getFrame: getFrame,
+    width: width,
+    height: height,
+    name: name,
+    ready: 1
+  };
+}
+
+// touch interface short circuits to runtime native getters
+this.TouchDevice = class {
+  constructor(runtime) {
+    this.runtime = runtime;
+  }
+
+  get touching() { return this.runtime.__touchTouching; }
+  get release() { return this.runtime.__touchReleased; }
+  get press() { return this.runtime.__touchPressed; }
+  get x() { return this.runtime.__touchX; }
+  get y() { return this.runtime.__touchY; }
+}
+
+// mouse is also partially automated by touch in the native engine
+this.Mouse = class extends TouchDevice {
+  constructor(runtime) {
+    super(runtime);
+  }
+
+  get pressed() { return this.touching; }
+}
+
+// keyboard interface short circuits to runtime native functions
+this.Keyboard = function(runtime) {
+  let dummy = {};
+
+  let pressHandler = {
+    get(target, prop, receiver) {
+      return runtime.__keyboardKeyPress(prop.toLowerCase());
+    }
+  };
+  let pressProxy = new Proxy(dummy, pressHandler);
+
+  let releaseHandler = {
+    get(target, prop, receiver) {
+      return runtime.__keyboardKeyRelease(prop.toLowerCase());
+    }
+  };
+  let releaseProxy = new Proxy(dummy, releaseHandler);
+
+  let ki = class KeyboardInternal {
+    constructor() {
+      this.press = pressProxy;
+      this.release = releaseProxy;
+    }
+  };
+  
+  let handler = {
+    get(target, prop, receiver) {
+      if (prop === 'press' || prop === 'release')
+        return Reflect.get(...arguments);
+      return runtime.__keyboardKeyDown(prop.toLowerCase());
+    },
+    ownKeys(target) {
+      for (const prop of Object.getOwnPropertyNames(target)) delete target[prop];
+      for (const prop of runtime.__keyboardKeys) target[prop] = 1;
+      target.press = pressProxy; target.release = releaseProxy;
+      return Object.keys(target);
+    }
+  };
+  return new Proxy(new ki, handler);
+}
+
 // add script methods to prototype
 this.Runtime.prototype.__startReady = function() {
   var err, file, global, init, j, len1, lib, meta, namespace, ref, ref1, src;
@@ -157,7 +240,7 @@ this.Runtime.prototype.__startReady = function() {
   global = {
     screen: this.screen.getInterface(),
     //audio: this.audio.getInterface(),
-    //keyboard: this.keyboard.keyboard,
+    keyboard: Keyboard(this),
     //gamepad: this.gamepad.status,
     sprites: this.sprites,
     sounds: this.sounds,
@@ -165,8 +248,8 @@ this.Runtime.prototype.__startReady = function() {
     assets: this.assets,
     //asset_manager: this.asset_manager.getInterface(),
     maps: this.maps,
-    touch: this.touch,
-    mouse: this.mouse,
+    touch: new TouchDevice(this),
+    mouse: new Mouse(this),
     fonts: window.fonts,
     //Sound: Sound.createSoundClass(this.audio),
     //Image: msImage,

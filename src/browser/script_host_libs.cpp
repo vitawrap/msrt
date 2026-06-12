@@ -42,6 +42,16 @@ namespace browser {
         MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
     }
 
+    static JSValue ScreenProto_getter(JSContext *ctx, JSValueConst self, int magic) {
+        auto* screen = opaqueToObject<Screen>(self);
+        JSValue ret = JS_UNDEFINED;
+        switch (magic) {
+            case 0: ret = JS_NewInt32(ctx, screen->getWidth()); break;
+            case 1: ret = JS_NewInt32(ctx, screen->getHeight()); break;
+        }
+        MAYBE_RETHROW_EXCEPTION_V(ctx, ret);
+    }
+
     static inline bool JSValueToScreenColor(JSContext* ctx, Screen* screen, JSValue cVal, uint32_t& color) {
         if (JS_IsString(cVal)) {
             char const* colorStr = JS_ToCString(ctx, cVal);
@@ -56,7 +66,7 @@ namespace browser {
 
     static JSValue ScreenProto_colorArg(JSContext* ctx, JSValueConst self, int argc, JSValueConst *argv, int magic) {
         auto* screen = opaqueToObject<Screen>(self);
-        uint32_t color = 0x0;
+        uint32_t color = 0xFF000000;
         if (argc) {
             JSValue const& cVal = argv[0];
             if (!JSValueToScreenColor(ctx, screen, cVal, color)) {
@@ -71,18 +81,22 @@ namespace browser {
         MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
     }
 
-    static JSValue ScreenProto_fillRect(JSContext* ctx, JSValueConst self, int argc, JSValueConst *argv) {
+    static JSValue ScreenProto_setDouble4C(JSContext* ctx, JSValueConst self, int argc, JSValueConst *argv, int magic) {
         auto* screen = opaqueToObject<Screen>(self);
         if (argc >= 4) {
-            double x; JS_ToFloat64(ctx, &x, argv[0]);
-            double y; JS_ToFloat64(ctx, &y, argv[1]);
-            double w; JS_ToFloat64(ctx, &w, argv[2]);
-            double h; JS_ToFloat64(ctx, &h, argv[3]);
+            double d0; JS_ToFloat64(ctx, &d0, argv[0]);
+            double d1; JS_ToFloat64(ctx, &d1, argv[1]);
+            double d2; JS_ToFloat64(ctx, &d2, argv[2]);
+            double d3; JS_ToFloat64(ctx, &d3, argv[3]);
             uint32_t color = screen->getColor();
             if (argc >= 5 && !JSValueToScreenColor(ctx, screen, argv[4], color))
                 return JS_ThrowTypeError(ctx, "%s: Cannot parse color.", "fillRect");
             screen->setColor(color);
-            screen->fillRect(x, y, w, h);
+            switch (magic) {
+                case 0: screen->fillRect(d0, d1, d2, d3); break;
+                case 1: screen->drawLine(d0, d1, d2, d3); break;
+                /** TODO: drawRect, drawRound, fillRound */
+            }
         }
         MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
     }
@@ -127,7 +141,20 @@ namespace browser {
         MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
     }
 
+    static JSValue ScreenProto_setDouble1(JSContext* ctx, JSValueConst self, int argc, JSValueConst *argv, int magic) {
+        auto* screen = opaqueToObject<Screen>(self);
+        double scalar; JS_ToFloat64(ctx, &scalar, argv[0]);
+        switch (magic) {
+            case 0: screen->setDrawRotation(scalar);
+            case 1: screen->setAlpha(scalar * 255.0);
+            case 2: screen->setLineWidth(scalar);
+        }
+        MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
+    }
+
     static JSCFunctionListEntry defineScreen[] = {
+        JS_CGETSET_MAGIC_DEF("width", ScreenProto_getter, nullptr, 0),
+        JS_CGETSET_MAGIC_DEF("height", ScreenProto_getter, nullptr, 1),
         JS_CFUNC_MAGIC_DEF("startControl", 0, ScreenProto_simple, 0),
         JS_CFUNC_MAGIC_DEF("initContext", 0, ScreenProto_simple, 1),
         JS_CFUNC_MAGIC_DEF("initDraw", 0, ScreenProto_simple, 2),
@@ -135,10 +162,14 @@ namespace browser {
         JS_CFUNC_MAGIC_DEF("resize", 0, ScreenProto_simple, 4),
         JS_CFUNC_MAGIC_DEF("setColor", 1, ScreenProto_colorArg, 0),
         JS_CFUNC_MAGIC_DEF("clear", 1, ScreenProto_colorArg, 1),
-        JS_CFUNC_DEF("fillRect", 5, ScreenProto_fillRect),
+        JS_CFUNC_MAGIC_DEF("fillRect", 5, ScreenProto_setDouble4C, 0),
+        JS_CFUNC_MAGIC_DEF("drawLine", 5, ScreenProto_setDouble4C, 1),
         JS_CFUNC_DEF("drawText", 5, ScreenProto_drawText),
         JS_CFUNC_DEF("drawSprite", 5, ScreenProto_drawSprite),
         JS_CFUNC_DEF("setDrawAnchor", 2, ScreenProto_setDrawAnchor),
+        JS_CFUNC_MAGIC_DEF("setDrawRotation", 1, ScreenProto_setDouble1, 0),
+        JS_CFUNC_MAGIC_DEF("setAlpha", 1, ScreenProto_setDouble1, 1),
+        JS_CFUNC_MAGIC_DEF("setLineWidth", 1, ScreenProto_setDouble1, 2),
     };
 
     static JSValue constructScreen(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv) {
@@ -204,13 +235,21 @@ namespace browser {
             JSTempVal ret = JS_Call(ctx, startFn, rtValue, 0, nullptr);
         });
         rt->timerStep.connect([ctx, rtValue]() {
-            JSTempVal startFn = JS_GetPropertyStr(ctx, rtValue, "__timer");
-            JSTempVal ret = JS_Call(ctx, startFn, rtValue, 0, nullptr);
+            JSTempVal stepFn = JS_GetPropertyStr(ctx, rtValue, "__timer");
+            JSTempVal ret = JS_Call(ctx, stepFn, rtValue, 0, nullptr);
         });
         rt->updatedControls.connect([ctx, rtValue]() {
-            Runtime* rt = opaqueToObject<Runtime>(rtValue);
-            JSTempVal touch = JS_GetPropertyStr(ctx, rtValue, "touch");
-            JS_SetPropertyStr(ctx, touch, "touching", JS_NewBool(ctx, rt->isTouching()));
+            //Runtime* rt = opaqueToObject<Runtime>(rtValue);
+            //JSTempVal touch = JS_GetPropertyStr(ctx, rtValue, "touch");
+            //JS_SetPropertyStr(ctx, touch, "touching", JS_NewBool(ctx, rt->isTouching()));
+        });
+        rt->spriteMapped.connect([ctx, rtValue](std::string_view path, res::Image const* img) {
+            JSTempVal sprFn = JS_GetPropertyStr(ctx, rtValue, "__addSprite");
+            std::array<JSTempVal, 5> argv = {
+                JS_NewStringLen(ctx, path.data(), path.length()),
+                JS_NewNumber(ctx, img->getFPS()), JS_NewNumber(ctx, img->getFrameCount()),
+                JS_NewNumber(ctx, img->getWidth()), JS_NewNumber(ctx, img->getHeight())};
+            JSTempVal ret = JS_Call(ctx, sprFn, rtValue, argv.size(), reinterpret_cast<JSValue*>(argv.data()));
         });
         JSValue screen = constructScreen(ctx, JS_UNDEFINED, 1, &rtValue);
         rt->setScreen(opaqueToObject<Screen>(screen));
@@ -245,6 +284,62 @@ namespace browser {
         MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
     }
 
+    static JSValue RuntimeProto_getter(JSContext *ctx, JSValueConst self, int magic) {
+        Runtime* runtime = opaqueToObject<Runtime>(self);
+        JSValue retVal = JS_UNDEFINED;
+        switch (magic) {
+            case 0: retVal = JS_NewBool(ctx, runtime->isTouching()); break;
+            case 1: retVal = JS_NewBool(ctx, runtime->isTouchPressed()); break;
+            case 2: retVal = JS_NewBool(ctx, runtime->isTouchReleased()); break;
+            case 3: retVal = JS_NewInt32(ctx, runtime->getTouchX()); break;
+            case 4: retVal = JS_NewInt32(ctx, runtime->getTouchY()); break;
+            case 5: {
+                JSValue keys[runtime->keyCount()]; int count = 0;
+                for (auto k = runtime->keysBegin(); k != runtime->keysEnd(); ++k)
+                    keys[count++] = JS_NewString(ctx, k->first.data());
+                retVal = JS_NewArrayFrom(ctx, count, keys);
+            } 
+        }
+        MAYBE_RETHROW_EXCEPTION_V(ctx, retVal);
+    }
+
+    // Runtime.__spriteSetFPS(path: string, fps: number) OR Runtime.__spriteSetFrame(path: string, frame: number)
+    static JSValue RuntimeProto_spriteAnim(JSContext *ctx, JSValueConst self, int argc, JSValueConst *argv, int magic) {
+        Runtime* runtime = opaqueToObject<Runtime>(self);
+        char const* path = JS_ToCString(ctx, argv[0]);
+        res::ResourceHandle<res::Image> image = runtime->getSpriteImage(path);
+        JS_FreeCString(ctx, path);
+        if (magic == 2) {
+            int frame = image->getAnimCurrentFrame();
+            return JS_NewInt32(ctx, frame);
+        }
+        double num = 0.0; JS_ToFloat64(ctx, &num, argv[1]);
+        switch (magic) {
+            case 0: {
+                auto screen = runtime->getScreen();
+                screen->getAtlas()->setAtlasImageFPS(image, num);
+            } break;
+            case 1: image->setAnimTimeOffset(Time::frameNow() - (num / image->getFPS())); break;
+        }
+        MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
+    }
+
+    static JSValue RuntimeProto_keyQuery(JSContext *ctx, JSValueConst self, int argc, JSValueConst *argv, int magic) {
+        Runtime* runtime = opaqueToObject<Runtime>(self);
+        JSValue retValue = JS_FALSE;
+        if (argc >= 1) {
+            char const* str = JS_ToCString(ctx, argv[0]);
+            switch (magic) {
+                case 0: retValue = JS_NewBool(ctx, runtime->isKeyDown(str));
+                case 1: retValue = JS_NewBool(ctx, runtime->isKeyUp(str));
+                case 2: retValue = JS_NewBool(ctx, runtime->isKeyPressed(str));
+                case 3: retValue = JS_NewBool(ctx, runtime->isKeyReleased(str));
+            }
+            JS_FreeCString(ctx, str);
+        }
+        MAYBE_RETHROW_EXCEPTION_V(ctx, retValue);
+    }
+
     static void gcMarkRuntime(JSRuntime* rt, JSValueConst self, JS_MarkFunc markFunc) {
         Runtime* runtime = opaqueToObject<Runtime>(self);
         if (Screen* screen = runtime->getScreen())
@@ -259,6 +354,21 @@ namespace browser {
         JS_CFUNC_MAGIC_DEF("checkStartReady", 0, RuntimeProto_simple, 4),
         JS_CFUNC_MAGIC_DEF("timer", 0, RuntimeProto_simple, 5),
         JS_CFUNC_MAGIC_DEF("updateControls", 0, RuntimeProto_simple, 6),
+
+        // extra functions for classes not exposed to JS
+        JS_CGETSET_MAGIC_DEF("__touchTouching", RuntimeProto_getter, nullptr, 0),
+        JS_CGETSET_MAGIC_DEF("__touchPressed", RuntimeProto_getter, nullptr, 1),
+        JS_CGETSET_MAGIC_DEF("__touchReleased", RuntimeProto_getter, nullptr, 2),
+        JS_CGETSET_MAGIC_DEF("__touchX", RuntimeProto_getter, nullptr, 3),
+        JS_CGETSET_MAGIC_DEF("__touchY", RuntimeProto_getter, nullptr, 4),
+        JS_CFUNC_MAGIC_DEF("__spriteSetFPS", 2, RuntimeProto_spriteAnim, 0),
+        JS_CFUNC_MAGIC_DEF("__spriteSetFrame", 2, RuntimeProto_spriteAnim, 1),
+        JS_CFUNC_MAGIC_DEF("__spriteGetFrame", 1, RuntimeProto_spriteAnim, 2),
+        JS_CFUNC_MAGIC_DEF("__keyboardKeyDown", 1, RuntimeProto_keyQuery, 0),
+        JS_CFUNC_MAGIC_DEF("__keyboardKeyUp", 1, RuntimeProto_keyQuery, 1),
+        JS_CFUNC_MAGIC_DEF("__keyboardKeyPress", 1, RuntimeProto_keyQuery, 2),
+        JS_CFUNC_MAGIC_DEF("__keyboardKeyRelease", 1, RuntimeProto_keyQuery, 3),
+        JS_CGETSET_MAGIC_DEF("__keyboardKeys", RuntimeProto_getter, nullptr, 5),
     };
 
     static void installRuntime(JSContext* ctx) {
@@ -304,10 +414,10 @@ namespace browser {
         player->setRuntime(opaqueToObject<Runtime>(rtValue));
         player->sourceFileAdded.connect([ctx, self](std::string name, std::string text){
             JSTempVal startFn = JS_GetPropertyStr(ctx, self, "__sourceFileAdded");
-            JSTempVal values[] = {
+            std::array<JSTempVal, 2> values = {
                 JS_NewStringLen(ctx, name.c_str(), name.length()),
                 JS_NewStringLen(ctx, text.c_str(), text.length())};
-            JSTempVal ret = JS_Call(ctx, startFn, self, 2, reinterpret_cast<JSValue*>(values));
+            JSTempVal ret = JS_Call(ctx, startFn, self, values.size(), reinterpret_cast<JSValue*>(values.data()));
             MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
         });
         player->start();

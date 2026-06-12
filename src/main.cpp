@@ -29,6 +29,11 @@ int main(int argc, char* argv[])
     
         if (argc > 1) {
             app->loadProject(argv[1]);
+
+            for (int i = 0; i < argc; ++i) {
+                if (strcmp(argv[i], "--fullscreen") == 0)
+                    app->startInFullScreen();
+            }
         }
         int code = app->run();
         return code;

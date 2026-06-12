@@ -25,9 +25,11 @@ namespace platform {
 #endif
     }
 
-    int WindowManager::createWindow(char const* title) {
+    int WindowManager::createWindow(char const* title, bool fullscreen) {
         if (!m_hasWindow) {
             InitWindow(m_windowWidth, m_windowHeight, title);
+            if (fullscreen)
+                ToggleFullscreen();
             m_hasWindow = IsWindowReady();
             if (m_hasWindow) {
                 SetWindowFocused();
@@ -62,6 +64,13 @@ namespace platform {
             selectWindow(-1);
             CloseWindow();
         }
+    }
+
+    bool WindowManager::isWindowFullScreen() const {
+        if (m_hasWindow && m_windowSelected) {
+            return IsWindowFullscreen();
+        }
+        return false;
     }
 
     int WindowManager::getWindowWidth() const {

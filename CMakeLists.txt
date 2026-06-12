@@ -16,6 +16,13 @@ add_compile_options(
     "$<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>:-O3>"
     "$<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>:-ffast-math>"
     "$<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>:-fno-stack-protector>"
+    #"$<$<CONFIG:Debug>:-fsanitize=address>"
+    #"$<$<CONFIG:Debug>:-O1>"
+    #"$<$<CONFIG:Debug>:-fno-omit-frame-pointer>"
+)
+
+add_link_options(
+    #"$<$<CONFIG:Debug>:-fsanitize=address>"
 )
 
 # find gtk for linux message boxes (or use win32 api on windows)

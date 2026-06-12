@@ -4,7 +4,9 @@
 
 #include "core/events.hpp"
 #include <ms/core/view_map.hpp>
+#include <ms/core/static_map.hpp>
 #include "platform/input.hpp"
+#include "resources/ms_image.hpp"
 
 namespace ms {
 namespace browser {
@@ -35,12 +37,33 @@ namespace browser {
         bool m_started;
 
         ms::unordered_map<std::string> m_spriteNameMap;
+        ms::unordered_map<res::ResourceHandle<res::Image>> m_spriteImageMap;
 
         void mapSpriteNames();
 
         platform::InputManager* m_input;
-        bool m_isTouching;
         int m_inputPointerHandler;
+        int m_inputKeyHandler;
+
+        struct {
+            short x, y;
+            bool isTouching  : 1;
+            bool isPressed   : 1;
+            bool isReleased  : 1;
+            bool isPressedFrame : 1;
+            bool isReleasedFrame : 1;
+        } m_touch;
+
+        enum KeyState {
+            KS_PRESS,
+            KS_DOWN,
+            KS_RELEASE,
+        };
+
+        struct {
+            ms::unordered_map_static<KeyState> current;
+            ms::unordered_map_static<KeyState> frame;
+        } m_keys;
     
     public:
         Runtime();
@@ -48,6 +71,9 @@ namespace browser {
 
         /** Get sprite path from name, for drawing */
         std::string_view getSpritePath(std::string_view path) const;
+
+        /** Get sprite image from path, for drawing */
+        res::ResourceHandle<res::Image> getSpriteImage(std::string_view path) const;
 
         /** Must only be called by script constructor */
         void setScreen(Screen* screen) { m_screen = screen; }
@@ -80,12 +106,39 @@ namespace browser {
 
         /* INPUT */
 
-        bool isTouching() const { return m_isTouching; }
+        bool isTouching() const { return m_touch.isTouching; }
+        bool isTouchPressed() const { return m_touch.isPressedFrame; }
+        bool isTouchReleased() const { return m_touch.isReleasedFrame; }
+        short getTouchX() const { return m_touch.x; }
+        short getTouchY() const { return m_touch.y; }
+
+        bool isKeyDown(char const* name) const {
+            return m_keys.frame.contains(name) && m_keys.frame.at(name) != KS_RELEASE;
+        }
+
+        bool isKeyUp(char const* name) const {
+            return name && (!m_keys.frame.contains(name) || isKeyReleased(name));
+        }
+
+        bool isKeyReleased(char const* name) const {
+            return m_keys.frame.contains(name) && m_keys.frame.at(name) == KS_RELEASE;
+        }
+
+        bool isKeyPressed(char const* name) const {
+            return m_keys.frame.contains(name) && m_keys.frame.at(name) == KS_PRESS;
+        }      
+
+        size_t keyCount() const { return m_keys.frame.size(); }
+        auto keysBegin() const { return m_keys.frame.cbegin(); }
+        auto keysBegin() { return m_keys.frame.begin(); }
+        auto keysEnd() const { return m_keys.frame.cend(); }
+        auto keysEnd() { return m_keys.frame.end(); }
 
     public:
         Event<> startVM;
         Event<> timerStep;
         Event<> updatedControls;
+        Event<std::string_view, res::Image const*> spriteMapped;
     };
 
     float Runtime::getRatioFor(AspectRatio enumval)  {

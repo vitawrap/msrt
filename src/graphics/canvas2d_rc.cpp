@@ -45,6 +45,7 @@ namespace gfx {
         Matrix transform; // camera transform
         Color fillColor;
         Color strokeColor;
+        float lineWidth;
         CanvasFont* font;
         std::string fontName;
 
@@ -57,7 +58,8 @@ namespace gfx {
         m_windowId(0),
         m_engine(nullptr),
         m_drawAnchorX(0.5),
-        m_drawAnchorY(0.5)
+        m_drawAnchorY(0.5),
+        m_drawing(false)
     {}
 
     void CanvasRC2D::init(platform::IWindowManager* wm, int wid) {
@@ -72,6 +74,7 @@ namespace gfx {
             m_engine->transform = MatrixIdentity();
             m_engine->strokeColor = BLACK;
             m_engine->fillColor = BLACK;
+            m_engine->lineWidth = 1.f;
             m_engine->renderTexture = LoadRenderTexture(m_width, m_height);
             m_engine->font = nullptr;
         }
@@ -138,6 +141,7 @@ namespace gfx {
         state.transform     = m_engine->transform;
         state.fillColor     = m_engine->fillColor;
         state.strokeColor   = m_engine->strokeColor;
+        state.lineWidth     = m_engine->lineWidth;
         state.fontName      = m_engine->fontName;
     }
 
@@ -148,6 +152,7 @@ namespace gfx {
         m_engine->transform     = state.transform;
         m_engine->fillColor     = state.fillColor;
         m_engine->strokeColor   = state.strokeColor;
+        m_engine->lineWidth     = state.lineWidth;
         m_engine->fontName      = state.fontName;
         m_engine->font          = nullptr;
         m_engine->states.pop_back();
@@ -167,11 +172,12 @@ namespace gfx {
     }
 
     void CanvasRC2D::fillRect(int x, int y, int w, int h) {
-        DrawRectangle(x, y, w, h, m_engine->fillColor);
+        //m_canvas->fillRect(x - (w * .5f), -y - (h * .5f), w, h);
+        DrawRectangle(x - (w * m_drawAnchorX), (-h * (1.f - m_drawAnchorY)) - y, w, h, m_engine->fillColor);
     }
 
     void CanvasRC2D::strokeRect(int x, int y, int w, int h) {
-        DrawRectangleLines(x, y, w, h, m_engine->strokeColor);
+        DrawRectangleLines(x - (w * m_drawAnchorX), (-h * (1.f - m_drawAnchorY)) - y, w, h, m_engine->strokeColor);
     }
 
     void CanvasRC2D::beginFrame() {
@@ -180,6 +186,7 @@ namespace gfx {
         // have to use rlgl here, because Camera2D is weirdly restrictive.
         rlLoadIdentity();
         rlMultMatrixf(MatrixToFloat(m_engine->transform));
+        m_drawing = true;
 
         ClearBackground(BLACK); // default microscript clear color is black
     }
@@ -199,6 +206,7 @@ namespace gfx {
         DrawText(fpsText, 8, 8, 20, WHITE);
         
         EndDrawing();
+        m_drawing = false;
     }
 
     platform::IWindowManager* CanvasRC2D::getWindowManager() const {
@@ -223,6 +231,8 @@ namespace gfx {
                       0.0f, 0.0f, 1.0f, 0.0f,
                       0.0f, 0.0f, 0.0f, 1.0f };
         m_engine->transform = MatrixMultiply(m_engine->transform, m3x3);
+        /** TODO: this is a workaround, m_engine->transform could be desynced from gl matrix. */
+        if (m_drawing) rlMultMatrixf(MatrixToFloat(m3x3));
     }
 
     void CanvasRC2D::translate(float x, float y) {
@@ -237,6 +247,16 @@ namespace gfx {
         transform(cosf(radians), sinf(radians), -sinf(radians), cosf(radians), 0.0, 0.0);
     }
 
+    void CanvasRC2D::setLineWidth(float w) {
+        m_engine->lineWidth = w;
+    }
+
+    void CanvasRC2D::drawLine(float x0, float y0, float x1, float y1) {
+        Vector2 begin {x0, -y0};
+        Vector2 end {x1, -y1};
+        DrawLineEx(begin, end, m_engine->lineWidth, m_engine->strokeColor);
+    }
+
     void CanvasRC2D::drawQuad(res::GPUTexture* hwTex, float x, float y, float w, float h) {
         drawQuad(hwTex, 0, 0, hwTex->getWidth(), hwTex->getHeight(), x, y, w, h);
     }
@@ -244,9 +264,11 @@ namespace gfx {
     void CanvasRC2D::drawQuad(res::GPUTexture* hwTex, float sx, float sy, float sw, float sh, float x, float y, float w, float h) {
         Rectangle src{ sx, sy, sw, sh };
         Rectangle dst{ x, y, w, h };
-        Vector2 origin{ w * m_drawAnchorX, h * m_drawAnchorY }; // microstudio uses the center as the origin
+        Vector2 origin{ w * m_drawAnchorX, h - (h * m_drawAnchorY) }; // microstudio uses the center as the origin
         Texture2D* rlTex = reinterpret_cast<Texture2D*>(hwTex->getPlatformTexture());
-        DrawTexturePro(*rlTex, src, dst, origin, 0.f, WHITE);
+        Color whiteAlpha { 255, 255, 255, m_engine->fillColor.a };
+        // strangely, microstudio doesn't use the effective drawing color for sprites, just the alpha.
+        DrawTexturePro(*rlTex, src, dst, origin, 0.f, whiteAlpha);
     }
 
     void CanvasRC2D::drawText(std::string_view text, float x, float y, int ftSize, float deblurFactor) {
@@ -254,7 +276,7 @@ namespace gfx {
             Font& ft = m_engine->font->font;
         
             Vector2 textSz = MeasureTextEx(ft, text.data(), ftSize, 0);
-            Vector2 origin{ (textSz.x * -.5f) + x, (textSz.y * -.5f) - y };
+            Vector2 origin{ (textSz.x * -m_drawAnchorX) + x, (textSz.y * (1.f - m_drawAnchorY)) - y };
             DrawTextEx(m_engine->font->font, text.data(), origin, ftSize, 0, m_engine->fillColor);
         }
     }

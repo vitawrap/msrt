@@ -10,6 +10,7 @@
 #include "resources/resource_manager.hpp"
 #include "resources/audio_stream_mp3.hpp"
 #include "resources/audio_stream_wav.hpp"
+#include "resources/ms_tilemap.hpp"
 
 namespace ms {
 
@@ -21,7 +22,7 @@ namespace ms {
 
         double now() {
             const auto end = std::chrono::steady_clock::now();
-            return (end - ProcessStart).count();
+            return std::chrono::duration_cast<std::chrono::microseconds>(end - ProcessStart).count() * 0.000001;
         }
 
         double frameNow() {
@@ -65,6 +66,7 @@ namespace ms {
     }
 
     void Application::init() {
+        m_cmdFullScreen = false;
         m_programExit = false;
         Thread::setMainThread();
         io::LogDispatcher::get().addStandardOutput();
@@ -74,6 +76,7 @@ namespace ms {
         PRECACHE_REGISTER_EXT(".png", res::Image);
         PRECACHE_REGISTER_EXT(".wav", res::AudioStreamWAV);
         PRECACHE_REGISTER_EXT(".mp3", res::AudioStreamMP3);
+        PRECACHE_REGISTER_EXT(".json", res::TileMap);
     }
 
     void Application::free() {
@@ -84,6 +87,10 @@ namespace ms {
         auto icon = m_project.getIcon();
         if (icon)
             m_wm.setWindowIcon(icon.operator->());
+    }
+
+    void Application::startInFullScreen() {
+        m_cmdFullScreen = true;
     }
 
     int Application::run() {
@@ -98,7 +105,7 @@ namespace ms {
         // make sure reentance doesn't leak another instance later with threads
         (void)EventQueue::get();
 
-        if (m_wm.createWindow(m_project.getSettings().title.c_str()) >= 0) {
+        if (m_wm.createWindow(m_project.getSettings().title.c_str(), m_cmdFullScreen) >= 0) {
             // set icon (createWindow auto-selects the new window)
             setWindowIcon();
 
@@ -110,6 +117,8 @@ namespace ms {
             // main event loop
             while (! m_wm.closeRequested()) {
                 if (m_programExit) break;
+                // advance time
+                Time::updateFrameNow();
 
                 // poll window manager events
                 m_wm.pollWindowEvents();

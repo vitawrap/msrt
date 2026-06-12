@@ -68,11 +68,20 @@ namespace browser {
         /** Draw centered text on screen */
         void drawText(char const* text, float x, float y, float sz);
 
+        /** Draw a line */
+        void drawLine(float x0, float y0, float x1, float y1);
+
+        /** Set line width for drawLine */
+        void setLineWidth(float w);
+
         /** Resize canvas and virtual viewport */
         void resize();
 
         /** Set draw anchor */
         void setDrawAnchor(float x, float y);
+
+        /** Set draw rotation */
+        void setDrawRotation(float deg);
 
         /** ? */
         void initDraw();
@@ -97,6 +106,15 @@ namespace browser {
         
         /** Get the runtime controlling this screen */
         Runtime* getRuntime() const { return m_runtime; }
+
+        /** Get reference to sprite atlas */
+        auto getAtlas() const { return m_atlas; }
+
+        /** Get virtual render width */
+        int getWidth() const { return m_width; }
+
+        /** Get virtual render height */
+        int getHeight() const { return m_height; }
     };
 
 }

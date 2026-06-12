@@ -87,7 +87,7 @@ namespace res {
     }
 
     void ResourceManager::purgeUnused() {
-        std::scoped_lock<std::mutex> lock(m_resourceLock);
+        std::scoped_lock<std::recursive_mutex> lock(m_resourceLock);
 
         // All "unused" resources should have a single grab
         // so just auto-kill them by destroying last ref.

@@ -139,7 +139,11 @@ namespace res {
                     ImageDraw(&bin, *(PlatformImage*)(rect.image->getPlatformImage()), srcRect, dstRect, WHITE);
 
                     // add to image resource atlas rectangles
-                    resImage->m_atlasRects[rect.image->getPath()] = AtlasRect{rpRect.x, rpRect.y, rpRect.w, rpRect.h};
+                    short nframes = static_cast<short>(rect.image->getFrameCount()); // basically: number of vertical splits
+                    short fps = static_cast<short>(rect.image->getFPS());
+                    resImage->m_atlasRects[rect.image->getPath()] = AtlasRect{
+                        rpRect.x, rpRect.y, (short)rpRect.w, (short)rpRect.h, fps, nframes
+                    };
                 }
                 //ExportImage(bin, "./atlas.png"); // debug atlas creation
 
@@ -177,6 +181,12 @@ namespace res {
         auto* pImage = (PlatformImage*) getPlatformImage();
         Texture2D* rlt = reinterpret_cast<Texture2D*>(hwTex->getPlatformTexture());
         UpdateTexture(*rlt, pImage->data);
+    }
+
+    void Image::setAtlasImageFPS(ResourceHandle<Image>& image, double fps) {
+        if (m_atlasRects.contains(image->getPath()))
+            m_atlasRects[image->getPath()].fps = fps;
+        image->m_fps = fps;
     }
 }
 }

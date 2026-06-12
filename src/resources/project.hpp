@@ -3,6 +3,7 @@
 #include "io/zip_archive.hpp"
 #include "resources/ms_script.hpp"
 #include "resources/ms_image.hpp"
+#include "resources/ms_tilemap.hpp"
 #include "resources/resource_manager.hpp"
 
 namespace ms {
@@ -10,11 +11,18 @@ namespace res {
 
     class Project {
     public:
+        struct SpriteSheet {
+            std::string filename;
+            int nframes;
+            int nfps;
+        };
+    
         struct Settings {
             std::string title;
             std::string orientation;
             std::string aspect;
             std::string language;
+            std::vector<SpriteSheet> spritesheets;
         };
 
         enum Language {
@@ -33,6 +41,11 @@ namespace res {
             res::ResourceHandle<res::Image>
         > m_sprites;
 
+        robin_hood::unordered_map<
+            std::string,
+            res::ResourceHandle<res::TileMap>
+        > m_tilemaps;
+
         ResourceHandle<Image> m_atlas;
         ResourceHandle<Image> m_icon;
 
@@ -44,6 +57,8 @@ namespace res {
          * query the project for any asset at runtime.
          */
         io::ZipArchive m_files;
+
+        SpriteSheet const* findSheetInfo(std::string_view path) const;
 
     public:
         Project():
@@ -64,6 +79,9 @@ namespace res {
 
         /** Get map of loaded sprites */
         decltype(m_sprites) const& getSpriteMap() const { return m_sprites; }
+
+        /** Get map of loaded tilemaps */
+        decltype(m_tilemaps) const& getTileMapMap() const { return m_tilemaps; }
 
         /** Get atlas constructed with the sprites from this project */
         ResourceHandle<Image> getSpriteAtlas() const { return m_atlas; }

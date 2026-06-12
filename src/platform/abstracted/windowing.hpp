@@ -23,12 +23,13 @@ namespace platform {
         bool selectWindow(int i) override { return m_windowSelected = (i == 0); }
 
         void setWindowIcon(res::Image const* image) override;
-        int createWindow(char const* title) override;
+        int createWindow(char const* title, bool fullscreen) override;
         void setWindowSize(int w, int h, bool invokeEvent = true) override;
         void destroyWindow() override;
 
         int getWindowWidth() const override;
         int getWindowHeight() const override;
+        bool isWindowFullScreen() const override;
 
         bool closeRequested() const override;
 
