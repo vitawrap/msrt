@@ -16,14 +16,16 @@ extern int yyerror(void* root, const char * err);
     long long iVal;
     char const* s;
     int op;
+    void* todo;
 }
+
+%token kwLOCAL kwNEW kwEND kwIF kwTHEN kwELSE kwELSIF kwFOR kwWHILE kwIN kwTO kwBY kwBREAK kwCONTINUE kwFUNC kwRETURN kwCLASS kwEXTENDS
 
 %token <fVal> FLT_CONST
 %token <iVal> INT_CONST
 %token <s> IDENT STR_CONST
 
-%left '['
-%token kwLOCAL kwEND kwIF kwTHEN kwELSE kwELSIF kwFOR kwWHILE kwIN kwTO kwBY kwBREAK kwCONTINUE kwFUNC kwRETURN kwCLASS kwEXTENDS
+%left '[' '('
 %right <op> OP_MODASN OP_ANDASN OP_ORASN OP_XORASN OP_ADDASN OP_SUBASN OP_MULASN OP_DIVASN OP_SHLASN OP_SHRASN OP_ASSIGN
 %left <op> OP_AND OP_OR
 %left <op> OP_BITOR OP_XOR
@@ -33,8 +35,22 @@ extern int yyerror(void* root, const char * err);
 %left <op> OP_SHL OP_SHR
 %left <op> OP_ADD OP_SUB
 %left <op> OP_MUL OP_DIV OP_MOD
-%right <op> OP_NOT OP_ONESC OP_INC OP_DEC UNARY
+%right <op> OP_NOT OP_ONESC UNARY
 %left OP_ACCESS
+
+%type <todo> STMTLIST STMT
+%type <todo> FLOWNODE
+%type <todo> IFBLOCK ELSIFBLOCK WHILEBLOCK FORBLOCK
+%type <todo> FIELDSET
+%type <todo> LOCALVARDECL
+%type <todo> PARAM PARAMLIST
+%type <todo> RETURN
+%type <todo> EXPRLIST
+%type <todo> CALL
+%type <todo> CLASSEXPR
+%type <todo> EXPR
+%type <todo> LIST_CONST
+%type <todo> ANY_ASN VARASN IDENTASN
 
 %start PROGRAM
 
@@ -43,7 +59,7 @@ extern int yyerror(void* root, const char * err);
 PROGRAM: STMTLIST {}
 
 STMTLIST
-    : STMT STMTLIST {}
+    : STMTLIST STMT {}
     |               {}
     ;
 
@@ -54,7 +70,7 @@ STMT
     | RETURN        {}
     | FLOWNODE      {}
     | LOCALVARDECL  {}
-    | EXPRSTMT      {}
+    | EXPR          {}
     ;
 
 FLOWNODE
@@ -83,7 +99,7 @@ FORBLOCK
     ;
 
 FIELDSET
-    : IDENTASN FIELDSET             {}
+    : FIELDSET IDENTASN             {}
     |                               {}
     ;
 
@@ -101,21 +117,10 @@ ANY_ASN
     | OP_SHRASN                     {}
     ;
 
-INCDEC
-    : OP_INC                        {}
-    | OP_DEC                        {}
-    ;
-
 VARASN
     : IDENT ANY_ASN EXPR                {}
     | EXPR OP_ACCESS IDENT ANY_ASN EXPR {}
     | EXPR '[' EXPR ']' ANY_ASN EXPR    {}
-    | INCDEC IDENT                      {}
-    | IDENT INCDEC                      {}
-    | INCDEC EXPR OP_ACCESS IDENT       {}
-    | EXPR OP_ACCESS IDENT INCDEC       {}
-    | INCDEC EXPR '[' EXPR ']'          {}
-    | EXPR '[' EXPR ']' INCDEC          {}
     ;
 
 LOCALVARDECL
@@ -132,12 +137,8 @@ PARAM
     ;
 
 PARAMLIST
-    : PARAM PARAMLIST               {}
+    : PARAMLIST PARAM               {}
     |                               {}
-    ;
-
-CALL
-    : IDENT '(' EXPRLIST ')'        {}
     ;
 
 RETURN
@@ -151,10 +152,11 @@ EXPRLIST
     |                               {}
     ;
 
-EXPRSTMT
-    : CALL                          {}
-    | EXPR OP_ACCESS CALL           {}
-    | VARASN                        {}
+CALL
+    : IDENT '(' EXPRLIST ')'                    {}
+    | EXPR OP_ACCESS IDENT '(' EXPRLIST ')'     {}
+    | EXPR '[' EXPR ']' '(' EXPRLIST ')'        {}
+    | '(' EXPR ')' '(' EXPRLIST ')'             {}
     ;
 
 CLASSEXPR
@@ -162,16 +164,21 @@ CLASSEXPR
     | kwCLASS kwEXTENDS IDENT FIELDSET kwEND {}
     ;
 
+FUNCEXPR
+    : kwFUNC '(' PARAMLIST ')' STMTLIST kwEND {}
+    ;
+
 LIST_CONST
     : '[' EXPRLIST ']'              {}
     ;
 
 EXPR
-    : EXPRSTMT                      {}
+    : CALL                          {}
+    | kwNEW CALL                    {}
+    | VARASN                        {}
     | '(' EXPR ')'                  {}
-    | kwFUNC '(' PARAMLIST ')' STMTLIST kwEND {}
+    | FUNCEXPR                      {}
     | CLASSEXPR                     {}
-    | LIST_CONST                    {}
     | EXPR OP_XOR EXPR              {}
     | EXPR OP_MOD EXPR              {}
     | EXPR OP_BITAND EXPR           {}
@@ -181,6 +188,7 @@ EXPR
     | EXPR OP_MUL EXPR              {}
     | EXPR OP_DIV EXPR              {}
     | OP_SUB EXPR %prec UNARY       {}
+    | OP_ADD EXPR %prec UNARY       {}
     | EXPR OP_LESS EXPR             {}
     | EXPR OP_GREATER EXPR          {}
     | EXPR OP_GEQUAL EXPR           {}
@@ -191,11 +199,16 @@ EXPR
     | EXPR OP_AND EXPR              {}
     | EXPR OP_SHL EXPR              {}
     | EXPR OP_SHR EXPR              {}
+    | EXPR OP_ACCESS IDENT          {}
+    | EXPR OP_ACCESS IDENT '[' EXPR ']' {}
+    | EXPR '[' EXPR ']'             {}
     | OP_NOT EXPR                   {}
     | OP_ONESC EXPR                 {}
+    | LIST_CONST                    {}
     | INT_CONST                     {}
     | FLT_CONST                     {}
     | STR_CONST                     {}
+    | IDENT                         {}
     ;
 
 %%

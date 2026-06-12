@@ -43,8 +43,6 @@ STRATOM ["][^\n"]*[^\\]["]
 "<="         { return(yylval.op = OP_LEQUAL); }
 "and"        { return(yylval.op = OP_AND); }
 "or"         { return(yylval.op = OP_OR); }
-"--"         { return(yylval.op = OP_INC); }
-"++"         { return(yylval.op = OP_DEC); }
 "<<"         { return(yylval.op = OP_SHL); }
 ">>"         { return(yylval.op = OP_SHR); }
 "+="         |
@@ -71,6 +69,7 @@ STRATOM ["][^\n"]*[^\\]["]
 "^"          { return(yylval.op = OP_XOR); }
 "~"          { return(yylval.op = OP_ONESC); }
 "="          { return(yylval.op = OP_ASSIGN); }
+"new"        { return(kwNEW); }
 "local"      { return(kwLOCAL); }
 "end"        { return(kwEND); }
 "if"         { return(kwIF); }
