@@ -62,14 +62,15 @@ namespace browser {
         JSValue except = JS_GetException(ctx);
         char const* exMsg = JS_ToCString(ctx, except);
         JSValue stackVal = JS_GetPropertyStr(ctx, except, "stack");
-        char const* exTrace = "";
+        char const* exTrace = nullptr;
         if (!JS_IsUndefined(stackVal)) {
             exTrace = JS_ToCString(ctx, stackVal);
             JS_FreeValue(ctx, stackVal);
         }
-        std::string err = path + " eval failed: " + exMsg + exTrace;
+        std::string err = path + " eval failed: " + exMsg + (exTrace? exTrace : " (no backtrace)");
         JS_FreeCString(ctx, exMsg);
-        JS_FreeCString(ctx, exTrace);
+        if (exTrace)
+            JS_FreeCString(ctx, exTrace);
         JS_FreeValue(ctx, except);
         throw ScriptException(err.c_str());
     }
