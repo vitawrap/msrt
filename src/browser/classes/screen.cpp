@@ -2,6 +2,7 @@
 #include "core/app.hpp"
 #include <algorithm>
 #include <string_view>
+#include <math.h>
 
 namespace ms {
 namespace browser {
@@ -219,11 +220,11 @@ namespace browser {
         // finally, draw
         if (initDrawOp(x, -y)) {
             m_canvas->drawQuad(texture.operator->(), r.x, r.y, r.width, r.height,
-            0.f, 0.f, w, h);
+            0.f, 0.f, isnan(w)? r.width : w, isnan(h)? r.height : h);
             closeDrawOp();
         } else {
             m_canvas->drawQuad(texture.operator->(), r.x, r.y, r.width, r.height,
-            x, -y, w, h);
+            x, -y, isnan(w)? r.width : w, isnan(h)? r.height : h);
         }
     }
 
