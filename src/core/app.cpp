@@ -61,8 +61,6 @@ namespace ms {
 
     void Application::unloadProject() {
         m_project.close();
-
-        // TODO: More to do later, like flushing resource cache?
     }
 
     void Application::init() {
@@ -81,6 +79,8 @@ namespace ms {
 
     void Application::free() {
         m_browser.free();
+
+        res::ResourceManager::get()->purgeUnused();
     }
 
     void Application::setWindowIcon() {
