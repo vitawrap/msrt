@@ -34,7 +34,7 @@ namespace res {
 
     Image::~Image() {
         PlatformImage* image = reinterpret_cast<PlatformImage*>(m_internalImage);
-        if (IsImageValid(*image)) {
+        if (image && IsImageValid(*image)) {
             UnloadImage(*image);
             delete image;
             m_internalImage = nullptr;
