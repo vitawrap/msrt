@@ -95,7 +95,6 @@ namespace res {
         while (it != m_resources.end()) {
             if (it->second.use_count() == 1)
             {
-                releaseResource((*it).second.get());
                 it = m_resources.erase(it);
                 continue;
             }
