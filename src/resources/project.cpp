@@ -138,6 +138,11 @@ namespace res {
     void Project::close()
     {
         m_files.close();
+        m_atlas = nullptr;
+        m_icon = nullptr;
+        m_scripts.clear();
+        m_tilemaps.clear();
+        m_sprites.clear();
     }
 }
 }
