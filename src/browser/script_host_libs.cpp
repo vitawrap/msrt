@@ -473,6 +473,16 @@ namespace browser {
                 char const* str = JS_ToCString(ctx, argv[i]);
                 LOG_MSGF("%s ", str);
                 JS_FreeCString(ctx, str);
+                if (JS_IsUndefined(argv[i]) || magic != 2)
+                    continue;
+
+                JSValue stack_v = JS_GetPropertyStr(ctx, argv[i], "stack");
+                if (!JS_IsUndefined(stack_v)) {
+                    char const* stack = JS_ToCString(ctx, stack_v);
+                    LOG_MSGF(": %s ", stack);
+                    JS_FreeCString(ctx, stack);
+                    JS_FreeValue(ctx, stack_v);
+                }
             }
             LOG_MSG("\n");
             return JS_UNDEFINED;
