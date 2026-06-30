@@ -108,25 +108,25 @@ namespace browser {
         }
     }
 
-    #define EVAL_STATIC_SCRIPT(global_name) evalScript(std::string(embed::__script_##global_name, embed::__script_##global_name##_size), #global_name)
+    #define EVAL_STATIC_SCRIPT(global_name) evalScript(std::string(embed::__script_##global_name##_js, embed::__script_##global_name##_js_size), #global_name ".js")
 
     void ScriptHost::installRuntime(res::Project::Language lang) {
         try {
-            EVAL_STATIC_SCRIPT(play_js); // play.js is required for all languages
+            EVAL_STATIC_SCRIPT(play); // play.js is required for all languages
             switch (lang) {
                 case res::Project::L_MicroscriptV2:
-                    EVAL_STATIC_SCRIPT(compiler_js);
-                    EVAL_STATIC_SCRIPT(parser_js);
-                    EVAL_STATIC_SCRIPT(processor_js);
-                    EVAL_STATIC_SCRIPT(program_js);
-                    EVAL_STATIC_SCRIPT(routine_js);
-                    EVAL_STATIC_SCRIPT(runner_js);
-                    EVAL_STATIC_SCRIPT(token_js);
-                    EVAL_STATIC_SCRIPT(tokenizer_js);
-                    EVAL_STATIC_SCRIPT(transpiler_js);
+                    EVAL_STATIC_SCRIPT(compiler);
+                    EVAL_STATIC_SCRIPT(parser);
+                    EVAL_STATIC_SCRIPT(processor);
+                    EVAL_STATIC_SCRIPT(program);
+                    EVAL_STATIC_SCRIPT(routine);
+                    EVAL_STATIC_SCRIPT(runner);
+                    EVAL_STATIC_SCRIPT(token);
+                    EVAL_STATIC_SCRIPT(tokenizer);
+                    EVAL_STATIC_SCRIPT(transpiler);
                     break;
                 case res::Project::L_JavaScript:
-                    EVAL_STATIC_SCRIPT(js_runner_js);
+                    EVAL_STATIC_SCRIPT(js_runner);
                     break;
                 default:
                     LOG_MSGF("Script language with ID %d is not known.\n", lang);
@@ -141,7 +141,7 @@ namespace browser {
     void ScriptHost::onLoaded() {
         patchRuntime();
         try {
-            EVAL_STATIC_SCRIPT(patch_js);
+            EVAL_STATIC_SCRIPT(patch);
         } catch (ScriptEngineException const& see) {
             LOG_MSGF("[SCRIPT ENGINE] %s\n", see.what());
         } catch (ScriptException const& se) {
