@@ -145,9 +145,9 @@ namespace browser {
         auto* screen = opaqueToObject<Screen>(self);
         double scalar; JS_ToFloat64(ctx, &scalar, argv[0]);
         switch (magic) {
-            case 0: screen->setDrawRotation(scalar);
-            case 1: screen->setAlpha(scalar * 255.0);
-            case 2: screen->setLineWidth(scalar);
+            case 0: screen->setDrawRotation(scalar); break;
+            case 1: screen->setAlpha(scalar * 255.0); break;
+            case 2: screen->setLineWidth(scalar); break;
         }
         MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
     }
