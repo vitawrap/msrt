@@ -55,7 +55,7 @@ FetchContent_Declare(
 FetchContent_Declare(
   quickjs
   GIT_REPOSITORY https://github.com/quickjs-ng/quickjs.git
-  GIT_TAG        v0.14.0 # latest release: april 2026
+  GIT_TAG        v0.15.1 # latest release: june 2026
 )
 
 FetchContent_Declare(
