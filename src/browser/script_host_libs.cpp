@@ -473,16 +473,22 @@ namespace browser {
                 char const* str = JS_ToCString(ctx, argv[i]);
                 LOG_MSGF("%s ", str);
                 JS_FreeCString(ctx, str);
-                if (JS_IsUndefined(argv[i]) || magic != 2)
+                if (!JS_IsObject(argv[i]) || magic != 2)
                     continue;
 
                 JSValue stack_v = JS_GetPropertyStr(ctx, argv[i], "stack");
-                if (!JS_IsUndefined(stack_v)) {
-                    char const* stack = JS_ToCString(ctx, stack_v);
-                    LOG_MSGF(": %s ", stack);
-                    JS_FreeCString(ctx, stack);
-                    JS_FreeValue(ctx, stack_v);
+                if (JS_IsUndefined(stack_v)) { // stack trace API works for non-error objects too
+                    JSTempVal globalThis = JS_GetGlobalObject(ctx);
+                    JSTempVal g_error_v = JS_GetPropertyStr(ctx, globalThis, "Error");
+                    JSTempVal g_capture_v = JS_GetPropertyStr(ctx, g_error_v, "captureStackTrace");
+                    JSTempVal error_v = JS_DupValue(ctx, argv[i]);
+                    JSTempVal out = JS_Call(ctx, g_capture_v, g_error_v, 1, error_v.ptr());
+                    stack_v = JS_GetPropertyStr(ctx, argv[i], "stack");
                 }
+                char const* stack = JS_ToCString(ctx, stack_v);
+                LOG_MSGF(": %s ", stack);
+                JS_FreeCString(ctx, stack);
+                JS_FreeValue(ctx, stack_v);
             }
             LOG_MSG("\n");
             return JS_UNDEFINED;
