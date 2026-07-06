@@ -1,4 +1,5 @@
 # CMake ignores
+.zed/
 .vscode/
 .cache/
 build/
