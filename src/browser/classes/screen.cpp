@@ -233,7 +233,7 @@ namespace browser {
     }
 
     void Screen::drawText(char const* text, float x, float y, float sz) {
-        const float ftBias = 1.2f; // artificially match ms' font render size (honestly just eyeball work)
+        const float ftBias = 1.3333f; // convert points to pixels
         m_canvas->drawText(text, x, y, static_cast<int>(sz * ftBias), m_ratio);
     }
 
