@@ -130,7 +130,7 @@ target_link_libraries(${PROJECT_NAME}
 
 # link-time linux specific shenanigans
 if(UNIX AND NOT APPLE)
-    target_link_libraries(${PROJECT_NAME} PRIVATE m pthread dl rt)
+    target_link_libraries(${PROJECT_NAME} PRIVATE m pthread dl rt fontconfig)
 endif()
 
 # test executable
@@ -155,5 +155,5 @@ target_link_libraries(unit_tests
 
 # link-time linux specific shenanigans
 if(UNIX AND NOT APPLE)
-    target_link_libraries(unit_tests PRIVATE m pthread dl rt)
+    target_link_libraries(unit_tests PRIVATE m pthread dl rt fontconfig)
 endif()
