@@ -152,6 +152,17 @@ namespace browser {
         MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
     }
 
+    static JSValue ScreenProto_font(JSContext* ctx, JSValueConst self, int argc, JSValueConst *argv, int magic) {
+        auto* screen = opaqueToObject<Screen>(self);
+        char const* name = JS_ToCString(ctx, argv[0]);
+        switch (magic) {
+            case 0: screen->loadFont(name); break;
+            case 1: screen->setFont(name); break;
+        }
+        JS_FreeCString(ctx, name);
+        MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
+    }
+
     static JSCFunctionListEntry defineScreen[] = {
         JS_CGETSET_MAGIC_DEF("width", ScreenProto_getter, nullptr, 0),
         JS_CGETSET_MAGIC_DEF("height", ScreenProto_getter, nullptr, 1),
@@ -170,6 +181,8 @@ namespace browser {
         JS_CFUNC_MAGIC_DEF("setDrawRotation", 1, ScreenProto_setDouble1, 0),
         JS_CFUNC_MAGIC_DEF("setAlpha", 1, ScreenProto_setDouble1, 1),
         JS_CFUNC_MAGIC_DEF("setLineWidth", 1, ScreenProto_setDouble1, 2),
+        JS_CFUNC_MAGIC_DEF("loadFont", 1, ScreenProto_font, 0),
+        JS_CFUNC_MAGIC_DEF("setFont", 1, ScreenProto_font, 0),
     };
 
     static JSValue constructScreen(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv) {

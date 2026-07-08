@@ -68,6 +68,12 @@ namespace browser {
         /** Draw centered text on screen */
         void drawText(char const* text, float x, float y, float sz);
 
+        /** Explicitly oad a font in the cache */
+        void loadFont(char const* name);
+
+        /** Set current text font (loads if not cached) */
+        void setFont(char const* name);
+
         /** Draw a line */
         void drawLine(float x0, float y0, float x1, float y1);
 

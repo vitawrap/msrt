@@ -237,6 +237,14 @@ namespace browser {
         m_canvas->drawText(text, x, y, static_cast<int>(sz * ftBias), m_ratio);
     }
 
+    void Screen::loadFont(char const* name) {
+        m_canvas->setFont(name);
+    }
+
+    void Screen::setFont(char const* name) {
+        m_canvas->setFont(name);
+    }
+
     void Screen::drawLine(float x0, float y0, float x1, float y1) {
         // anchor is not taken into account for lines
         m_canvas->drawLine(x0, y0, x1, y1);

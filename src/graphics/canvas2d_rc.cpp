@@ -1,4 +1,5 @@
 #include "canvas2d_rc.hpp"
+#include "graphics/font_loader.hpp"
 #include <ms/core/view_map.hpp>
 
 #include <stdio.h>
@@ -118,6 +119,16 @@ namespace gfx {
                     embed::__font_bitcell_ttf_size, ftSize, nullptr, 0);
                     if (IsFontValid(font))
                         ftCache.emplace(ftKey, std::move(font));
+                } else {
+                    std::string path;
+                    FontLoader::FontFile ff;
+                    auto* sysFonts = FontLoader::get();
+                    if (sysFonts->load(m_engine->fontName, ff)) {
+                        Font font = LoadFontFromMemory(".ttf", reinterpret_cast<const unsigned char*>(ff.data),
+                        ff.size, ftSize, nullptr, 0);
+                        if (IsFontValid(font))
+                            ftCache.emplace(ftKey, std::move(font));
+                    }
                 }
 
                 // try one last time with the fonts we just loaded
