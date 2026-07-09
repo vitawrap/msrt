@@ -343,10 +343,10 @@ namespace browser {
         if (argc >= 1) {
             char const* str = JS_ToCString(ctx, argv[0]);
             switch (magic) {
-                case 0: retValue = JS_NewBool(ctx, runtime->isKeyDown(str));
-                case 1: retValue = JS_NewBool(ctx, runtime->isKeyUp(str));
-                case 2: retValue = JS_NewBool(ctx, runtime->isKeyPressed(str));
-                case 3: retValue = JS_NewBool(ctx, runtime->isKeyReleased(str));
+                case 0: retValue = JS_NewBool(ctx, runtime->isKeyDown(str)); break;
+                case 1: retValue = JS_NewBool(ctx, runtime->isKeyUp(str)); break;
+                case 2: retValue = JS_NewBool(ctx, runtime->isKeyPressed(str)); break;
+                case 3: retValue = JS_NewBool(ctx, runtime->isKeyReleased(str)); break;
             }
             JS_FreeCString(ctx, str);
         }
