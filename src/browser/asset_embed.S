@@ -51,3 +51,7 @@ embed "assets/patch.js", "__script_patch_js"
 
 /* FONTS */
 embed "assets/bitcell.ttf", "__font_bitcell_ttf"
+
+/* SHADERS */
+embed "assets/basic2d.vert", "__shader_basic2d_vert"
+embed "assets/basic2d.frag", "__shader_basic2d_frag"

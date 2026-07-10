@@ -10,8 +10,10 @@
 #include <rlgl.h>
 
 FONT_RESOLVE_EMBED(bitcell_ttf)
-
 #define MSFONT_DEFNAME "BitCell"
+
+STATIC_RESOLVE_EMBED(__shader_basic2d_vert)
+STATIC_RESOLVE_EMBED(__shader_basic2d_frag)
 
 namespace ms {
 namespace gfx {
@@ -42,6 +44,7 @@ namespace gfx {
      * @brief This holds all of the raylib-specific data not exposed in class header
      */
     struct CanvasEngine {
+        Shader shader;
         RenderTexture renderTexture;
         Matrix transform; // camera transform
         Color fillColor;
@@ -76,8 +79,9 @@ namespace gfx {
             m_engine->strokeColor = BLACK;
             m_engine->fillColor = BLACK;
             m_engine->lineWidth = 1.f;
-            m_engine->renderTexture = LoadRenderTexture(m_width, m_height);
             m_engine->font = nullptr;
+            m_engine->renderTexture = LoadRenderTexture(m_width, m_height);
+            m_engine->shader = LoadShaderFromMemory(__shader_basic2d_vert, __shader_basic2d_frag);
             
             rlSetLineWidth(m_engine->lineWidth);
             rlEnableSmoothLines();
@@ -88,6 +92,8 @@ namespace gfx {
         if (m_engine) {
             if (IsRenderTextureValid(m_engine->renderTexture))
                 UnloadRenderTexture(m_engine->renderTexture);
+            if (IsShaderValid(m_engine->shader))
+                UnloadShader(m_engine->shader);
             delete m_engine;
             m_engine = nullptr;
         }
@@ -225,6 +231,8 @@ namespace gfx {
         Rectangle src{ 0, 0, m_width, -m_height };
         Rectangle dst{ 0, 0, (float)m_window->getWindowWidth(), (float)m_window->getWindowHeight()};
         BeginDrawing();
+        BeginShaderMode(m_engine->shader);
+        
         DrawTexturePro(m_engine->renderTexture.texture, src, dst, Vector2{0,0}, 0.f, WHITE);
         
         // draw an FPS counter over everything
@@ -232,6 +240,7 @@ namespace gfx {
         snprintf(fpsText, 64, "%d FPS", GetFPS());
         DrawText(fpsText, 8, 8, 20, WHITE);
         
+        EndShaderMode();
         EndDrawing();
         m_drawing = false;
     }
