@@ -95,9 +95,9 @@ namespace browser {
             switch (magic) {
                 case 0: screen->fillRect(d0, d1, d2, d3); break;
                 case 1: screen->drawLine(d0, d1, d2, d3); break;
+                case 2: screen->drawRect(d0, d1, d2, d3); break;
                 case 3: screen->drawRound(d0, d1, d2, d3); break;
                 case 4: screen->fillRound(d0, d1, d2, d3); break;
-                /** TODO: drawRect, drawRound, fillRound */
             }
         }
         MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
@@ -177,6 +177,7 @@ namespace browser {
         JS_CFUNC_MAGIC_DEF("clear", 1, ScreenProto_colorArg, 1),
         JS_CFUNC_MAGIC_DEF("fillRect", 5, ScreenProto_setDouble4C, 0),
         JS_CFUNC_MAGIC_DEF("drawLine", 5, ScreenProto_setDouble4C, 1),
+        JS_CFUNC_MAGIC_DEF("drawRect", 5, ScreenProto_setDouble4C, 2),
         JS_CFUNC_MAGIC_DEF("drawRound", 5, ScreenProto_setDouble4C, 3),
         JS_CFUNC_MAGIC_DEF("fillRound", 5, ScreenProto_setDouble4C, 4),
         JS_CFUNC_DEF("drawText", 5, ScreenProto_drawText),

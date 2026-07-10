@@ -232,6 +232,10 @@ namespace browser {
         m_canvas->fillRect(x, y, w, h);
     }
 
+    void Screen::drawRect(float x, float y, float w, float h) {
+        m_canvas->strokeRect(x, y, w, h);
+    }
+
     void Screen::drawRound(float x, float y, float w, float h) {
         m_canvas->strokeRound(x, y, w, h);
     }

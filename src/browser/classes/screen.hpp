@@ -65,6 +65,9 @@ namespace browser {
         /** Draw a filled rectangle */
         void fillRect(float x, float y, float w, float h);
 
+        /** Draw a rectangle outline */
+        void drawRect(float x, float y, float w, float h);
+
         /** Draw an ellipsoid shape */
         void drawRound(float x, float y, float w, float h);
 
