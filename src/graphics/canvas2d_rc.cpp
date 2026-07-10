@@ -195,6 +195,18 @@ namespace gfx {
         DrawRectangleLines(x - (w * m_drawAnchorX), (-h * (1.f - m_drawAnchorY)) - y, w, h, m_engine->strokeColor);
     }
 
+    void CanvasRC2D::strokeRound(float x, float y, float w, float h) {
+        float realAnchorX = Remap(m_drawAnchorX, 0.f, 1.f, -.5f, .5f);
+        float realAnchorY = Remap(m_drawAnchorY, 0.f, 1.f, -.5f, .5f);
+        DrawEllipseLines(x - (w * realAnchorX), (h * (realAnchorY)) - y, w * .5f, h * .5f, m_engine->fillColor);
+    }
+
+    void CanvasRC2D::fillRound(float x, float y, float w, float h) {
+        float realAnchorX = Remap(m_drawAnchorX, 0.f, 1.f, -.5f, .5f);
+        float realAnchorY = Remap(m_drawAnchorY, 0.f, 1.f, -.5f, .5f);
+        DrawEllipse(x - (w * realAnchorX), (h * (realAnchorY)) - y, w * .5f, h * .5f, m_engine->strokeColor);
+    }
+
     void CanvasRC2D::beginFrame() {
         BeginTextureMode(m_engine->renderTexture);
 
