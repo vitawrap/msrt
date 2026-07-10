@@ -536,14 +536,14 @@ namespace browser {
                 JSValue ownFn = JS_DupValue(ctx, argv[0]);
                 Context* browser = nullptr; JS_ToInt64(ctx, (int64_t*)&browser, data[0]);
                 browser->addRepaintListener([ctx, ownFn](){
-                    JSTempVal tstamp = JS_NewObject(ctx); /** TODO: DOMHighResTimeStamp!!! */
+                    JSTempVal tstamp = JS_NewObject(ctx); // ms does not make use of timestamp
                     JSTempVal ret = JS_Call(ctx, ownFn, JS_UNDEFINED, 1, tstamp.ptr());
                 }, [ctx, ownFn](){
                     JS_FreeValue(ctx, ownFn);
                 });
                 return JS_UNDEFINED;
             }
-            /** TODO: this should be a counter system? */
+            // ms does not also use the counter returned by requestAnimationFrame
             return JS_ThrowTypeError(ctx, "%s arg in requestAnimationFrame", argc? "not a Function" : "expected 1");
         }, 1, 0, 1, &browserRef);
         JS_SetPropertyStr(ctx, globalThis, "requestAnimationFrame", reqFrame);
