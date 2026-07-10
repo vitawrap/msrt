@@ -53,6 +53,10 @@ namespace gfx {
         CanvasFont* font;
         std::string fontName;
 
+        struct {
+            int locationUVOffset;
+        } uniform;
+
         std::list<CanvasState> states;
         ms::unordered_map<CanvasFont> loadedFonts;
     };
@@ -82,6 +86,13 @@ namespace gfx {
             m_engine->font = nullptr;
             m_engine->renderTexture = LoadRenderTexture(m_width, m_height);
             m_engine->shader = LoadShaderFromMemory(__shader_basic2d_vert, __shader_basic2d_frag);
+
+            // pull the uniforms we care about
+            if (IsShaderValid(m_engine->shader)) {
+                float defaultUVOffset = 0.f;
+                m_engine->uniform.locationUVOffset = GetShaderLocation(m_engine->shader, "uvOffset");
+                SetShaderValue(m_engine->shader, m_engine->uniform.locationUVOffset, &defaultUVOffset, SHADER_UNIFORM_FLOAT);
+            }
             
             rlSetLineWidth(m_engine->lineWidth);
             rlEnableSmoothLines();
@@ -211,6 +222,11 @@ namespace gfx {
         float realAnchorX = Remap(m_drawAnchorX, 0.f, 1.f, -.5f, .5f);
         float realAnchorY = Remap(m_drawAnchorY, 0.f, 1.f, -.5f, .5f);
         DrawEllipse(x - (w * realAnchorX), (h * (realAnchorY)) - y, w * .5f, h * .5f, m_engine->strokeColor);
+    }
+
+    void CanvasRC2D::setUVOffsetY(float offset) {
+        if (IsShaderValid(m_engine->shader) && m_engine->uniform.locationUVOffset != -1)
+            SetShaderValue(m_engine->shader, m_engine->uniform.locationUVOffset, &offset, SHADER_UNIFORM_FLOAT);
     }
 
     void CanvasRC2D::beginFrame() {
