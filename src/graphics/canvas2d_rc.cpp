@@ -78,6 +78,9 @@ namespace gfx {
             m_engine->lineWidth = 1.f;
             m_engine->renderTexture = LoadRenderTexture(m_width, m_height);
             m_engine->font = nullptr;
+            
+            rlSetLineWidth(m_engine->lineWidth);
+            rlEnableSmoothLines();
         }
     }
 
@@ -167,6 +170,7 @@ namespace gfx {
         m_engine->fontName      = state.fontName;
         m_engine->font          = nullptr;
         m_engine->states.pop_back();
+        rlSetLineWidth(state.lineWidth);
         return true;
     }
 
@@ -260,6 +264,7 @@ namespace gfx {
 
     void CanvasRC2D::setLineWidth(float w) {
         m_engine->lineWidth = w;
+        rlSetLineWidth(w);
     }
 
     void CanvasRC2D::drawLine(float x0, float y0, float x1, float y1) {
