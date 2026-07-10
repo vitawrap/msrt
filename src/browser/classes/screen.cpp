@@ -232,6 +232,14 @@ namespace browser {
         m_canvas->fillRect(x, y, w, h);
     }
 
+    void Screen::drawRound(float x, float y, float w, float h) {
+        m_canvas->strokeRound(x, y, w, h);
+    }
+
+    void Screen::fillRound(float x, float y, float w, float h) {
+        m_canvas->fillRound(x, y, w, h);
+    }
+
     void Screen::drawText(char const* text, float x, float y, float sz) {
         const float ftBias = 1.3333f; // convert points to pixels
         m_canvas->drawText(text, x, y, static_cast<int>(sz * ftBias), m_ratio);

@@ -65,6 +65,12 @@ namespace browser {
         /** Draw a filled rectangle */
         void fillRect(float x, float y, float w, float h);
 
+        /** Draw an ellipsoid shape */
+        void drawRound(float x, float y, float w, float h);
+
+        /** Draw a filled ellipsoid shape */
+        void fillRound(float x, float y, float w, float h);
+
         /** Draw centered text on screen */
         void drawText(char const* text, float x, float y, float sz);
 
