@@ -18,6 +18,7 @@
 \global_name:
     .incbin "\file"
 \global_name\()_end:
+    .byte 0
 
     .global \global_name\()_size
 #if defined(__unix__)
