@@ -40,6 +40,24 @@ namespace gfx {
         std::string fontName;
     };
 
+    struct CanvasMesh {
+        Mesh data;
+
+        CanvasMesh(unsigned triCount)
+            : data{}
+        {
+            data.vertexCount = triCount * 3;
+            data.triangleCount = triCount;
+            data.vertices = (float*) MemAlloc(data.vertexCount * 3 * sizeof(float));
+            data.texcoords = (float*) MemAlloc(data.vertexCount * 2 * sizeof(float));
+            data.normals = nullptr;
+        }
+
+        ~CanvasMesh() {
+            UnloadMesh(data);
+        }
+    };
+
     /**
      * @brief This holds all of the raylib-specific data not exposed in class header
      */
@@ -357,5 +375,37 @@ namespace gfx {
         ClearBackground(*(Color*)&OxAABBGGRR);
     }
 
+    std::weak_ptr<CanvasMesh> CanvasRC2D::beginMesh(unsigned triCount) {
+        auto cm = std::make_shared<CanvasMesh>(triCount);
+        m_meshes.push_back(std::move(cm));
+        return std::weak_ptr<CanvasMesh>(m_meshes.back());
+    }
+
+    void CanvasRC2D::setTriangle(std::weak_ptr<CanvasMesh> mesh, unsigned index, CanvasTriangle const& tri) {
+        auto cm = mesh.lock();
+        if (!cm || index >= cm->data.triangleCount) return;
+        
+        cm->data.vertices[index * 9 + 0] = tri.x0;
+        cm->data.vertices[index * 9 + 1] = tri.y0;
+        cm->data.vertices[index * 9 + 2] = 0.f;
+        cm->data.vertices[index * 9 + 3] = tri.x1;
+        cm->data.vertices[index * 9 + 4] = tri.y1;
+        cm->data.vertices[index * 9 + 5] = 0.f;
+        cm->data.vertices[index * 9 + 6] = tri.x2;
+        cm->data.vertices[index * 9 + 7] = tri.y2;
+        cm->data.vertices[index * 9 + 8] = 0.f;
+
+        cm->data.texcoords[index * 6 + 0] = tri.u0;
+        cm->data.texcoords[index * 6 + 1] = tri.v0;
+        cm->data.texcoords[index * 6 + 2] = tri.u1;
+        cm->data.texcoords[index * 6 + 3] = tri.v1;
+        cm->data.texcoords[index * 6 + 4] = tri.u2;
+        cm->data.texcoords[index * 6 + 5] = tri.v2;
+    }
+
+    void CanvasRC2D::endMesh(std::weak_ptr<CanvasMesh> mesh) {
+        auto cm = mesh.lock();
+        if (cm) UploadMesh(&cm->data, false);
+    }
 }
 }

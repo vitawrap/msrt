@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <stdint.h>
 #include "canvas_rc.hpp"
 #include "resources/gpu_texture.hpp"
@@ -12,6 +13,13 @@ namespace res {
 namespace gfx {
 
     struct CanvasEngine;
+    struct CanvasMesh;
+
+    struct CanvasTriangle {
+        float x0, y0, u0, v0;
+        float x1, y1, u1, v1;
+        float x2, y2, u2, v2;
+    };
 
     class CanvasRC2D : public CanvasRC {
         platform::IWindowManager* m_window;
@@ -28,6 +36,9 @@ namespace gfx {
         float m_drawAnchorX, m_drawAnchorY;
 
         bool validateFont(int ftSize);
+
+        /** Allocated meshes */
+        std::vector<std::shared_ptr<CanvasMesh>> m_meshes;
 
     public:
         CanvasRC2D();
@@ -73,6 +84,12 @@ namespace gfx {
         void drawText(std::string_view text, float x, float y, int ftSize, float deblurFactor = 1.f);
         void setFont(char const* fontFaceName);
         void setUVOffsetY(float offset);
+
+        /* Canvas2D lower level drawing ops */
+
+        std::weak_ptr<CanvasMesh> beginMesh(unsigned triCount);
+        void setTriangle(std::weak_ptr<CanvasMesh> mesh, unsigned index, CanvasTriangle const& tri);
+        void endMesh(std::weak_ptr<CanvasMesh> mesh);
     };
 
 }
