@@ -43,6 +43,7 @@ namespace res {
 
         bool isEmptyTile(Tile tile) const { return tile.id == 0; }
         inline const Tile& getTile(unsigned x, unsigned y) const;
+        inline const Tile& getTileYUp(unsigned x, unsigned y) const;
         inline std::string_view getTileName(Tile tile) const;
 
         DECLARE_LOADER;
@@ -52,6 +53,11 @@ namespace res {
         if (x >= m_width || y >= m_height) return EMPTY_TILE;
         unsigned index = m_tileGrid[x + y * m_width];
         return m_tiles[index];
+    }
+
+    // intuitive getter for sampling the tilemap were it displayed in the editor
+    inline const TileMap::Tile& TileMap::getTileYUp(unsigned x, unsigned y) const {
+        return getTile(x, m_height - y - 1);
     }
 
     std::string_view TileMap::getTileName(Tile tile) const {
