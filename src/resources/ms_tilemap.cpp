@@ -32,10 +32,10 @@ namespace res {
             name = name.substr(0, pos);
         }
         auto it = std::find(m_spriteNames.begin(), m_spriteNames.end(), name);
+        unsigned index = std::distance(m_spriteNames.begin(), it);
         if (it == m_spriteNames.end()) {
             m_spriteNames.push_back(name);
         }
-        unsigned index = it - m_spriteNames.begin();
         m_tiles.push_back({index, x, y});
     }
 
@@ -50,20 +50,22 @@ namespace res {
             io::CJSON json;
             auto root = json.parse(text.c_str());
             
-            map->m_width = root["width"];
-            map->m_height = root["height"];
-            map->m_blockWidth = root["block_width"];
-            map->m_blockHeight = root["block_height"];
+            map->m_width = root["width"].number();
+            map->m_height = root["height"].number();
+            map->m_blockWidth = root["block_width"].number();
+            map->m_blockHeight = root["block_height"].number();
 
-            auto sprites = root["sprites"]; io::CJSONNode sprite;
+            io::CJSONNode sprites = root["sprites"]; io::CJSONNode sprite;
+            int i = 0;
             CJSONNode_forEach(sprite, sprites) {
+                if (i++ == 0) continue; // first entry is a zero
                 std::string spriteTile = (char const*) sprite;
                 map->addTileInfo(spriteTile);
             }
             map->allocateGrid();
 
             int at = 0;
-            auto data = root["data"]; io::CJSONNode datum;
+            io::CJSONNode data = root["data"]; io::CJSONNode datum;
             CJSONNode_forEach(datum, data) {
                 int tileId = (double) datum;
                 map->m_tileGrid[at++] = tileId;
