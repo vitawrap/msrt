@@ -42,9 +42,10 @@ namespace gfx {
 
     struct CanvasMesh {
         Mesh data;
+        int triCursor;
 
         CanvasMesh(unsigned triCount)
-            : data{}
+            : data{}, triCursor(0)
         {
             data.vertexCount = triCount * 3;
             data.triangleCount = triCount;
@@ -53,10 +54,69 @@ namespace gfx {
             data.normals = nullptr;
         }
 
-        ~CanvasMesh() {
+        virtual ~CanvasMesh() {
             UnloadMesh(data);
         }
+
+        virtual void setTriangle(CanvasTriangle const& tri, unsigned index) {
+            assert(index < data.triangleCount);
+            
+            data.vertices[index * 9 + 0] = tri.x0;
+            data.vertices[index * 9 + 1] = tri.y0;
+            data.vertices[index * 9 + 2] = 0.f;
+            data.vertices[index * 9 + 3] = tri.x1;
+            data.vertices[index * 9 + 4] = tri.y1;
+            data.vertices[index * 9 + 5] = 0.f;
+            data.vertices[index * 9 + 6] = tri.x2;
+            data.vertices[index * 9 + 7] = tri.y2;
+            data.vertices[index * 9 + 8] = 0.f;
+    
+            data.texcoords[index * 6 + 0] = tri.u0;
+            data.texcoords[index * 6 + 1] = tri.v0;
+            data.texcoords[index * 6 + 2] = tri.u1;
+            data.texcoords[index * 6 + 3] = tri.v1;
+            data.texcoords[index * 6 + 4] = tri.u2;
+            data.texcoords[index * 6 + 5] = tri.v2;
+        }
+
+        void addTriangle(CanvasTriangle const& tri) {
+            setTriangle(tri, triCursor++);
+        }
     };
+
+    struct CanvasDynamicMesh : public CanvasMesh {
+        unsigned pageSize;
+
+        int validatePageSize(int triCursor) {
+            int triCount = triCursor + pageSize - 1;
+            return ceil(triCount / pageSize) * pageSize;
+        }
+
+        CanvasDynamicMesh(unsigned triReserve, unsigned pageSize)
+            : pageSize(pageSize), CanvasMesh(validatePageSize(triReserve))
+        {}
+        
+        void setTriangle(CanvasTriangle const& tri, unsigned index) override {
+            int newTriCount = validatePageSize(index + 1); // index 0 = page size 0, so always treat index as size here
+            if (newTriCount > data.triangleCount) {
+                data.vertices = (float*) MemRealloc(data.vertices, newTriCount * 9 * sizeof(float));
+                data.texcoords = (float*) MemRealloc(data.vertices, newTriCount * 6 * sizeof(float));
+            }
+            CanvasMesh::setTriangle(tri, index++);
+            data.triangleCount = index;
+            data.vertexCount = index * 3;
+        }
+    };
+
+    void CanvasRC2D::addTriangle(std::weak_ptr<CanvasMesh> mesh, CanvasTriangle const& tri) {
+        auto cm = mesh.lock();
+        if (cm) cm->addTriangle(tri);
+    }
+
+    void CanvasRC2D::addTriangle(std::weak_ptr<CanvasDynamicMesh> mesh, CanvasTriangle const& tri) {
+        auto cm = mesh.lock();
+        if (cm) cm->addTriangle(tri);
+    }
 
     /**
      * @brief This holds all of the raylib-specific data not exposed in class header
@@ -381,29 +441,19 @@ namespace gfx {
         return std::weak_ptr<CanvasMesh>(m_meshes.back());
     }
 
-    void CanvasRC2D::setTriangle(std::weak_ptr<CanvasMesh> mesh, unsigned index, CanvasTriangle const& tri) {
+    void CanvasRC2D::endMesh(std::weak_ptr<CanvasMesh> mesh) {
         auto cm = mesh.lock();
-        if (!cm || index >= cm->data.triangleCount) return;
-        
-        cm->data.vertices[index * 9 + 0] = tri.x0;
-        cm->data.vertices[index * 9 + 1] = tri.y0;
-        cm->data.vertices[index * 9 + 2] = 0.f;
-        cm->data.vertices[index * 9 + 3] = tri.x1;
-        cm->data.vertices[index * 9 + 4] = tri.y1;
-        cm->data.vertices[index * 9 + 5] = 0.f;
-        cm->data.vertices[index * 9 + 6] = tri.x2;
-        cm->data.vertices[index * 9 + 7] = tri.y2;
-        cm->data.vertices[index * 9 + 8] = 0.f;
-
-        cm->data.texcoords[index * 6 + 0] = tri.u0;
-        cm->data.texcoords[index * 6 + 1] = tri.v0;
-        cm->data.texcoords[index * 6 + 2] = tri.u1;
-        cm->data.texcoords[index * 6 + 3] = tri.v1;
-        cm->data.texcoords[index * 6 + 4] = tri.u2;
-        cm->data.texcoords[index * 6 + 5] = tri.v2;
+        if (cm) UploadMesh(&cm->data, false);
     }
 
-    void CanvasRC2D::endMesh(std::weak_ptr<CanvasMesh> mesh) {
+    std::weak_ptr<CanvasDynamicMesh> CanvasRC2D::beginDynamicMesh(unsigned triReserve, unsigned pageSize) {
+        auto cm = std::make_shared<CanvasDynamicMesh>(triReserve, pageSize);
+        m_meshes.push_back(std::move(cm));
+        return std::weak_ptr<CanvasDynamicMesh>(std::static_pointer_cast<CanvasDynamicMesh>(m_meshes.back()));
+    }
+
+    void CanvasRC2D::endDynamicMesh(std::weak_ptr<CanvasDynamicMesh> mesh, bool compact) {
+        /** TODO: Implement compact (final resize of mesh memory block) */
         auto cm = mesh.lock();
         if (cm) UploadMesh(&cm->data, false);
     }

@@ -14,6 +14,7 @@ namespace gfx {
 
     struct CanvasEngine;
     struct CanvasMesh;
+    struct CanvasDynamicMesh;
 
     struct CanvasTriangle {
         float x0, y0, u0, v0;
@@ -88,8 +89,13 @@ namespace gfx {
         /* Canvas2D lower level drawing ops */
 
         std::weak_ptr<CanvasMesh> beginMesh(unsigned triCount);
-        void setTriangle(std::weak_ptr<CanvasMesh> mesh, unsigned index, CanvasTriangle const& tri);
         void endMesh(std::weak_ptr<CanvasMesh> mesh);
+
+        std::weak_ptr<CanvasDynamicMesh> beginDynamicMesh(unsigned triReserve = 0, unsigned pageSize = 2048);
+        void endDynamicMesh(std::weak_ptr<CanvasDynamicMesh> mesh, bool compact = false);
+
+        static void addTriangle(std::weak_ptr<CanvasMesh> mesh, CanvasTriangle const& tri);
+        static void addTriangle(std::weak_ptr<CanvasDynamicMesh> mesh, CanvasTriangle const& tri);
     };
 
 }
