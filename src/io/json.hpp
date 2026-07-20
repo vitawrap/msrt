@@ -77,9 +77,16 @@ public:
     }
 
     /**
+     * Explicit double getter
+     */
+    double number() const noexcept(false) {
+        return operator double();
+    }
+
+    /**
      * Get boolean value of this node.
      */
-    operator bool() const {
+    explicit operator bool() const {
         return cJSON_IsTrue(m_node);
     }
 
