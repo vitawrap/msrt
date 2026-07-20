@@ -1,4 +1,5 @@
 #include "context.hpp"
+#include "classes/player.hpp"
 #include <ms/core/util.hpp>
 
 namespace ms {
@@ -40,6 +41,10 @@ namespace browser {
 
     void Context::repaint() {
         m_renderer.submitFrame();
+    }
+
+    Player* Context::getPlayer() const {
+        return Player::current();
     }
 
 }

@@ -8,6 +8,9 @@
 namespace ms {
 namespace browser {
 
+    class Player;
+
+    /** The context manager for the minimal browser environment viable for microStudio. */
     class Context {
         EventQueue m_repaintQueue;
         EventQueue m_cleanupQueue;
@@ -47,6 +50,9 @@ namespace browser {
 
         /** Get reference to canvas used in this context */
         gfx::CanvasRC2D* getCanvas() { return &m_renderer; }
+
+        /** Try to get a player instance spawned from the script host */
+        Player* getPlayer() const;
 
         /* Events */
 

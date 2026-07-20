@@ -13,6 +13,9 @@ namespace browser {
         Runtime* m_runtime;
         int m_resizeListener;
 
+        /** The current player instance */
+        static Player* s_instance;
+
     public:
         /** Must only be called by script constructor */
         void setRuntime(Runtime* rt) { m_runtime = rt; }
@@ -27,6 +30,9 @@ namespace browser {
         void resize();
 
         Runtime* getRuntime() const { return m_runtime; }
+
+        /** Player* is null when JS layer is not initialized! */
+        static Player* current() { return s_instance; }
 
         Event<std::string, std::string> sourceFileAdded;
         Event<> needRedraw;

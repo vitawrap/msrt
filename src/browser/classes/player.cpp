@@ -7,13 +7,18 @@
 namespace ms {
 namespace browser {
 
+    Player* Player::s_instance = nullptr;
+
     Player::Player() :
         m_runtime(nullptr),
         m_resizeListener(0)
     {
+        s_instance = this;
     }
 
     Player::~Player() {
+        if (s_instance == this)
+            s_instance = nullptr;
         if (m_resizeListener)
             Application::get()->getWindowManager()->resized
                 .disconnect(m_resizeListener);
