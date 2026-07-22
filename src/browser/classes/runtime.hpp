@@ -7,6 +7,7 @@
 #include <ms/core/static_map.hpp>
 #include "platform/input.hpp"
 #include "resources/ms_image.hpp"
+#include "resources/ms_tilemap.hpp"
 
 namespace ms {
 namespace browser {
@@ -39,7 +40,10 @@ namespace browser {
         ms::unordered_map<std::string> m_spriteNameMap;
         ms::unordered_map<res::ResourceHandle<res::Image>> m_spriteImageMap;
 
+        ms::unordered_map<res::ResourceHandle<res::TileMap>> m_tilemapMap;
+
         void mapSpriteNames();
+        void mapTilemapNames();
 
         platform::InputManager* m_input;
         int m_inputPointerHandler;
@@ -71,6 +75,9 @@ namespace browser {
 
         /** Get sprite path from name, for drawing */
         std::string_view getSpritePath(std::string_view path) const;
+
+        /** Get reference to a loaded tilemap */
+        res::ResourceHandle<res::TileMap> getTilemap(std::string_view path) const;
 
         /** Get sprite image from path, for drawing */
         res::ResourceHandle<res::Image> getSpriteImage(std::string_view path) const;
@@ -139,6 +146,7 @@ namespace browser {
         Event<> timerStep;
         Event<> updatedControls;
         Event<std::string_view, res::Image const*> spriteMapped;
+        Event<std::string_view, res::TileMap const*> tilemapMapped;
     };
 
     float Runtime::getRatioFor(AspectRatio enumval)  {

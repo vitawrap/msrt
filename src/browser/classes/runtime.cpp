@@ -86,6 +86,13 @@ namespace browser {
         return "";
     }
 
+    res::ResourceHandle<res::TileMap> Runtime::getTilemap(std::string_view name) const {
+        auto itr = m_tilemapMap.find(name);
+        if (itr != m_tilemapMap.cend())
+            return itr->second;
+        return nullptr;
+    }
+
     res::ResourceHandle<res::Image> Runtime::getSpriteImage(std::string_view path) const {
         auto itr = m_spriteImageMap.find(path);
         if (itr != m_spriteImageMap.cend())
@@ -108,8 +115,23 @@ namespace browser {
         }
     }
 
+    void Runtime::mapTilemapNames() {
+        // remap tilemap resource names to tilemap paths for use in screen commands
+        auto* project = Application::get()->getProject();
+        auto const& tmMap = project->getTileMapMap();
+        for (const auto& [pathStr, res] : tmMap) {
+            char stemBuffer[256] = {0}; // frankly easier than std for such tasks
+            sscanf(pathStr.c_str(), "maps/%255[^.]s", stemBuffer);
+            m_tilemapMap.emplace(stemBuffer, res);
+
+            // give script realm initial map info
+            tilemapMapped.invoke(pathStr, res.operator->());
+        }
+    }
+
     void Runtime::start() {
         mapSpriteNames();
+        mapTilemapNames();
         checkStartReady();
     }
 
