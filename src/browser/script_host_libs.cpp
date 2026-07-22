@@ -120,18 +120,21 @@ namespace browser {
         MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
     }
 
-    static JSValue ScreenProto_drawSprite(JSContext* ctx, JSValueConst self, int argc, JSValueConst *argv) {
+    static JSValue ScreenProto_drawImage(JSContext* ctx, JSValueConst self, int argc, JSValueConst *argv, int magic) {
         auto* screen = opaqueToObject<Screen>(self);
         if (argc < 5)
             return JS_ThrowTypeError(ctx, "drawSprite expects 5 arguments, %d given.", argc);
         
-        char const* sprite = JS_ToCString(ctx, argv[0]);
+        char const* imname = JS_ToCString(ctx, argv[0]);
         double x; JS_ToFloat64(ctx, &x, argv[1]);
         double y; JS_ToFloat64(ctx, &y, argv[2]);
         double w; JS_ToFloat64(ctx, &w, argv[3]);
         double h; JS_ToFloat64(ctx, &h, argv[4]);
-        screen->drawSprite(sprite, x, y, w, h);
-        JS_FreeCString(ctx, sprite);
+        switch (magic) {
+            case 0: screen->drawSprite(imname, x, y, w, h); break;
+            case 1: screen->drawMap(imname, x, y, w, h); break;
+        }
+        JS_FreeCString(ctx, imname);
         MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
     }
 
@@ -180,8 +183,9 @@ namespace browser {
         JS_CFUNC_MAGIC_DEF("drawRect", 5, ScreenProto_setDouble4C, 2),
         JS_CFUNC_MAGIC_DEF("drawRound", 5, ScreenProto_setDouble4C, 3),
         JS_CFUNC_MAGIC_DEF("fillRound", 5, ScreenProto_setDouble4C, 4),
+        JS_CFUNC_MAGIC_DEF("drawSprite", 5, ScreenProto_drawImage, 0),
+        JS_CFUNC_MAGIC_DEF("drawMap", 5, ScreenProto_drawImage, 1),
         JS_CFUNC_DEF("drawText", 5, ScreenProto_drawText),
-        JS_CFUNC_DEF("drawSprite", 5, ScreenProto_drawSprite),
         JS_CFUNC_DEF("setDrawAnchor", 2, ScreenProto_setDrawAnchor),
         JS_CFUNC_MAGIC_DEF("setDrawRotation", 1, ScreenProto_setDouble1, 0),
         JS_CFUNC_MAGIC_DEF("setAlpha", 1, ScreenProto_setDouble1, 1),
@@ -268,6 +272,15 @@ namespace browser {
                 JS_NewNumber(ctx, img->getFPS()), JS_NewNumber(ctx, img->getFrameCount()),
                 JS_NewNumber(ctx, img->getWidth()), JS_NewNumber(ctx, img->getHeight())};
             JSTempVal ret = JS_Call(ctx, sprFn, rtValue, argv.size(), reinterpret_cast<JSValue*>(argv.data()));
+        });
+        rt->tilemapMapped.connect([ctx, rtValue](std::string_view path, res::TileMap const* tmap) {
+            JSTempVal mapFn = JS_GetPropertyStr(ctx, rtValue, "__addTilemap");
+            std::array<JSTempVal, 5> argv = {
+                JS_NewStringLen(ctx, path.data(), path.length()),
+                JS_NewNumber(ctx, tmap->getWidth()), JS_NewNumber(ctx, tmap->getHeight()),
+                JS_NewNumber(ctx, tmap->getBlockWidth()), JS_NewNumber(ctx, tmap->getBlockHeight()),
+            };
+            JSTempVal ret = JS_Call(ctx, mapFn, rtValue, argv.size(), reinterpret_cast<JSValue*>(argv.data()));
         });
         JSValue screen = constructScreen(ctx, JS_UNDEFINED, 1, &rtValue);
         rt->setScreen(opaqueToObject<Screen>(screen));

@@ -163,6 +163,27 @@ this.Runtime.prototype.__addSprite = function(path, fps, fcount, width, height) 
   };
 }
 
+// same functionality for maps
+this.Runtime.prototype.__addTilemap = function (path, width, height, blkWidth, blkHeight) {
+  console.log("Adding tilemap: " + path)
+  if (this.maps === undefined) { this.maps = {}; }
+  let mapGet = (x, y) => { this.__mapGet(path, x, y); };
+  let mapSet = (x, y, name) => { this.__mapSet(path, x, y, name); };
+  let mapClone = () => { this.__mapClone(path); }
+  const name = path.match(/(?<=maps\/)([^\t\n\r .]+)/g);
+  this.maps[name] = {
+    width: width,
+    height: height,
+    block_width: blkWidth,
+    block_height: blkHeight,
+    get: mapGet,
+    set: mapSet,
+    clone: mapClone,
+    name: name,
+    ready: 1
+  };
+}
+
 // touch interface short circuits to runtime native getters
 this.TouchDevice = class {
   constructor(runtime) {
