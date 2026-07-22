@@ -4,6 +4,10 @@
 #include "resource_manager.hpp"
 
 namespace ms {
+namespace gfx {
+    class TilemapRenderData;
+    class CanvasRC2D;
+}
 namespace res {
 
     /**
@@ -29,6 +33,8 @@ namespace res {
 
         void addTileInfo(std::string name);
         void allocateGrid();
+
+        gfx::TilemapRenderData* m_renderData;
         
     public:
         TileMap();
@@ -45,6 +51,8 @@ namespace res {
         inline const Tile& getTile(unsigned x, unsigned y) const;
         inline const Tile& getTileYUp(unsigned x, unsigned y) const;
         inline std::string_view getTileName(Tile tile) const;
+
+        gfx::TilemapRenderData* getRenderData(gfx::CanvasRC2D* device);
 
         DECLARE_LOADER;
     };

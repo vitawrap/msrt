@@ -2,6 +2,8 @@
 #include "io/json.hpp"
 #include <algorithm>
 
+#include "graphics/tilemap_render.hpp"
+
 namespace ms {
 namespace res {
 
@@ -9,13 +11,15 @@ namespace res {
 
     TileMap::TileMap():
         m_width(0), m_height(0), m_blockWidth(0), m_blockHeight(0),
-        m_tileGrid(nullptr)
+        m_tileGrid(nullptr), m_renderData(nullptr)
     {
         // microStudio uses tile ID 0 for blank tiles
         m_spriteNames.push_back("");
+        m_tiles.push_back(EMPTY_TILE);
     }
     
     TileMap::~TileMap() {
+        delete m_renderData;
         delete[] m_tileGrid;
     }
 
@@ -77,6 +81,14 @@ namespace res {
             return nullptr;
         }
         return map;
+    }
+
+    gfx::TilemapRenderData* TileMap::getRenderData(gfx::CanvasRC2D* canvas) {
+        if (!m_renderData) {
+            m_renderData = new gfx::TilemapRenderData;
+            m_renderData->createFromTilemap(*this, canvas);
+        }
+        return m_renderData;
     }
 
 }
