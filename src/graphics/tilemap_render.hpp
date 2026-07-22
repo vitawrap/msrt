@@ -11,12 +11,19 @@ namespace gfx {
     public:
         // Each layer is a separate draw call
         struct TilemapRenderLayer {
-            std::weak_ptr<CanvasMesh> mesh;
-            float uvBase, uvIncrement;
+            friend TilemapRenderData;
+            
+            std::weak_ptr<CanvasDynamicMesh> mesh;
+            float uvIncrement;
             short fps, numFrames;
 
-            
+            TilemapRenderLayer() : uvIncrement(0), fps(0), numFrames(1) {}
+            void emitQuad(int blockW, int blockH, int x, int y, int atlasWidth, int atlasHeight, int atlasU, int atlasV);
+            void submit();
         };
+
+        /** Keep reference to atlas */
+        res::ResourceHandle<res::Image> m_atlas;
 
     private:
         std::vector<TilemapRenderLayer> m_layers;
@@ -30,20 +37,16 @@ namespace gfx {
             return index < m_layers.size() ? &m_layers[index] : nullptr;
         }
 
-        TilemapRenderLayer& addLayer() {
-            m_layers.emplace_back();
-            return m_layers.back();
-        }
+        TilemapRenderLayer& addLayer(CanvasRC2D* canvas);
 
         void clearLayers() {
             m_layers.clear();
         }
 
-        void createFromTilemap(res::TileMap const& tilemap);
+        void createFromTilemap(res::TileMap const& tilemap, CanvasRC2D* canvas);
 
-        void buildRenderData(CanvasRC2D* canvas);
-
-        void render(CanvasRC2D* canvas);
+        /** Anchors as defined by map.draw */
+        void render(CanvasRC2D* canvas, float x, float y, float w, float h);
     };
     
 }
