@@ -1,5 +1,6 @@
 #include "canvas2d_rc.hpp"
 #include "graphics/font_loader.hpp"
+#include "io/log.hpp"
 #include <ms/core/view_map.hpp>
 
 #include <stdio.h>
@@ -86,25 +87,29 @@ namespace gfx {
 
     struct CanvasDynamicMesh : public CanvasMesh {
         unsigned pageSize;
+        unsigned reserved; // triangle count + triangles allocated ahead
 
         int validatePageSize(int triCursor) {
+            DEBUG_ASSERT(pageSize);
             int triCount = triCursor + pageSize - 1;
             return ceil(triCount / pageSize) * pageSize;
         }
 
         CanvasDynamicMesh(unsigned triReserve, unsigned pageSize)
-            : pageSize(pageSize), CanvasMesh(validatePageSize(triReserve))
-        {}
+            : pageSize(pageSize), reserved(triReserve), CanvasMesh(triReserve)
+        {
+        }
         
         void setTriangle(CanvasTriangle const& tri, unsigned index) override {
             int newTriCount = validatePageSize(index + 1); // index 0 = page size 0, so always treat index as size here
-            if (newTriCount > data.triangleCount) {
+            if (newTriCount > reserved) {
                 data.vertices = (float*) MemRealloc(data.vertices, newTriCount * 9 * sizeof(float));
                 data.texcoords = (float*) MemRealloc(data.vertices, newTriCount * 6 * sizeof(float));
+                reserved = newTriCount;
             }
-            CanvasMesh::setTriangle(tri, index++);
-            data.triangleCount = index;
-            data.vertexCount = index * 3;
+            data.triangleCount = index + 1;
+            data.vertexCount = (index + 1) * 3;
+            CanvasMesh::setTriangle(tri, index);
         }
     };
 
@@ -122,6 +127,7 @@ namespace gfx {
      * @brief This holds all of the raylib-specific data not exposed in class header
      */
     struct CanvasEngine {
+        Material material;
         Shader shader;
         RenderTexture renderTexture;
         Matrix transform; // camera transform
@@ -171,9 +177,18 @@ namespace gfx {
                 m_engine->uniform.locationUVOffset = GetShaderLocation(m_engine->shader, "uvOffset");
                 SetShaderValue(m_engine->shader, m_engine->uniform.locationUVOffset, &defaultUVOffset, SHADER_UNIFORM_FLOAT);
             }
+
+            // for the API that requires a material instead: inject the same shader
+            m_engine->material.shader.id = m_engine->shader.id;
+            m_engine->material.shader.locs = rlGetShaderLocsDefault(); // we can control our uniforms outside of raylib
+            m_engine->material.maps = (MaterialMap *)RL_CALLOC(2, sizeof(MaterialMap));
+            m_engine->material.maps[MATERIAL_MAP_DIFFUSE].texture = (Texture2D){ rlGetTextureIdDefault(), 1, 1, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 };
+            m_engine->material.maps[MATERIAL_MAP_DIFFUSE].color = WHITE;    // Diffuse color
+            m_engine->material.maps[MATERIAL_MAP_SPECULAR].color = WHITE;   // Specular color
             
             rlSetLineWidth(m_engine->lineWidth);
             rlEnableSmoothLines();
+            rlDisableBackfaceCulling();
         }
     }
 
@@ -435,6 +450,20 @@ namespace gfx {
         ClearBackground(*(Color*)&OxAABBGGRR);
     }
 
+    void CanvasRC2D::setMaterialTexture(res::GPUTexture* texture) {
+        if (IsMaterialValid(m_engine->material)) {
+            // TODO: Keep ref to texture currently being assigned
+            m_engine->material.maps[MATERIAL_MAP_DIFFUSE].texture = *reinterpret_cast<Texture2D*>(texture->getPlatformTexture());
+        }
+    }
+
+    void CanvasRC2D::resetMaterialTexture() {
+        if (IsMaterialValid(m_engine->material)) {
+            // TODO: Keep ref to texture currently being assigned
+            m_engine->material.maps[MATERIAL_MAP_DIFFUSE].texture = (Texture2D){ rlGetTextureIdDefault(), 1, 1, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 };
+        }
+    }
+
     std::weak_ptr<CanvasMesh> CanvasRC2D::beginMesh(unsigned triCount) {
         auto cm = std::make_shared<CanvasMesh>(triCount);
         m_meshes.push_back(std::move(cm));
@@ -456,6 +485,26 @@ namespace gfx {
         /** TODO: Implement compact (final resize of mesh memory block) */
         auto cm = mesh.lock();
         if (cm) UploadMesh(&cm->data, false);
+    }
+    
+    void CanvasRC2D::drawMesh(std::weak_ptr<CanvasDynamicMesh> mesh, float x, float y, float w, float h) {
+        auto spMesh = mesh.lock();
+        if (spMesh) {
+            // this transform is relative to the current m_engine->transform
+            Matrix m3x3 = { w, 0.0f, 0.0f, x, 0.0f, h, 0.0f, y, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f };
+            Matrix transform = MatrixMultiply(MatrixIdentity(), m3x3);
+            DrawMesh(spMesh->data, m_engine->material, transform);
+        }
+    }
+
+    void CanvasRC2D::drawMesh(std::weak_ptr<CanvasMesh> mesh, float x, float y, float w, float h) {
+        auto spMesh = mesh.lock();
+        if (spMesh) {
+            // this transform is relative to the current m_engine->transform
+            Matrix m3x3 = { w, 0.0f, 0.0f, x, 0.0f, h, 0.0f, y, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f };
+            Matrix transform = MatrixMultiply(MatrixIdentity(), m3x3);
+            DrawMesh(spMesh->data, m_engine->material, transform);
+        }
     }
 }
 }

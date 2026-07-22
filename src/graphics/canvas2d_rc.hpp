@@ -88,14 +88,19 @@ namespace gfx {
 
         /* Canvas2D lower level drawing ops */
 
+        void setMaterialTexture(res::GPUTexture* texture);
+        void resetMaterialTexture();
+        
         std::weak_ptr<CanvasMesh> beginMesh(unsigned triCount);
-        void endMesh(std::weak_ptr<CanvasMesh> mesh);
-
         std::weak_ptr<CanvasDynamicMesh> beginDynamicMesh(unsigned triReserve = 0, unsigned pageSize = 2048);
-        void endDynamicMesh(std::weak_ptr<CanvasDynamicMesh> mesh, bool compact = false);
 
         static void addTriangle(std::weak_ptr<CanvasMesh> mesh, CanvasTriangle const& tri);
         static void addTriangle(std::weak_ptr<CanvasDynamicMesh> mesh, CanvasTriangle const& tri);
+        static void endMesh(std::weak_ptr<CanvasMesh> mesh);
+        static void endDynamicMesh(std::weak_ptr<CanvasDynamicMesh> mesh, bool compact = false);
+
+        void drawMesh(std::weak_ptr<CanvasMesh> mesh, float x, float y, float w, float h);
+        void drawMesh(std::weak_ptr<CanvasDynamicMesh> mesh, float x, float y, float w, float h);
     };
 
 }
