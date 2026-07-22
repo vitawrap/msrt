@@ -1,5 +1,6 @@
 #include "screen.hpp"
 #include "core/app.hpp"
+#include "graphics/tilemap_render.hpp"
 #include <algorithm>
 #include <string_view>
 #include <math.h>
@@ -225,6 +226,23 @@ namespace browser {
         } else {
             m_canvas->drawQuad(texture.operator->(), r.x, r.y, r.width, r.height,
             x, -y, isnan(w)? r.width : w, isnan(h)? r.height : h);
+        }
+    }
+
+    void Screen::drawMap(std::string_view name, float x, float y, float w, float h) {
+        // tilemap dict in runtime is directly addressed by name
+        res::ResourceHandle<res::TileMap> tilemap = getRuntime()->getTilemap(name);
+        if (!tilemap)
+            return;
+
+        auto* rd = tilemap->getRenderData(m_canvas);
+        w = w / (tilemap->getWidth() * tilemap->getBlockWidth());
+        h = h / (tilemap->getHeight() * tilemap->getBlockHeight());
+        if (initDrawOp(x, -y)) {
+            rd->render(m_canvas, 0.f, 0.f, w, h);
+            closeDrawOp();
+        } else {
+            rd->render(m_canvas, x, y, w, h);
         }
     }
 
