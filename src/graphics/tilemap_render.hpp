@@ -25,6 +25,9 @@ namespace gfx {
         /** Keep reference to atlas */
         res::ResourceHandle<res::Image> m_atlas;
 
+        unsigned m_blockWidth, m_blockHeight;
+        unsigned m_width, m_height;
+
     private:
         std::vector<TilemapRenderLayer> m_layers;
 
@@ -47,6 +50,11 @@ namespace gfx {
 
         /** Anchors as defined by map.draw */
         void render(CanvasRC2D* canvas, float x, float y, float w, float h);
+
+        unsigned getBlockWidth() const { return m_blockWidth; }
+        unsigned getBlockHeight() const { return m_blockHeight; }
+        unsigned getWidth() const { return m_width; }
+        unsigned getHeight() const { return m_height; }
     };
     
 }

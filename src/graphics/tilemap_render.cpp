@@ -75,22 +75,22 @@ namespace gfx {
         auto& defaultLayer = addLayer(canvas);
         ms::unordered_map<TilemapRenderLayer*> animLayers;
 
-        float blockWidth = tilemap.getBlockWidth();
-        float blockHeight = tilemap.getBlockHeight();
-        int width = tilemap.getWidth();
-        int height = tilemap.getHeight();
+        m_blockWidth = tilemap.getBlockWidth();
+        m_blockHeight = tilemap.getBlockHeight();
+        m_width = tilemap.getWidth();
+        m_height = tilemap.getHeight();
         
-        for (int y = 0; y < height; ++y) {
-            for (int x = 0; x < width; ++x) {
+        for (int y = 0; y < m_height; ++y) {
+            for (int x = 0; x < m_width; ++x) {
                 const res::TileMap::Tile& tile = tilemap.getTileYUp(x, y); // TODO: Not cache-friendly
                 if (!tilemap.isEmptyTile(tile)) {
                     std::string_view name = tilemap.getTileName(tile);
                     std::string_view path = rt->getSpritePath(name);
                     res::Image::AtlasRect rect;
                     if (atlas->findAtlasRect(path, rect)) {
-                        rect.x += tile.x * blockWidth;
-                        rect.y += tile.y * blockHeight;
-                        defaultLayer.emitQuad(blockWidth, blockHeight, x, y, atlas->getWidth(), atlas->getHeight(), rect.x, rect.y);
+                        rect.x += tile.x * m_blockWidth;
+                        rect.y += tile.y * m_blockHeight;
+                        defaultLayer.emitQuad(m_blockWidth, m_blockHeight, x, y, atlas->getWidth(), atlas->getHeight(), rect.x, rect.y);
                     }
                 }
             }
