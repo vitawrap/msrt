@@ -103,9 +103,12 @@ namespace gfx {
      */
     void TilemapRenderData::render(CanvasRC2D* canvas, float x, float y, float w, float h) {
         // TODO: is this correct?
+        // w and h need to be mapped to linear transform scale
+        float w_ratio = w / (m_width * m_blockWidth);
+        float h_ratio = h / (m_height * m_blockHeight);
+        canvas->setMaterialTexture(m_atlas->toTexture().cast());
         for (auto& layer : m_layers) {
-            canvas->setMaterialTexture(m_atlas->toTexture().cast());
-            canvas->drawMesh(layer.mesh, x - w*0.5, y - h*0.5, w, h);
+            canvas->drawMesh(layer.mesh, x - w*0.5, y - h*0.5, w_ratio, h_ratio);
         }
     }
 

@@ -236,8 +236,6 @@ namespace browser {
             return;
 
         auto* rd = tilemap->getRenderData(m_canvas);
-        w = w / (tilemap->getWidth() * tilemap->getBlockWidth());
-        h = h / (tilemap->getHeight() * tilemap->getBlockHeight());
         if (initDrawOp(x, -y)) {
             rd->render(m_canvas, 0.f, 0.f, w, h);
             closeDrawOp();
