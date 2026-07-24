@@ -106,9 +106,11 @@ namespace gfx {
         // w and h need to be mapped to linear transform scale
         float w_ratio = w / (m_width * m_blockWidth);
         float h_ratio = h / (m_height * m_blockHeight);
+        float x_ratio = canvas->getDrawAnchorX();
+        float y_ratio = 1.0 - canvas->getDrawAnchorY();
         canvas->setMaterialTexture(m_atlas->toTexture().cast());
         for (auto& layer : m_layers) {
-            canvas->drawMesh(layer.mesh, x - w*0.5, y - h*0.5, w_ratio, h_ratio);
+            canvas->drawMesh(layer.mesh, x - w*x_ratio, y - h*y_ratio, w_ratio, h_ratio);
         }
     }
 
