@@ -86,6 +86,10 @@ namespace gfx {
         void setFont(char const* fontFaceName);
         void setUVOffsetY(float offset);
 
+        /* Canvas anchors are mapped from -1 to 1 */
+        float getDrawAnchorX() const { return m_drawAnchorX; }
+        float getDrawAnchorY() const { return m_drawAnchorY; }
+
         /* Canvas2D lower level drawing ops */
 
         void setMaterialTexture(res::GPUTexture* texture);
