@@ -25,7 +25,8 @@ namespace browser {
         m_anchorY(0.f),
         m_lineWidth(1.f),
         m_ratio(1.f),
-        m_screenTransform(false)
+        m_screenTransform(false),
+        m_color(0xFFFFFFFF)
     {}
 
     void Screen::initContext() {
