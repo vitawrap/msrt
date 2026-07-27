@@ -330,7 +330,7 @@ namespace gfx {
         rlMultMatrixf(MatrixToFloat(m_engine->transform));
         m_drawing = true;
 
-        ClearBackground(BLACK); // default microscript clear color is black
+        // microstudio offloads clear control to script
     }
 
     void CanvasRC2D::submitFrame() {
