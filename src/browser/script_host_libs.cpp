@@ -122,8 +122,10 @@ namespace browser {
 
     static JSValue ScreenProto_drawImage(JSContext* ctx, JSValueConst self, int argc, JSValueConst *argv, int magic) {
         auto* screen = opaqueToObject<Screen>(self);
-        if (argc < 5)
-            return JS_ThrowTypeError(ctx, "drawSprite expects 5 arguments, %d given.", argc);
+        if (argc < 5) {
+            static char const* nameMap[] = {"drawSprite", "drawMap"};
+            return JS_ThrowTypeError(ctx, "%s expects 5 arguments, %d given.", nameMap[magic], argc);
+        }
         
         char const* imname = JS_ToCString(ctx, argv[0]);
         double x; JS_ToFloat64(ctx, &x, argv[1]);
