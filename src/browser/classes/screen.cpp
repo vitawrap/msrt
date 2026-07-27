@@ -292,7 +292,10 @@ namespace browser {
         if (sscanf(str, "#%X%n", &r, &len)) {
             switch (len) {
                 case 4: // #RGB notation
-                return r << 12 | r << 8 | ((r & 7) << 4);
+                g = r;
+                r |= g << 12;
+                r = (r & 0xFFF000FF) | g << 8;
+                r = (r & 0xFFFFF00F) | ((g & 0xFF) << 4); // v fallthrough
                 case 7: // #RRGGBB notation
                 return (r & 0xFFFFFF) | 0xFF000000;
                 case 9: // #RRGGBBAA notation
