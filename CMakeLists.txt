@@ -64,9 +64,6 @@ FetchContent_Declare(
   GIT_TAG        aee7fbddf118d9363575af96310c29fa747d70c0 # master as of april 2026
 )
 
-# for snmalloc, force it to override os allocator symbols, this is apparently risky on windows
-set(SNMALLOC_STATIC_LIBRARY_PREFIX "" CACHE STRING "Remove prefix to override global allocator")
-
 FetchContent_Declare(
   snmalloc
   GIT_REPOSITORY https://github.com/microsoft/snmalloc.git
