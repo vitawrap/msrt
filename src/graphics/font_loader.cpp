@@ -20,26 +20,35 @@ FontLoader::~FontLoader() {
 
 bool FontLoader::getPath(std::string_view ftname, std::string& path) {
 #ifdef PLATFORM_UNIX
-    FcConfig* config = FcInitLoadConfigAndFonts();
-    FcPattern* pattern = FcNameParse((const FcChar8*)ftname.data());
-    FcConfigSubstitute(config, pattern, FcMatchPattern);
-    FcDefaultSubstitute(pattern);
-
-    FcResult res;
-    FcPattern* font = FcFontMatch(config, pattern, &res);
-    if (font) {
-        FcChar8* file;
-        if (FcPatternGetString(font, FC_FILE, 0, &file) == FcResultMatch) {
-            path = reinterpret_cast<char const*>(file);
-            return true;
+    #ifdef FC_VERSION
+        FcConfig* config = FcInitLoadConfigAndFonts();
+        FcPattern* pattern = FcNameParse((const FcChar8*)ftname.data());
+        FcConfigSubstitute(config, pattern, FcMatchPattern);
+        FcDefaultSubstitute(pattern);
+    
+        FcResult res;
+        FcPattern* font = FcFontMatch(config, pattern, &res);
+        if (font) {
+            FcChar8* file;
+            if (FcPatternGetString(font, FC_FILE, 0, &file) == FcResultMatch) {
+                path = reinterpret_cast<char const*>(file);
+                return true;
+            }
+            FcPatternDestroy(font);
         }
-        FcPatternDestroy(font);
-    }
-    FcPatternDestroy(pattern);
-    return false;
+        FcPatternDestroy(pattern);
+        return false;
+    #else
+        /* fontconfig is not on the system (very weird) */
+        #warning Fontconfig is not available on this system, only internal fonts will be used.
+        return false;
+    #endif
 #endif
 #ifdef PLATFORM_NT
     /* TODO: Regkey based lookup on NT */
+    return false;
+#endif
+#ifdef PLATFORM_UNKNOWN
     return false;
 #endif
 }
