@@ -2,6 +2,7 @@
 #include <ms/core/util.hpp>
 #include "io/log.hpp"
 #include "script_qjs.hpp"
+#include "core/alloc_ext.hpp"
 
 /* Script list */
 SCRIPT_RESOLVE_EMBED(play_js)
@@ -26,11 +27,38 @@ namespace browser {
 
     thread_local JSContext* JSTempVal::s_context = nullptr;
 
+    static void* script_malloc(void*, size_t size) {
+        return MS_ALLOC_EXT_FUNC(malloc) (size);
+    }
+
+    static void* script_calloc(void*, size_t nmemb, size_t size) {
+        return MS_ALLOC_EXT_FUNC(calloc) (nmemb, size);
+    }
+
+    static void* script_realloc(void*, void* ptr, size_t size) {
+        return MS_ALLOC_EXT_FUNC(realloc) (ptr, size);
+    }
+
+    static size_t script_msize(const void* ptr) {
+        return MS_ALLOC_EXT_FUNC(malloc_usable_size) (ptr);
+    }
+
+    static void script_free(void*, void* ptr) {
+        MS_ALLOC_EXT_FUNC(free) (ptr);
+    }
+    
     void ScriptHost::createEngine() {
         destroyEngine();
         auto* js = m_engine = new ScriptEngine;
 
-        js->runtime = JS_NewRuntime(); // TODO: Test with fast allocator libs
+        JSMallocFunctions mf;
+        mf.js_free = script_free;
+        mf.js_malloc = script_malloc;
+        mf.js_calloc = script_calloc;
+        mf.js_realloc = script_realloc;
+        mf.js_malloc_usable_size = script_msize;
+        
+        js->runtime = JS_NewRuntime2(&mf, nullptr);
         if (! js->runtime) {
             throw ScriptEngineException("QuickJS: Cannot create runtime!");
         }
@@ -42,7 +70,6 @@ namespace browser {
         // try to have a better memory footprint in release mode
         JS_SetStripInfo(js->runtime, JS_STRIP_DEBUG | JS_STRIP_SOURCE);
 #endif
-
         // Browser API
         JSTempVal::scopeContext(m_engine->context);
         installLibs();
