@@ -328,19 +328,20 @@ namespace gfx {
         // have to use rlgl here, because Camera2D is weirdly restrictive.
         rlLoadIdentity();
         rlMultMatrixf(MatrixToFloat(m_engine->transform));
-        m_drawing = true;
 
+        BeginShaderMode(m_engine->shader);
+        m_drawing = true;
         // microstudio offloads clear control to script
     }
 
     void CanvasRC2D::submitFrame() {
+        EndShaderMode();
         EndTextureMode();
         // render RT on screen
         m_window->selectWindow(m_windowId);
         Rectangle src{ 0, 0, m_width, -m_height };
         Rectangle dst{ 0, 0, (float)m_window->getWindowWidth(), (float)m_window->getWindowHeight()};
         BeginDrawing();
-        BeginShaderMode(m_engine->shader);
         
         DrawTexturePro(m_engine->renderTexture.texture, src, dst, Vector2{0,0}, 0.f, WHITE);
         
@@ -349,7 +350,6 @@ namespace gfx {
         snprintf(fpsText, 64, "%d FPS", GetFPS());
         DrawText(fpsText, 8, 8, 20, WHITE);
         
-        EndShaderMode();
         EndDrawing();
         m_drawing = false;
     }
