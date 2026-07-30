@@ -133,6 +133,9 @@ namespace browser {
 
         /** Get virtual render height */
         int getHeight() const { return m_height; }
+
+        /** Display scale ratio compared to true world scale */
+        float getRatio() const { return m_ratio; }
     };
 
 }
