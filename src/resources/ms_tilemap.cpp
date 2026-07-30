@@ -28,19 +28,56 @@ namespace res {
         memset(m_tileGrid, 0, m_width * m_height * sizeof(int));
     }
 
-    void TileMap::addTileInfo(std::string name) {
+    void TileMap::addTileInfo(std::string_view name, bool checkDuplicates) {
         short x = 0, y = 0;
         size_t pos = name.rfind(":");
         if (pos != std::string::npos) {
-            sscanf(name.c_str() + pos + 1, "%hd,%hd", &x, &y);
+            sscanf(name.data() + pos + 1, "%hd,%hd", &x, &y);
             name = name.substr(0, pos);
         }
         auto it = std::find(m_spriteNames.begin(), m_spriteNames.end(), name);
         unsigned index = std::distance(m_spriteNames.begin(), it);
         if (it == m_spriteNames.end()) {
-            m_spriteNames.push_back(name);
+            m_spriteNames.push_back(std::string{name});
         }
-        m_tiles.push_back({index, x, y});
+        Tile tile{index, x, y};
+        if (!checkDuplicates || std::find(m_tiles.begin(), m_tiles.end(), tile) == m_tiles.end())
+            m_tiles.push_back(std::move(tile));
+    }
+
+    void TileMap::setTile(std::string_view name, unsigned x, unsigned y) {
+        if (x < 0 || x >= m_width || y < 0 || y >= m_height)
+            return;
+        
+        addTileInfo(name, true);
+        auto it = std::find_if(m_tiles.begin(), m_tiles.end(), [this, name](Tile const& tile){
+            return m_spriteNames[tile.id] == name;
+        });
+        DEBUG_ASSERT(it != m_tiles.end());
+        int idx = std::distance(m_tiles.begin(), it);
+        int oldidx = m_tileGrid[(y * m_width) + x];
+        if (oldidx != idx) {
+            m_tileGrid[(y * m_width) + x] = idx;
+
+            // force graphics rebuild for next draw call
+            delete m_renderData;
+            m_renderData = nullptr;
+        }
+    }
+
+    void TileMap::removeTile(unsigned x, unsigned y) {
+        if (x < 0 || x >= m_width || y < 0 || y >= m_height)
+            return;
+
+        const int idx = 0; // EMPTY_TILE is always the first entry
+        int oldidx = m_tileGrid[(y * m_width) + x];
+        if (oldidx != idx) {
+            m_tileGrid[(y * m_width) + x] = idx;
+
+            // force graphics rebuild for next draw call
+            delete m_renderData;
+            m_renderData = nullptr;
+        }
     }
 
     Resource* TileMap::loadingHandler(class ms::io::File *file) {

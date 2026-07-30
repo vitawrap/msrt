@@ -370,6 +370,23 @@ namespace browser {
         MAYBE_RETHROW_EXCEPTION_V(ctx, ret);
     }
 
+    static JSValue RuntimeProto_mapSet(JSContext *ctx, JSValueConst self, int argc, JSValueConst *argv) {
+        Runtime* runtime = opaqueToObject<Runtime>(self);
+        char const* name = JS_ToCString(ctx, argv[0]);
+        res::ResourceHandle<res::TileMap> tmap = runtime->getTilemap(name);
+        JS_FreeCString(ctx, name);
+        int64_t x; JS_ToInt64(ctx, &x, argv[1]);
+        int64_t y; JS_ToInt64(ctx, &y, argv[2]);
+        if (JS_IsStrictEqual(ctx, argv[3], JS_NewInt32(ctx, 0))) {
+            tmap->removeTile(x, y);
+        } else {
+            char const* tile = JS_ToCString(ctx, argv[3]);
+            tmap->setTile(tile, x, y);
+            JS_FreeCString(ctx, tile);
+        }
+        MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
+    }
+
     static JSValue RuntimeProto_keyQuery(JSContext *ctx, JSValueConst self, int argc, JSValueConst *argv, int magic) {
         Runtime* runtime = opaqueToObject<Runtime>(self);
         JSValue retValue = JS_FALSE;
@@ -416,6 +433,7 @@ namespace browser {
         JS_CFUNC_MAGIC_DEF("__keyboardKeyRelease", 1, RuntimeProto_keyQuery, 3),
         JS_CGETSET_MAGIC_DEF("__keyboardKeys", RuntimeProto_getter, nullptr, 5),
         JS_CFUNC_DEF("__mapGet", 3, RuntimeProto_mapGet),
+        JS_CFUNC_DEF("__mapSet", 4, RuntimeProto_mapSet),
     };
 
     static void installRuntime(JSContext* ctx) {

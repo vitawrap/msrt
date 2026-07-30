@@ -167,11 +167,11 @@ this.Runtime.prototype.__addSprite = function(path, fps, fcount, width, height) 
 this.Runtime.prototype.__addTilemap = function (path, width, height, blkWidth, blkHeight) {
   console.log("Adding tilemap: " + path)
   if (this.maps === undefined) { this.maps = {}; }
-  let mapGet = (x, y) => { this.__mapGet(path, x, y); };
-  let mapSet = (x, y, name) => { this.__mapSet(path, x, y, name); };
-  let mapClone = () => { this.__mapClone(path); }
-  const name = path.match(/(?<=maps\/)([^\t\n\r .]+)/g);
-  this.maps[name] = {
+  const map_name = path.match(/(?<=maps\/)([^\t\n\r .]+)/g);
+  let mapGet = (x, y) => { return this.__mapGet(map_name, x, y); };
+  let mapSet = (x, y, name) => { this.__mapSet(map_name, x, y, name); };
+  let mapClone = () => { this.__mapClone(map_name); }
+  this.maps[map_name] = {
     width: width,
     height: height,
     block_width: blkWidth,
@@ -179,7 +179,7 @@ this.Runtime.prototype.__addTilemap = function (path, width, height, blkWidth, b
     get: mapGet,
     set: mapSet,
     clone: mapClone,
-    name: name,
+    name: map_name,
     ready: 1
   };
 }

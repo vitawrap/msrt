@@ -19,6 +19,10 @@ namespace res {
         struct Tile {
             unsigned id; // index into m_spriteNames
             short x, y;
+
+            bool operator == (Tile const& rhs) {
+                return id == rhs.id && x == rhs.x && y == rhs.y;
+            }
         };
 
         static const Tile EMPTY_TILE;
@@ -31,7 +35,7 @@ namespace res {
         int m_blockWidth, m_blockHeight;
         int* m_tileGrid;
 
-        void addTileInfo(std::string name);
+        void addTileInfo(std::string_view name, bool checkDuplicates = false);
         void allocateGrid();
 
         gfx::TilemapRenderData* m_renderData;
@@ -46,6 +50,9 @@ namespace res {
         int getHeight() const { return m_height; }
         int getBlockWidth() const { return m_blockWidth; }
         int getBlockHeight() const { return m_blockHeight; }
+
+        void setTile(std::string_view name, unsigned x, unsigned y);
+        void removeTile(unsigned x, unsigned y);
 
         bool isEmptyTile(Tile tile) const { return tile.id == 0; }
         inline const Tile& getTile(unsigned x, unsigned y) const;
