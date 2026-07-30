@@ -324,8 +324,8 @@ namespace browser {
             case 0: retVal = JS_NewBool(ctx, runtime->isTouching()); break;
             case 1: retVal = JS_NewBool(ctx, runtime->isTouchPressed()); break;
             case 2: retVal = JS_NewBool(ctx, runtime->isTouchReleased()); break;
-            case 3: retVal = JS_NewInt32(ctx, runtime->getTouchX()); break;
-            case 4: retVal = JS_NewInt32(ctx, runtime->getTouchY()); break;
+            case 3: retVal = JS_NewNumber(ctx, runtime->getTouchX()); break;
+            case 4: retVal = JS_NewNumber(ctx, runtime->getTouchY()); break;
             case 5: {
                 JSValue keys[runtime->keyCount()]; int count = 0;
                 for (auto k = runtime->keysBegin(); k != runtime->keysEnd(); ++k)

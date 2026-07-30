@@ -50,7 +50,7 @@ namespace browser {
         int m_inputKeyHandler;
 
         struct {
-            short x, y;
+            float x, y;
             bool isTouching  : 1;
             bool isPressed   : 1;
             bool isReleased  : 1;
@@ -116,8 +116,8 @@ namespace browser {
         bool isTouching() const { return m_touch.isTouching; }
         bool isTouchPressed() const { return m_touch.isPressedFrame; }
         bool isTouchReleased() const { return m_touch.isReleasedFrame; }
-        short getTouchX() const { return m_touch.x; }
-        short getTouchY() const { return m_touch.y; }
+        float getTouchX() const { return m_touch.x; }
+        float getTouchY() const { return m_touch.y; }
 
         bool isKeyDown(char const* name) const {
             return m_keys.frame.contains(name) && m_keys.frame.at(name) != KS_RELEASE;

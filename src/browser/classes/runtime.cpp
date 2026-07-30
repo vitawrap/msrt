@@ -2,6 +2,7 @@
 #include "core/app.hpp"
 #include "io/log.hpp"
 
+#include "screen.hpp"
 #include <stdio.h>
 
 namespace ms {
@@ -43,10 +44,12 @@ namespace browser {
         m_input = Application::get()->getInputManager();
         DEBUG_ASSERT(m_input);
         m_inputPointerHandler = m_input->pointer.connect([this](auto pi) {
+            auto* screen = getScreen();
             m_touch.isTouching = Application::get()->getInputManager()->isPointerPressed();
             if (m_touch.isTouching) {
-                m_touch.x = pi.x;
-                m_touch.y = pi.y;
+                // It seems no matter what transformation is in effect, mouse coords are always centered.
+                m_touch.x = screen? (pi.x / screen->getRatio()) - (float(screen->getWidth()) * .5f) : pi.x;
+                m_touch.y = screen? (float(screen->getHeight()) * .5f) - (pi.y / screen->getRatio()) : pi.y;
                 m_touch.isPressed = true;
             } else {
                 m_touch.isReleased = true;
