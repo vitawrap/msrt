@@ -364,7 +364,7 @@ namespace browser {
         int64_t y; JS_ToInt64(ctx, &y, argv[2]);
         res::ResourceHandle<res::TileMap> tmap = runtime->getTilemap(name);
         JS_FreeCString(ctx, name);
-        const res::TileMap::Tile tile = tmap->getTileYUp(x, y);
+        const res::TileMap::Tile tile = tmap->getTile(x, y);
         std::string_view tname = tmap->getTileName(tile);
         JSValue ret = tname == ""? JS_NewInt32(ctx, 0) : JS_NewStringLen(ctx, tname.data(), tname.length());
         MAYBE_RETHROW_EXCEPTION_V(ctx, ret);
