@@ -90,12 +90,23 @@ namespace gfx {
                     if (atlas->findAtlasRect(path, rect)) {
                         rect.x += tile.x * m_blockWidth;
                         rect.y += tile.y * m_blockHeight;
-                        defaultLayer.emitQuad(m_blockWidth, m_blockHeight, x, y, atlas->getWidth(), atlas->getHeight(), rect.x, rect.y);
+                        TilemapRenderLayer* layer = &defaultLayer;
+                        if (rect.nframes > 1) {
+                            auto it = animLayers.find(name);
+                            if (it != animLayers.end())
+                                layer = it->second;
+                            else {
+                                layer = &addLayer(canvas);
+                                animLayers.emplace(name, layer);
+                            }
+                        }
+                        layer->emitQuad(m_blockWidth, m_blockHeight, x, y, atlas->getWidth(), atlas->getHeight(), rect.x, rect.y);
                     }
                 }
             }
         }
-        defaultLayer.submit();
+        for (auto layer : m_layers)
+            layer.submit();
     }
 
     /**
