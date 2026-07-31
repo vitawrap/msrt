@@ -36,6 +36,13 @@ namespace res {
                     m_settings.orientation  = (char const*) root["orientation"];
                     m_settings.language     = (char const*) root["language"];
 
+                    // we are not targeting msv1, but sometimes this works.
+                    if (m_settings.language == "microscript_v1_i" || m_settings.language == "microscript_v1_t") {
+                        LOG_MSGF("[WARNING] Project intended for %s will run as microscript_v2, expect (fatal!) bugs.\n",
+                            m_settings.language.c_str());
+                        m_settings.language = "microscript_v2";
+                    }
+
                     auto files = root["files"]; io::CJSONNode file;
                     CJSONNode_forEach(file, files) {
                         std::filesystem::path key(file->string);
