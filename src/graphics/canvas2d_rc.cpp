@@ -482,8 +482,8 @@ namespace gfx {
         if (cm) UploadMesh(&cm->data, false);
     }
 
-    std::weak_ptr<CanvasDynamicMesh> CanvasRC2D::beginDynamicMesh(unsigned triReserve, unsigned pageBits) {
-        auto cm = std::make_shared<CanvasDynamicMesh>(triReserve, pageBits);
+    std::weak_ptr<CanvasDynamicMesh> CanvasRC2D::beginDynamicMesh(unsigned triReserve) {
+        auto cm = std::make_shared<CanvasDynamicMesh>(triReserve);
         m_meshes.push_back(std::move(cm));
         return std::weak_ptr<CanvasDynamicMesh>(std::static_pointer_cast<CanvasDynamicMesh>(m_meshes.back()));
     }

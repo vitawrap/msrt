@@ -96,7 +96,7 @@ namespace gfx {
         void resetMaterialTexture();
         
         std::weak_ptr<CanvasMesh> beginMesh(unsigned triCount);
-        std::weak_ptr<CanvasDynamicMesh> beginDynamicMesh(unsigned triReserve = 0, unsigned pageBits = 10);
+        std::weak_ptr<CanvasDynamicMesh> beginDynamicMesh(unsigned triReserve = 0);
 
         static void addTriangle(std::weak_ptr<CanvasMesh> mesh, CanvasTriangle const& tri);
         static void addTriangle(std::weak_ptr<CanvasDynamicMesh> mesh, CanvasTriangle const& tri);
