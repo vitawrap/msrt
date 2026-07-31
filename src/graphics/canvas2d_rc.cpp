@@ -48,10 +48,10 @@ namespace gfx {
         CanvasMesh(unsigned triCount)
             : data{}, triCursor(0)
         {
-            data.vertexCount = triCount * 3;
-            data.triangleCount = triCount;
-            data.vertices = (float*) MemAlloc(data.vertexCount * 3 * sizeof(float));
-            data.texcoords = (float*) MemAlloc(data.vertexCount * 2 * sizeof(float));
+            data.vertexCount = triCursor * 3;
+            data.triangleCount = triCursor;
+            data.vertices = (float*) MemAlloc(triCount * 9 * sizeof(float));
+            data.texcoords = (float*) MemAlloc(triCount * 6 * sizeof(float));
             data.normals = nullptr;
         }
 
@@ -60,7 +60,7 @@ namespace gfx {
         }
 
         virtual void setTriangle(CanvasTriangle const& tri, unsigned index) {
-            assert(index < data.triangleCount);
+            DEBUG_ASSERT(index < data.triangleCount);
             
             data.vertices[index * 9 + 0] = tri.x0;
             data.vertices[index * 9 + 1] = tri.y0;
@@ -81,16 +81,17 @@ namespace gfx {
         }
 
         void addTriangle(CanvasTriangle const& tri) {
-            setTriangle(tri, triCursor++);
+            triCursor++;
+            data.vertexCount = triCursor * 3;
+            data.triangleCount = triCursor;
+            setTriangle(tri, triCursor - 1);
         }
     };
 
     struct CanvasDynamicMesh : public CanvasMesh {
-        unsigned pageBits; // how many bits for a vertex page
         unsigned reserved; // triangle count + triangles allocated ahead
 
-        int validatePageSize(int triCursor) {
-            DEBUG_ASSERT(pageBits);
+        int validatePageSize(unsigned triCursor) {
             --triCursor;
             unsigned bl2 = 0;
             while (triCursor & (size_t)-1) {
@@ -100,8 +101,8 @@ namespace gfx {
             return (1 << bl2);
         }
 
-        CanvasDynamicMesh(unsigned triReserve, unsigned pageBits)
-            : pageBits(pageBits), reserved(triReserve), CanvasMesh(triReserve)
+        CanvasDynamicMesh(unsigned triReserve)
+            : reserved(validatePageSize(triReserve)), CanvasMesh(validatePageSize(triReserve))
         {
         }
         
@@ -111,6 +112,7 @@ namespace gfx {
             if (newTriCount > reserved) {
                 data.vertices = (float*) MemRealloc(data.vertices, newTriCount * 9 * sizeof(float));
                 data.texcoords = (float*) MemRealloc(data.texcoords, newTriCount * 6 * sizeof(float));
+                DEBUG_ASSERT(data.vertices && data.texcoords);
                 reserved = newTriCount;
             }
             data.triangleCount = index + 1;
