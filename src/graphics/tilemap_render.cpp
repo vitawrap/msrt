@@ -10,7 +10,7 @@ namespace gfx {
     TilemapRenderData::TilemapRenderLayer& TilemapRenderData::addLayer(CanvasRC2D* canvas)  {
         m_layers.emplace_back();
         TilemapRenderLayer& layer = m_layers.back();
-        layer.mesh = canvas->beginDynamicMesh(2048, 2048); // FIXME: triReserve does not work unless it is = to pageSize
+        layer.mesh = canvas->beginDynamicMesh(2048, 10);
         return layer;
     }
 

@@ -86,25 +86,31 @@ namespace gfx {
     };
 
     struct CanvasDynamicMesh : public CanvasMesh {
-        unsigned pageSize;
+        unsigned pageBits; // how many bits for a vertex page
         unsigned reserved; // triangle count + triangles allocated ahead
 
         int validatePageSize(int triCursor) {
-            DEBUG_ASSERT(pageSize);
-            int triCount = triCursor + pageSize - 1;
-            return ceil(triCount / pageSize) * pageSize;
+            DEBUG_ASSERT(pageBits);
+            --triCursor;
+            unsigned bl2 = 0;
+            while (triCursor & (size_t)-1) {
+                triCursor >>= 1;
+                ++bl2;
+            }
+            return (1 << bl2);
         }
 
-        CanvasDynamicMesh(unsigned triReserve, unsigned pageSize)
-            : pageSize(pageSize), reserved(triReserve), CanvasMesh(triReserve)
+        CanvasDynamicMesh(unsigned triReserve, unsigned pageBits)
+            : pageBits(pageBits), reserved(triReserve), CanvasMesh(triReserve)
         {
         }
         
         void setTriangle(CanvasTriangle const& tri, unsigned index) override {
             int newTriCount = validatePageSize(index + 1); // index 0 = page size 0, so always treat index as size here
+            DEBUG_ASSERT(index < newTriCount);
             if (newTriCount > reserved) {
                 data.vertices = (float*) MemRealloc(data.vertices, newTriCount * 9 * sizeof(float));
-                data.texcoords = (float*) MemRealloc(data.vertices, newTriCount * 6 * sizeof(float));
+                data.texcoords = (float*) MemRealloc(data.texcoords, newTriCount * 6 * sizeof(float));
                 reserved = newTriCount;
             }
             data.triangleCount = index + 1;
@@ -474,8 +480,8 @@ namespace gfx {
         if (cm) UploadMesh(&cm->data, false);
     }
 
-    std::weak_ptr<CanvasDynamicMesh> CanvasRC2D::beginDynamicMesh(unsigned triReserve, unsigned pageSize) {
-        auto cm = std::make_shared<CanvasDynamicMesh>(triReserve, pageSize);
+    std::weak_ptr<CanvasDynamicMesh> CanvasRC2D::beginDynamicMesh(unsigned triReserve, unsigned pageBits) {
+        auto cm = std::make_shared<CanvasDynamicMesh>(triReserve, pageBits);
         m_meshes.push_back(std::move(cm));
         return std::weak_ptr<CanvasDynamicMesh>(std::static_pointer_cast<CanvasDynamicMesh>(m_meshes.back()));
     }
