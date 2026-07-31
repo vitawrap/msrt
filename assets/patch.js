@@ -133,7 +133,7 @@ this.Screen.prototype.getInterface = function() {
       return screen.loadFont(font);
     },
     isFontReady: function(font) {
-      return screen.isFontReady(font);
+      return true;
     }
   };
 }
