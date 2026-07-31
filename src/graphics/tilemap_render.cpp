@@ -97,6 +97,9 @@ namespace gfx {
                                 layer = it->second;
                             else {
                                 layer = &addLayer(canvas);
+                                layer->fps = rect.fps;
+                                layer->numFrames = rect.nframes;
+                                layer->uvIncrement = ((float)rect.height / rect.nframes) / atlas->getHeight();
                                 animLayers.emplace(name, layer);
                             }
                         }
@@ -121,8 +124,17 @@ namespace gfx {
         float y_ratio = 1.0 - canvas->getDrawAnchorY();
         canvas->setMaterialTexture(m_atlas->toTexture().cast());
         for (auto& layer : m_layers) {
+            if (layer.numFrames > 1) {
+                double animTime = Time::frameNow();
+                long long frame = static_cast<long long>(animTime * layer.fps) % layer.numFrames;
+                canvas->setUVOffsetY(layer.uvIncrement * double(frame));
+            } else {
+                // !! unlikely that we find another still layer after the default one !!
+                canvas->setUVOffsetY(0.f);
+            }
             canvas->drawMesh(layer.mesh, x - w*x_ratio, -y - h*y_ratio, w_ratio, h_ratio);
         }
+        canvas->setUVOffsetY(0.f); // reset uv state for other draw calls
     }
 
 }
