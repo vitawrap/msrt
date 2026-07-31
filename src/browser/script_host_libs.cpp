@@ -140,11 +140,14 @@ namespace browser {
         MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
     }
 
-    static JSValue ScreenProto_setDrawAnchor(JSContext* ctx, JSValueConst self, int argc, JSValueConst *argv) {
+    static JSValue ScreenProto_setDrawFloat2(JSContext* ctx, JSValueConst self, int argc, JSValueConst *argv, int magic) {
         auto* screen = opaqueToObject<Screen>(self);
         double x; JS_ToFloat64(ctx, &x, argv[0]);
         double y; JS_ToFloat64(ctx, &y, argv[1]);
-        screen->setDrawAnchor(x, y);
+        switch (magic) {
+            case 0: screen->setDrawAnchor(x, y); break;
+            case 1: screen->setDrawScale(x, y); break;
+        }
         MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
     }
 
@@ -188,7 +191,8 @@ namespace browser {
         JS_CFUNC_MAGIC_DEF("drawSprite", 5, ScreenProto_drawImage, 0),
         JS_CFUNC_MAGIC_DEF("drawMap", 5, ScreenProto_drawImage, 1),
         JS_CFUNC_DEF("drawText", 5, ScreenProto_drawText),
-        JS_CFUNC_DEF("setDrawAnchor", 2, ScreenProto_setDrawAnchor),
+        JS_CFUNC_MAGIC_DEF("setDrawAnchor", 2, ScreenProto_setDrawFloat2, 0),
+        JS_CFUNC_MAGIC_DEF("setDrawScale", 2, ScreenProto_setDrawFloat2, 1),
         JS_CFUNC_MAGIC_DEF("setDrawRotation", 1, ScreenProto_setDouble1, 0),
         JS_CFUNC_MAGIC_DEF("setAlpha", 1, ScreenProto_setDouble1, 1),
         JS_CFUNC_MAGIC_DEF("setLineWidth", 1, ScreenProto_setDouble1, 2),

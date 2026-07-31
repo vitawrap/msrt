@@ -177,6 +177,11 @@ namespace browser {
         m_objectDegrees = deg;
     }
 
+    void Screen::setDrawScale(float w, float h) {
+        //m_objectScaleX = w;
+        //m_objectScaleY = h;
+    }
+
     void Screen::drawSprite(std::string_view name, float x, float y, float w, float h) {
         int frameNum = -1;
         size_t pFrame = name.rfind('.');

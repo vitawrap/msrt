@@ -101,6 +101,9 @@ namespace browser {
         /** Set draw rotation */
         void setDrawRotation(float deg);
 
+        /** Global scale modifier */
+        void setDrawScale(float w, float h);
+
         /** ? */
         void initDraw();
 
