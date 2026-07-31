@@ -20,7 +20,7 @@ namespace res {
             unsigned id; // index into m_spriteNames
             short x, y;
 
-            bool operator == (Tile const& rhs) {
+            constexpr bool operator == (Tile const& rhs) {
                 return id == rhs.id && x == rhs.x && y == rhs.y;
             }
         };
