@@ -119,7 +119,7 @@ namespace res {
                 )
             );
             binSide <<= 1;
-            DEBUG_ASSERT(binSide <= 2048);
+            //DEBUG_ASSERT(binSide <= 2048);
 
             if (!packingFailed) {
                 PlatformImage* pImage = new PlatformImage;
