@@ -29,7 +29,7 @@ namespace gfx {
         unsigned m_width, m_height;
 
     private:
-        std::vector<TilemapRenderLayer> m_layers;
+        std::deque<TilemapRenderLayer> m_layers;
 
     public:
         TilemapRenderLayer const* getLayer(unsigned index) const {
