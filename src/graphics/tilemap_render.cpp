@@ -10,7 +10,7 @@ namespace gfx {
     TilemapRenderData::TilemapRenderLayer& TilemapRenderData::addLayer(CanvasRC2D* canvas)  {
         m_layers.emplace_back();
         TilemapRenderLayer& layer = m_layers.back();
-        layer.mesh = canvas->beginDynamicMesh(2048, 10);
+        layer.mesh = canvas->beginDynamicMesh(2048);
         return layer;
     }
 
