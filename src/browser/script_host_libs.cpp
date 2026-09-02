@@ -191,6 +191,7 @@ namespace browser {
         JS_CFUNC_MAGIC_DEF("drawSprite", 5, ScreenProto_drawImage, 0),
         JS_CFUNC_MAGIC_DEF("drawMap", 5, ScreenProto_drawImage, 1),
         JS_CFUNC_DEF("drawText", 5, ScreenProto_drawText),
+        JS_CFUNC_DEF("drawTextOutline", 5, ScreenProto_drawText),
         JS_CFUNC_MAGIC_DEF("setDrawAnchor", 2, ScreenProto_setDrawFloat2, 0),
         JS_CFUNC_MAGIC_DEF("setDrawScale", 2, ScreenProto_setDrawFloat2, 1),
         JS_CFUNC_MAGIC_DEF("setDrawRotation", 1, ScreenProto_setDouble1, 0),
