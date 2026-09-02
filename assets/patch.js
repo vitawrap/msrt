@@ -170,7 +170,10 @@ this.Runtime.prototype.__addTilemap = function (path, width, height, blkWidth, b
   const map_name = path.match(/(?<=maps\/)([^\t\n\r .]+)/g);
   let mapGet = (x, y) => { return this.__mapGet(map_name, x, y); };
   let mapSet = (x, y, name) => { this.__mapSet(map_name, x, y, name); };
-  let mapClone = () => { this.__mapClone(map_name); }
+  let mapClone = () => {
+    let clone_name = this.__mapClone(map_name); // should recurse into __addTilemap
+    return this.maps[clone_name];
+  }
   this.maps[map_name] = {
     width: width,
     height: height,

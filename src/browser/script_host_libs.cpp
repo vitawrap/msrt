@@ -392,6 +392,15 @@ namespace browser {
         MAYBE_RETHROW_EXCEPTION_V(ctx, JS_UNDEFINED);
     }
 
+    static JSValue RuntimeProto_mapClone(JSContext *ctx, JSValueConst self, int argc, JSValueConst *argv) {
+        Runtime* runtime = opaqueToObject<Runtime>(self);
+        char const* name = JS_ToCString(ctx, argv[0]);
+        res::ResourceHandle<res::TileMap> tmap = runtime->getTilemap(name);
+        JS_FreeCString(ctx, name);
+        auto cloneName = runtime->cloneTilemap(tmap);
+        MAYBE_RETHROW_EXCEPTION_V(ctx, JS_NewStringLen(ctx, cloneName.c_str(), cloneName.length()));
+    }
+
     static JSValue RuntimeProto_keyQuery(JSContext *ctx, JSValueConst self, int argc, JSValueConst *argv, int magic) {
         Runtime* runtime = opaqueToObject<Runtime>(self);
         JSValue retValue = JS_FALSE;
@@ -439,6 +448,7 @@ namespace browser {
         JS_CGETSET_MAGIC_DEF("__keyboardKeys", RuntimeProto_getter, nullptr, 5),
         JS_CFUNC_DEF("__mapGet", 3, RuntimeProto_mapGet),
         JS_CFUNC_DEF("__mapSet", 4, RuntimeProto_mapSet),
+        JS_CFUNC_DEF("__mapClone", 1, RuntimeProto_mapClone),
     };
 
     static void installRuntime(JSContext* ctx) {
