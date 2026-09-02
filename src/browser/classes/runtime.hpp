@@ -79,6 +79,9 @@ namespace browser {
         /** Get reference to a loaded tilemap */
         res::ResourceHandle<res::TileMap> getTilemap(std::string_view path) const;
 
+        /** Add tilemap after initial mapping (ie. when generated through TileMap::clone). */
+        std::string cloneTilemap(res::ResourceHandle<res::TileMap> const& handle);
+
         /** Get sprite image from path, for drawing */
         res::ResourceHandle<res::Image> getSpriteImage(std::string_view path) const;
 

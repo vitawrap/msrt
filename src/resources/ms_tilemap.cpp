@@ -23,6 +23,15 @@ namespace res {
         delete[] m_tileGrid;
     }
 
+    TileMap::TileMap(TileMap const& rhs):
+        m_width(rhs.m_width), m_height(rhs.m_height),
+        m_blockWidth(rhs.m_blockWidth), m_blockHeight(rhs.m_blockHeight),
+        m_renderData(nullptr), m_spriteNames(rhs.m_spriteNames), m_tiles(rhs.m_tiles)
+    {
+        m_tileGrid = new int[m_width * m_height];
+        memcpy(m_tileGrid, rhs.m_tileGrid, m_width * m_height * sizeof(int));
+    }
+
     void TileMap::allocateGrid() {
         m_tileGrid = new int[m_width * m_height];
         memset(m_tileGrid, 0, m_width * m_height * sizeof(int));

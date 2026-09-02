@@ -96,6 +96,20 @@ namespace browser {
         return nullptr;
     }
 
+    std::string Runtime::cloneTilemap(res::ResourceHandle<res::TileMap> const& res) {
+        static size_t cloneId = 0;
+
+        auto* dup = new res::TileMap(*res.operator->());
+        char name[128];
+        snprintf(name, 128, "maps/clone:%zu.json", cloneId++);
+        auto clRes = res->getManager()->cacheResource<res::TileMap>(name, dup);
+        
+        // also give script realm initial map info
+        m_tilemapMap.emplace(name, clRes);
+        tilemapMapped.invoke(name, clRes.operator->());
+        return name;
+    }
+
     res::ResourceHandle<res::Image> Runtime::getSpriteImage(std::string_view path) const {
         auto itr = m_spriteImageMap.find(path);
         if (itr != m_spriteImageMap.cend())

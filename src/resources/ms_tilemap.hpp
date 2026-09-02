@@ -41,6 +41,7 @@ namespace res {
         gfx::TilemapRenderData* m_renderData;
         
     public:
+        TileMap(TileMap const& rhs);
         TileMap();
         ~TileMap();
 
