@@ -96,6 +96,7 @@ this.Parser = (function() {
         return this;
       } catch (error1) {
         err = error1;
+        console.info(`Error ${err.toString()} at line: ${this.current.line} column: ${this.current.column} : ${err.stack}`);
         //console.info "Error at line: #{@current.line} column: #{@current.column}"
         if (this.not_terminated.length > 0 && err === "Unexpected end of file") {
           nt = this.not_terminated[this.not_terminated.length - 1];

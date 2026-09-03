@@ -580,6 +580,14 @@ namespace browser {
         JS_SetPropertyStr(ctx, console, "info", info);
         JS_SetPropertyStr(ctx, console, "error", error);
         JS_SetPropertyStr(ctx, globalThis, "console", console);
+
+        auto exitfn = [](JSContext *ctx, JSValueConst self, int argc, JSValueConst *argv) -> JSValue {
+            int code = 0;
+            exit(argc? JS_ToInt32(ctx, &code, argv[0]), code : 0);
+            return JS_UNDEFINED;
+        };
+        JSValue exitv = JS_NewCFunction(ctx, exitfn, "exit", 1);
+        JS_SetPropertyStr(ctx, globalThis, "exit", exitv);
     }
 
     /**

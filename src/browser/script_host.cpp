@@ -167,6 +167,7 @@ namespace browser {
 
     void ScriptHost::onLoaded() {
         patchRuntime();
+        js_init_native_vm(m_engine->context);
         try {
             EVAL_STATIC_SCRIPT(patch);
         } catch (ScriptEngineException const& see) {

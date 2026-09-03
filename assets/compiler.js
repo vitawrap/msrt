@@ -14,15 +14,19 @@ Compiler = (function() {
       ref = this.program.statements;
       for (i = j = 0, len = ref.length; j < len; i = ++j) {
         s = ref[i];
+        console.info("compiling...");
         this.compile(s);
         if (i < this.program.statements.length - 1) {
+          console.info("end, place POP...");
           this.routine.POP(s);
         }
       }
+      console.info("before optimize");
       this.routine.optimize();
       this.routine.resolveLabels();
       this.count += this.routine.opcodes.length;
       this.routine.locals_size = this.locals.max_index;
+      console.log(JSON.stringify(this.routine.arg1));
     }
 
     
@@ -30,57 +34,82 @@ Compiler = (function() {
     // @routine = new Routine(0).import( @routine.export() )
     compile(statement) {
       if (statement instanceof Program.Value) {
+        console.info("compile value");
         return this.compileValue(statement);
       } else if (statement instanceof Program.Operation) {
+        console.info("compile operation");
         return this.compileOperation(statement);
       } else if (statement instanceof Program.Assignment) {
+        console.info("compile assignment");
         return this.compileAssignment(statement);
       } else if (statement instanceof Program.Variable) {
+        console.info("compile variable");
         return this.compileVariable(statement);
       } else if (statement instanceof Program.Function) {
+        console.info("compile function");
         return this.compileFunction(statement);
       } else if (statement instanceof Program.FunctionCall) {
+        console.info("compile function call");
         return this.compileFunctionCall(statement);
       } else if (statement instanceof Program.While) {
+        console.info("compile while");
         return this.compileWhile(statement);
-      }
-      if (statement instanceof Program.SelfAssignment) {
+      } else if (statement instanceof Program.SelfAssignment) {
+        console.info("compile self assignment");
         return this.compileSelfAssignment(statement);
       } else if (statement instanceof Program.Braced) {
+        console.info("compile braced");
         return this.compileBraced(statement);
       } else if (statement instanceof Program.CreateObject) {
+        console.info("compile create object");
         return this.compileCreateObject(statement);
       } else if (statement instanceof Program.Field) {
+        console.info("compile field");
         return this.compileField(statement);
       } else if (statement instanceof Program.Negate) {
+        console.info("compile negate");
         return this.compileNegate(statement);
       } else if (statement instanceof Program.For) {
+        console.info("compile for");
         return this.compileFor(statement);
       } else if (statement instanceof Program.ForIn) {
+        console.info("compile for in");
         return this.compileForIn(statement);
       } else if (statement instanceof Program.Not) {
+        console.info("compile not");
         return this.compileNot(statement);
       } else if (statement instanceof Program.Return) {
+        console.info("compile return");
         return this.compileReturn(statement);
       } else if (statement instanceof Program.Condition) {
+        console.info("compile condition");
         return this.compileCondition(statement);
       } else if (statement instanceof Program.Break) {
+        console.info("compile break");
         return this.compileBreak(statement);
       } else if (statement instanceof Program.Continue) {
+        console.info("compile continue");
         return this.compileContinue(statement);
       } else if (statement instanceof Program.CreateClass) {
+        console.info("compile create class");
         return this.compileCreateClass(statement);
       } else if (statement instanceof Program.NewCall) {
+        console.info("compile new call");
         return this.compileNewCall(statement);
       } else if (statement instanceof Program.After) {
+        console.info("compile after");
         return this.compileAfter(statement);
       } else if (statement instanceof Program.Every) {
+        console.info("compile every");
         return this.compileEvery(statement);
       } else if (statement instanceof Program.Do) {
+        console.info("compile do");
         return this.compileDo(statement);
       } else if (statement instanceof Program.Sleep) {
+        console.info("compile sleep");
         return this.compileSleep(statement);
       } else if (statement instanceof Program.Delete) {
+        console.info("compile delete");
         return this.compileDelete(statement);
       } else if (true) {
         console.info(statement);
@@ -582,7 +611,9 @@ Compiler = (function() {
 
     compileFunction(func) {
       var r;
+      console.info("compile body");
       r = this.compileFunctionBody(func);
+      console.info("compile load routine");
       return this.routine.LOAD_ROUTINE(r, func);
     }
 
@@ -597,6 +628,7 @@ Compiler = (function() {
       if (func.args != null) {
         if (this.routine.uses_arguments) {
           args = this.locals.register("arguments");
+          console.info("compile arguments");
           this.routine.STORE_LOCAL(args, func);
           this.routine.POP(func);
         }

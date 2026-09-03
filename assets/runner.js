@@ -326,6 +326,7 @@ this.Thread = class Thread {
       },
       status: "running"
     };
+    //this.routine_cache = {};
   }
 
   addCall(call) {
@@ -337,7 +338,15 @@ this.Thread = class Thread {
   loadNext() {
     var compiler, f, parser, program;
     if (this.next_calls.length > 0) {
+      console.log("parsing...");
       f = this.next_calls.splice(0, 1)[0];
+      // if (f in this.routine_cache) {
+      //   this.processor.load(this.routine_cache[f]);
+      //   if ((f === "update()" || f === "serverUpdate()") && (this.runner.updateControls != null)) {
+      //     this.runner.updateControls();
+      //   }
+      //   return true;
+      // }
       if (f instanceof Routine) {
         this.processor.load(f);
       } else {
@@ -345,6 +354,7 @@ this.Thread = class Thread {
         parser.parse();
         program = parser.program;
         compiler = new Compiler(program);
+        //this.routine_cache[f] = compiler.routine;
         this.processor.load(compiler.routine);
         if ((f === "update()" || f === "serverUpdate()") && (this.runner.updateControls != null)) {
           this.runner.updateControls();

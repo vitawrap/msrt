@@ -447,6 +447,7 @@ this.MicroVM = class MicroVM {
         return null;
       }
     } catch (error1) {
+      console.info(error1);
       err = error1;
       if ((err.type != null) && (err.line != null) && (err.error != null)) {
         this.error_info = err;

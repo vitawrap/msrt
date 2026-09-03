@@ -1,0 +1,1888 @@
+diff --git a/assets/compiler.js b/assets/compiler.js
+index ba890e4..c7e912b 100644
+--- a/assets/compiler.js
++++ b/assets/compiler.js
+@@ -14,19 +14,15 @@ Compiler = (function() {
+       ref = this.program.statements;
+       for (i = j = 0, len = ref.length; j < len; i = ++j) {
+         s = ref[i];
+-        console.info("compiling...");
+         this.compile(s);
+         if (i < this.program.statements.length - 1) {
+-          console.info("end, place POP...");
+           this.routine.POP(s);
+         }
+       }
+-      console.info("before optimize");
+       this.routine.optimize();
+       this.routine.resolveLabels();
+       this.count += this.routine.opcodes.length;
+       this.routine.locals_size = this.locals.max_index;
+-      console.log(JSON.stringify(this.routine.arg1));
+     }
+ 
+     
+@@ -34,82 +30,57 @@ Compiler = (function() {
+     // @routine = new Routine(0).import( @routine.export() )
+     compile(statement) {
+       if (statement instanceof Program.Value) {
+-        console.info("compile value");
+         return this.compileValue(statement);
+       } else if (statement instanceof Program.Operation) {
+-        console.info("compile operation");
+         return this.compileOperation(statement);
+       } else if (statement instanceof Program.Assignment) {
+-        console.info("compile assignment");
+         return this.compileAssignment(statement);
+       } else if (statement instanceof Program.Variable) {
+-        console.info("compile variable");
+         return this.compileVariable(statement);
+       } else if (statement instanceof Program.Function) {
+-        console.info("compile function");
+         return this.compileFunction(statement);
+       } else if (statement instanceof Program.FunctionCall) {
+-        console.info("compile function call");
+         return this.compileFunctionCall(statement);
+       } else if (statement instanceof Program.While) {
+-        console.info("compile while");
+         return this.compileWhile(statement);
+-      } else if (statement instanceof Program.SelfAssignment) {
+-        console.info("compile self assignment");
++      }
++      if (statement instanceof Program.SelfAssignment) {
+         return this.compileSelfAssignment(statement);
+       } else if (statement instanceof Program.Braced) {
+-        console.info("compile braced");
+         return this.compileBraced(statement);
+       } else if (statement instanceof Program.CreateObject) {
+-        console.info("compile create object");
+         return this.compileCreateObject(statement);
+       } else if (statement instanceof Program.Field) {
+-        console.info("compile field");
+         return this.compileField(statement);
+       } else if (statement instanceof Program.Negate) {
+-        console.info("compile negate");
+         return this.compileNegate(statement);
+       } else if (statement instanceof Program.For) {
+-        console.info("compile for");
+         return this.compileFor(statement);
+       } else if (statement instanceof Program.ForIn) {
+-        console.info("compile for in");
+         return this.compileForIn(statement);
+       } else if (statement instanceof Program.Not) {
+-        console.info("compile not");
+         return this.compileNot(statement);
+       } else if (statement instanceof Program.Return) {
+-        console.info("compile return");
+         return this.compileReturn(statement);
+       } else if (statement instanceof Program.Condition) {
+-        console.info("compile condition");
+         return this.compileCondition(statement);
+       } else if (statement instanceof Program.Break) {
+-        console.info("compile break");
+         return this.compileBreak(statement);
+       } else if (statement instanceof Program.Continue) {
+-        console.info("compile continue");
+         return this.compileContinue(statement);
+       } else if (statement instanceof Program.CreateClass) {
+-        console.info("compile create class");
+         return this.compileCreateClass(statement);
+       } else if (statement instanceof Program.NewCall) {
+-        console.info("compile new call");
+         return this.compileNewCall(statement);
+       } else if (statement instanceof Program.After) {
+-        console.info("compile after");
+         return this.compileAfter(statement);
+       } else if (statement instanceof Program.Every) {
+-        console.info("compile every");
+         return this.compileEvery(statement);
+       } else if (statement instanceof Program.Do) {
+-        console.info("compile do");
+         return this.compileDo(statement);
+       } else if (statement instanceof Program.Sleep) {
+-        console.info("compile sleep");
+         return this.compileSleep(statement);
+       } else if (statement instanceof Program.Delete) {
+-        console.info("compile delete");
+         return this.compileDelete(statement);
+       } else if (true) {
+         console.info(statement);
+@@ -611,9 +582,7 @@ Compiler = (function() {
+ 
+     compileFunction(func) {
+       var r;
+-      console.info("compile body");
+       r = this.compileFunctionBody(func);
+-      console.info("compile load routine");
+       return this.routine.LOAD_ROUTINE(r, func);
+     }
+ 
+@@ -628,7 +597,6 @@ Compiler = (function() {
+       if (func.args != null) {
+         if (this.routine.uses_arguments) {
+           args = this.locals.register("arguments");
+-          console.info("compile arguments");
+           this.routine.STORE_LOCAL(args, func);
+           this.routine.POP(func);
+         }
+diff --git a/assets/parser.js b/assets/parser.js
+index 232bf42..c969647 100644
+--- a/assets/parser.js
++++ b/assets/parser.js
+@@ -96,7 +96,6 @@ this.Parser = (function() {
+         return this;
+       } catch (error1) {
+         err = error1;
+-        console.info(`Error ${err.toString()} at line: ${this.current.line} column: ${this.current.column} : ${err.stack}`);
+         //console.info "Error at line: #{@current.line} column: #{@current.column}"
+         if (this.not_terminated.length > 0 && err === "Unexpected end of file") {
+           nt = this.not_terminated[this.not_terminated.length - 1];
+diff --git a/assets/play.js b/assets/play.js
+index b034a6c..7989168 100644
+--- a/assets/play.js
++++ b/assets/play.js
+@@ -447,7 +447,6 @@ this.MicroVM = class MicroVM {
+         return null;
+       }
+     } catch (error1) {
+-      console.info(error1);
+       err = error1;
+       if ((err.type != null) && (err.line != null) && (err.error != null)) {
+         this.error_info = err;
+diff --git a/assets/processor.js b/assets/processor.js
+index e7f88c7..60ed44c 100644
+--- a/assets/processor.js
++++ b/assets/processor.js
+@@ -1072,8 +1072,6 @@ this.Processor = class Processor {
+           break;
+         case 89: // OPCODE_LOAD_ROUTINE
+           r = arg1[op_index++];
+-          console.log(JSON.stringify(r));
+-          exit();
+           rc = r.clone();
+           ref3 = r.import_refs;
+           for (l = 0, len = ref3.length; l < len; l++) {
+diff --git a/assets/runner.js b/assets/runner.js
+index 02aea79..a4cde56 100644
+--- a/assets/runner.js
++++ b/assets/runner.js
+@@ -326,7 +326,6 @@ this.Thread = class Thread {
+       },
+       status: "running"
+     };
+-    //this.routine_cache = {};
+   }
+ 
+   addCall(call) {
+@@ -338,15 +337,7 @@ this.Thread = class Thread {
+   loadNext() {
+     var compiler, f, parser, program;
+     if (this.next_calls.length > 0) {
+-      console.log("parsing...");
+       f = this.next_calls.splice(0, 1)[0];
+-      // if (f in this.routine_cache) {
+-      //   this.processor.load(this.routine_cache[f]);
+-      //   if ((f === "update()" || f === "serverUpdate()") && (this.runner.updateControls != null)) {
+-      //     this.runner.updateControls();
+-      //   }
+-      //   return true;
+-      // }
+       if (f instanceof Routine) {
+         this.processor.load(f);
+       } else {
+@@ -354,7 +345,6 @@ this.Thread = class Thread {
+         parser.parse();
+         program = parser.program;
+         compiler = new Compiler(program);
+-        //this.routine_cache[f] = compiler.routine;
+         this.processor.load(compiler.routine);
+         if ((f === "update()" || f === "serverUpdate()") && (this.runner.updateControls != null)) {
+           this.runner.updateControls();
+diff --git a/native_processor.patch b/native_processor.patch
+deleted file mode 100644
+index e69de29..0000000
+diff --git a/src/browser/ms_native.cpp b/src/browser/ms_native.cpp
+deleted file mode 100644
+index 68f7ea0..0000000
+--- a/src/browser/ms_native.cpp
++++ /dev/null
+@@ -1,1473 +0,0 @@
+-#include "ms_native.hpp"
+-#include "quickjs.h"
+-#include <assert.h>
+-
+-JSClassID js_routine_class_id = 0;
+-JSClassID js_processor_class_id = 0;
+-
+-// HELPERS
+-std::string get_type_string(JSContext* ctx, JSValue val) {
+-    if (JS_IsNumber(val)) return "number";
+-    if (JS_IsString(val)) return "string";
+-    if (JS_IsFunction(ctx, val)) return "function";
+-    if (JS_IsArray(val)) return "list";
+-    if (JS_GetOpaque(val, js_routine_class_id) != nullptr) return "function";
+-    if (JS_IsObject(val)) return "object";
+-    return "undefined";
+-}
+-
+-void add_warning(JSContext* ctx, JSValue context_val, const std::string& category, const std::string& id, JSValue warning_obj) {
+-    JSValue warnings = JS_GetPropertyStr(ctx, context_val, "warnings");
+-    if (JS_IsUndefined(warnings)) {
+-        warnings = JS_NewObject(ctx);
+-        JS_SetPropertyStr(ctx, context_val, "warnings", JS_DupValue(ctx, warnings));
+-    }
+-    JSValue cat_obj = JS_GetPropertyStr(ctx, warnings, category.c_str());
+-    if (JS_IsUndefined(cat_obj)) {
+-        cat_obj = JS_NewObject(ctx);
+-        JS_SetPropertyStr(ctx, warnings, category.c_str(), JS_DupValue(ctx, cat_obj));
+-    }
+-    JS_SetPropertyStr(ctx, cat_obj, id.c_str(), warning_obj);
+-    JS_FreeValue(ctx, cat_obj);
+-    JS_FreeValue(ctx, warnings);
+-}
+-
+-// ROUTINE JS METHODS
+-static JSValue js_routine_ctor(JSContext* ctx, JSValue const this_val, int argc, JSValueConst* argv) {
+-    int num_args = 0;
+-    if (argc > 0) JS_ToInt32(ctx, &num_args, argv[0]);
+-
+-    Routine* r = new Routine();
+-    r->label_count = 0;
+-    r->num_args = num_args;
+-    r->import_self = -1;
+-    r->arg1 = JS_NewArray(ctx);
+-    r->uses_arguments = false;
+-
+-    JSValue proto;
+-    if (JS_IsUndefined(this_val)) {
+-        proto = JS_GetClassProto(ctx, js_routine_class_id);
+-    } else {
+-        proto = JS_GetPropertyStr(ctx, this_val, "prototype");
+-        if (JS_IsException(proto)) {
+-            delete r;
+-            return JS_EXCEPTION;
+-        }
+-    }
+-
+-    JSValue obj = JS_NewObjectProtoClass(ctx, proto, js_routine_class_id);
+-    if (JS_IsException(obj)) {
+-        delete r;
+-        return JS_EXCEPTION;
+-    }
+-    JS_SetOpaque(obj, r);
+-    return obj;
+-}
+-
+-static void js_routine_finalizer(JSRuntime* rt, JSValue val) {
+-    Routine* r = (Routine*)JS_GetOpaque(val, js_routine_class_id);
+-    if (r) {
+-        // since we don't have ctx here, execution frames use contextual cleanup
+-        delete r;
+-    }
+-}
+-
+-static void js_routine_gcmark(JSRuntime* rt, JSValue val, JS_MarkFunc *mf) {
+-    Routine* r = (Routine*)JS_GetOpaque(val, js_routine_class_id);
+-    if (r) {
+-        JS_MarkValue(rt, r->callback, mf);
+-        JS_MarkValue(rt, r->object, mf);
+-        JS_MarkValue(rt, r->as_function, mf);
+-        JS_MarkValue(rt, r->arg1, mf);
+-        for (const auto& val : r->ref) JS_MarkValue(rt, val, mf);
+-        for (const auto& val : r->import_values) JS_MarkValue(rt, val, mf);
+-    }
+-}
+-
+-static JSValue js_routine_create_label(JSContext* ctx, JSValue const this_val, int argc, JSValueConst* argv) {
+-    Routine* r = (Routine*)JS_GetOpaque(this_val, js_routine_class_id);
+-    if (!r) return JS_ThrowInternalError(ctx, "Routine create_label: no routine");
+-    std::string prefix = "label";
+-    if (argc > 0) {
+-        size_t len;
+-        const char* str = JS_ToCStringLen(ctx, &len, argv[0]);
+-        if (str) { prefix = str; JS_FreeCString(ctx, str); }
+-    }
+-    std::string label_name = ":" + prefix + "_" + std::to_string(r->label_count++);
+-    return JS_NewString(ctx, label_name.c_str());
+-}
+-
+-static JSValue js_routine_set_label(JSContext* ctx, JSValue const this_val, int argc, JSValueConst* argv) {
+-    Routine* r = (Routine*)JS_GetOpaque(this_val, js_routine_class_id);
+-    if (!r || argc < 1) return JS_ThrowInternalError(ctx, "Routine set_label: argc = %d", argc);
+-    size_t len;
+-    const char* str = JS_ToCStringLen(ctx, &len, argv[0]);
+-    if (str) {
+-        r->labels[str] = r->opcodes.size();
+-        JS_FreeCString(ctx, str);
+-    }
+-    return JS_NewInt32(ctx, r->opcodes.size());
+-}
+-
+-static JSValue js_routine_remove(JSContext* ctx, JSValue const this_val, int argc, JSValueConst* argv) {
+-    Routine* r = (Routine*)JS_GetOpaque(this_val, js_routine_class_id);
+-    if (!r || argc < 1) return JS_ThrowInternalError(ctx, "Routine remove: argc = %d", argc);
+-    int index; JS_ToInt32(ctx, &index, argv[0]);
+-    for (auto& label : r->labels) {
+-        if (label.second == index) {
+-            return JS_FALSE;
+-        } else if (label.second > index) {
+-            --(label.second);
+-        }
+-    }
+-    r->opcodes.erase(r->opcodes.begin() + index);
+-    r->ref.erase(r->ref.begin() + index);
+-    //r->arg1.erase(r->arg1.begin() + index);
+-    assert(JS_IsArray(r->arg1));
+-    JSValue splice = JS_GetPropertyStr(ctx, r->arg1, "splice");
+-    JSValue args[2] = {JS_NewInt32(ctx, index), JS_NewInt32(ctx, 1)};
+-    JSValue result = JS_Call(ctx, splice, r->arg1, 2, args);
+-    JS_FreeValue(ctx, result);
+-    JS_FreeValue(ctx, args[0]);
+-    JS_FreeValue(ctx, args[1]);
+-    JS_FreeValue(ctx, splice);
+-    return JS_HasException(ctx)? JS_EXCEPTION : JS_TRUE;
+-}
+-
+-static JSValue js_routine_resolve_labels(JSContext* ctx, JSValue const this_val, int argc, JSValueConst* argv) {
+-    Routine* r = (Routine*)JS_GetOpaque(this_val, js_routine_class_id);
+-    if (!r) return JS_ThrowInternalError(ctx, "Routine resolve_labels: no routine");
+-    JSValue results = JS_NewArray(ctx); JS_SetLength(ctx, results, r->opcodes.size() - 1);
+-    for (int i = 0; i < r->opcodes.size() - 1; ++i) {
+-        int ref = r->opcodes[i];
+-        if (ref == OPCODE_JUMP || ref == OPCODE_JUMPY || ref == OPCODE_JUMPN || ref == OPCODE_JUMPY_NOPOP || ref == OPCODE_JUMPN_NOPOP) {
+-            JSValue r_arg1i = JS_GetPropertyInt64(ctx, r->arg1, i);
+-            char const* label = JS_ToCString(ctx, r_arg1i);
+-            if (r->labels.find(label) != r->labels.end()) {
+-                JS_SetPropertyInt64(ctx, r->arg1, i, JS_NewInt32(ctx, r->labels[label]));
+-                JS_SetPropertyUint32(ctx, results, i, JS_DupValue(ctx, JS_NewInt32(ctx, r->labels[label])));
+-            } else {
+-                JS_SetPropertyUint32(ctx, results, i, JS_UNDEFINED);
+-            }
+-            JS_FreeCString(ctx, label);
+-        } else if (ref == OPCODE_FORLOOP_CONTROL || ref == OPCODE_FORLOOP_INIT || ref == OPCODE_FORIN_CONTROL || ref == OPCODE_FORIN_INIT) {
+-            JSValue r_arg1i = JS_GetPropertyInt64(ctx, r->arg1, i);
+-            JSValue _label = JS_GetPropertyInt64(ctx, r_arg1i, 1);
+-            char const* label = JS_ToCString(ctx, _label);
+-            if (r->labels.find(label) != r->labels.end()) {
+-                JSValue new_label = JS_NewInt32(ctx, r->labels[label]);
+-                JS_SetPropertyUint32(ctx, r_arg1i, 1, new_label);
+-                JS_SetPropertyUint32(ctx, results, i, new_label);
+-            } else {
+-                JS_SetPropertyUint32(ctx, results, i, JS_UNDEFINED);
+-            }
+-            JS_FreeCString(ctx, label);
+-            JS_FreeValue(ctx, _label);
+-            JS_FreeValue(ctx, r_arg1i);
+-        } else {
+-            JS_SetPropertyUint32(ctx, results, i, JS_UNDEFINED);
+-        }
+-    }
+-    return results;
+-}
+-
+-static JSValue js_routine_optimize(JSContext* ctx, JSValue const this_val, int argc, JSValueConst* argv) {
+-    return JS_UNDEFINED; /* no transpilation */
+-}
+-
+-static JSValue js_routine_OP(JSContext* ctx, JSValue const this_val, int argc, JSValueConst* argv, int magic) {
+-    Routine* r = (Routine*)JS_GetOpaque(this_val, js_routine_class_id);
+-    int code, inline_opcode = !!magic;
+-    if (!r || argc < (2 - inline_opcode)) return JS_ThrowInternalError(ctx, r? "No routine for argc = %d" : "Routine OP: argc = %d", argc);
+-    if (inline_opcode) {
+-        code = magic;
+-    } else {
+-        JS_ToInt32(ctx, &code, argv[0]);
+-    }
+-    r->opcodes.push_back(code);
+-    r->ref.push_back(JS_DupValue(ctx, argv[1 - inline_opcode]));
+-    int64_t arg1_len; JS_GetLength(ctx, r->arg1, &arg1_len);
+-    if (argc > (2 - inline_opcode)) {
+-        JS_SetPropertyUint32(ctx, r->arg1, arg1_len, JS_DupValue(ctx, argv[2 - inline_opcode]));
+-    } else {
+-        JS_SetPropertyUint32(ctx, r->arg1, arg1_len, JS_NewInt32(ctx, 0));
+-    }
+-    return JS_DupValue(ctx, this_val);
+-}
+-
+-static JSValue js_routine_get(JSContext* ctx, JSValue const this_val, int magic) {
+-    Routine* r = (Routine*)JS_GetOpaque(this_val, js_routine_class_id);
+-    if (!r) return JS_ThrowInternalError(ctx, "Routine get: no routine");
+-    JSValue result = JS_UNDEFINED;
+-    switch (magic) {
+-        case 0: /* opcodes */
+-            result = JS_NewArray(ctx);
+-            JS_SetLength(ctx, result, r->opcodes.size());
+-            for (size_t i = 0; i < r->opcodes.size(); i++)
+-                JS_SetPropertyUint32(ctx, result, i, JS_NewInt32(ctx, r->opcodes[i]));
+-            break;
+-        case 1: /* locals_size */
+-            result = JS_NewInt32(ctx, r->locals_size); break;
+-        case 2: /* arg1 */
+-            result = JS_DupValue(ctx, r->arg1); break;
+-        case 3: /* num_args */
+-            result = JS_NewInt32(ctx, r->num_args); break;
+-        case 4: /* uses_arguments */
+-            result = JS_NewBool(ctx, r->uses_arguments); break;
+-    }
+-    return result;
+-}
+-
+-static JSValue js_routine_set(JSContext* ctx, JSValue const this_val, JSValue value, int magic) {
+-    Routine* r = (Routine*)JS_GetOpaque(this_val, js_routine_class_id);
+-    if (!r) return JS_ThrowInternalError(ctx, "Routine set: no routine");
+-    switch (magic) {
+-        case 1: { /* locals_size */
+-            int32_t locals_size = 0; JS_ToInt32(ctx, &locals_size, value);
+-            r->locals_size = locals_size;
+-            break;
+-        }
+-        case 2: /* arg1 */
+-            JS_FreeValue(ctx, r->arg1);
+-            r->arg1 = JS_DupValue(ctx, value);
+-            break;
+-        case 4: /* uses_arguments */
+-            r->uses_arguments = JS_ToBool(ctx, value);
+-            break;
+-        case 3: /* num_args */
+-            int32_t num_args = 0; JS_ToInt32(ctx, &num_args, value);
+-            r->num_args = num_args;
+-            break;
+-    }
+-    return JS_UNDEFINED;
+-}
+-
+-// PROCESSOR OPERATOR FALLBACKS
+-JSValue resolve_operator_func(JSContext* ctx, JSValue vmcontext, JSValue a, const std::string& op) {
+-    JSValue obj = JS_UNDEFINED;
+-    JSValue global = JS_GetPropertyStr(ctx, vmcontext, "global");
+-    if (JS_IsArray(a)) {
+-        obj = JS_GetPropertyStr(ctx, global, "List");
+-    } else if (JS_IsString(a)) {
+-        obj = JS_GetPropertyStr(ctx, global, "String");
+-    } else {
+-        obj = JS_DupValue(ctx, a);
+-    }
+-
+-    JSValue f = JS_GetPropertyStr(ctx, obj, op.c_str());
+-    while (JS_IsUndefined(f) || JS_IsNull(f)) {
+-        JSValue cls = JS_GetPropertyStr(ctx, obj, "class");
+-        if (JS_IsUndefined(cls) || JS_IsNull(cls)) {
+-            JS_FreeValue(ctx, cls);
+-            break;
+-        }
+-        JS_FreeValue(ctx, obj);
+-        obj = cls;
+-        f = JS_GetPropertyStr(ctx, obj, op.c_str());
+-    }
+-
+-    if (JS_IsUndefined(f) || JS_IsNull(f)) {
+-        JSValue obj_proto = JS_GetPropertyStr(ctx, global, "Object");
+-        f = JS_GetPropertyStr(ctx, obj_proto, op.c_str());
+-        JS_FreeValue(ctx, obj_proto);
+-    }
+-    JS_FreeValue(ctx, obj);
+-    JS_FreeValue(ctx, global);
+-    return f;
+-}
+-
+-JSValue execute_fallback_op(JSContext* ctx, JSValue context_val, JSValue f, JSValue a, JSValue b, JSValue self) {
+-    JSValue global = JS_GetPropertyStr(ctx, context_val, "global");
+-    JSValue args[3] = { a, b, self };
+-    JSValue res = JS_Call(ctx, f, global, 3, args);
+-    JS_FreeValue(ctx, global);
+-    return res;
+-}
+-
+-// PROCESSOR JS METHODS
+-static JSValue js_processor_ctor(JSContext* ctx, JSValue const new_target, int argc, JSValueConst* argv) {
+-    Processor* p = new Processor();
+-    if (argc > 0) p->runner = JS_DupValue(ctx, argv[0]);
+-    p->global = JS_UNDEFINED;
+-    p->done = true;
+-
+-    JSValue proto;
+-    if (JS_IsUndefined(new_target)) {
+-        proto = JS_GetClassProto(ctx, js_processor_class_id);
+-    } else {
+-        proto = JS_GetPropertyStr(ctx, new_target, "prototype");
+-        if (JS_IsException(proto)) {
+-            delete p;
+-            return JS_EXCEPTION;
+-        }
+-    }
+-
+-    JSValue obj = JS_NewObjectProtoClass(ctx, proto, js_processor_class_id);
+-    if (JS_IsException(obj)) {
+-        delete p;
+-        return JS_EXCEPTION;
+-    }
+-    JS_SetOpaque(obj, p);
+-    return obj;
+-}
+-
+-static void js_processor_finalizer(JSRuntime* rt, JSValue val) {
+-    Processor* p = (Processor*)JS_GetOpaque(val, js_processor_class_id);
+-    if (p) {
+-        delete p;
+-    }
+-}
+-
+-static void js_processor_gcmark(JSRuntime* rt, JSValue val, JS_MarkFunc* mf) {
+-    Processor* p = (Processor*)JS_GetOpaque(val, js_processor_class_id);
+-    if (p) {
+-        JS_MarkValue(rt, p->global, mf);
+-        JS_MarkValue(rt, p->object, mf);
+-        JS_MarkValue(rt, p->call_super, mf);
+-        for (const auto& val : p->locals) JS_MarkValue(rt, val, mf);
+-        for (const auto& val : p->stack) JS_MarkValue(rt, val, mf);
+-        for (const auto& val : p->call_stack) JS_MarkValue(rt, val.object, mf);
+-    }
+-}
+-
+-static JSValue js_processor_load(JSContext* ctx, JSValue const this_val, int argc, JSValueConst* argv) {
+-    Processor* p = (Processor*)JS_GetOpaque(this_val, js_processor_class_id);
+-    if (!p || argc < 1) return JS_ThrowInternalError(ctx, p? "Processor load: argc = %d" : "No processor for argc = %d", argc);
+-    Routine* r = (Routine*)JS_GetOpaque(argv[0], js_routine_class_id);
+-    if (!r) return JS_ThrowInternalError(ctx, "Processor load: no routine");
+-
+-    p->routine = r;
+-    p->local_index = 0;
+-    p->stack_index = -1;
+-    p->op_index = 0;
+-    p->call_stack_index = 0;
+-    p->object = JS_DupValue(ctx, r->object);
+-    if (JS_IsUndefined(p->object) || JS_IsNull(p->object)) {
+-        p->object = JS_DupValue(ctx, p->global);
+-    }
+-    p->locals_offset = 0;
+-    p->call_super = JS_DupValue(ctx, p->global);
+-    p->call_supername = "";
+-    p->done = false;
+-
+-    JS_FreeValue(ctx, p->global);
+-    p->global = JS_NULL;
+-
+-    return JS_NewBool(ctx, p->done == false);
+-}
+-
+-// CORE VIRTUAL MACHINE EXECUTION LOOP
+-static JSValue js_processor_run(JSContext* ctx, JSValue const this_val, int argc, JSValueConst* argv) {
+-    Processor* p = (Processor*)JS_GetOpaque(this_val, js_processor_class_id);
+-    if (!p || argc < 1) return JS_ThrowInternalError(ctx, p? "Processor run: argc = %d" : "No processor for argc = %d", argc);
+-    JSValue context_val = argv[0];
+-
+-    {
+-        JSValue globalThis = JS_GetGlobalObject(ctx);
+-        JSValue g_error_v = JS_GetPropertyStr(ctx, globalThis, "Error");
+-        JSValue g_capture_v = JS_GetPropertyStr(ctx, g_error_v, "captureStackTrace");
+-        JSValue error_v = JS_NewObject(ctx);
+-        JSValue out = JS_Call(ctx, g_capture_v, g_error_v, 1, &error_v);
+-        JSValue stack_v = JS_GetPropertyStr(ctx, error_v, "stack");
+-        JS_FreeValue(ctx, globalThis);
+-        JS_FreeValue(ctx, g_capture_v);
+-        JS_FreeValue(ctx, g_error_v);
+-        JS_FreeValue(ctx, error_v);
+-        JS_FreeValue(ctx, out);
+-        char const* stack = JS_ToCString(ctx, stack_v);
+-        printf("trace js_processor_run: %s \n", stack);
+-        JS_FreeCString(ctx, stack);
+-        JS_FreeValue(ctx, stack_v);
+-    }
+-
+-    Routine* routine = p->routine;
+-    if (!routine) return JS_NewInt32(ctx, 0);
+-
+-    {
+-        JSValue arg = JS_GetPropertyInt64(ctx, routine->arg1, p->op_index);
+-        const char* name = JS_ToCString(ctx, arg);
+-        printf("arg %d: %s\n", p->op_index, name);
+-        JS_FreeCString(ctx, name);
+-        JS_FreeValue(ctx, arg);
+-    }
+-
+-    int length = routine->opcodes.size();
+-    int const* opcodes = routine->opcodes.data();
+-    int op_count = 0;
+-    int restore_op_index = -1;
+-
+-    // expand stack/locals automatically from here
+-    auto check_stack = [&](int idx) {
+-        if (idx >= (int)p->stack.size()) p->stack.resize(idx + 10, JS_UNDEFINED);
+-    };
+-    auto check_locals = [&](int idx) {
+-        if (idx >= (int)p->locals.size()) p->locals.resize(idx + 10, JS_UNDEFINED);
+-    };
+-
+-    while (p->op_index < length) {
+-        int opcode = opcodes[p->op_index];
+-        int64_t arg1_len; JS_GetLength(ctx, routine->arg1, &arg1_len);
+-        JSValue arg = JS_GetPropertyInt64(ctx, routine->arg1, p->op_index);
+-
+-        printf("Processor OP %d\n", opcode);
+-        
+-        switch (opcode) {
+-            case OPCODE_TYPE: { // 1
+-                std::string t_str = get_type_string(ctx, p->stack[p->stack_index]);
+-                JS_FreeValue(ctx, p->stack[p->stack_index]);
+-                p->stack[p->stack_index] = JS_NewString(ctx, t_str.c_str());
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_VARIABLE_TYPE: { // 2
+-                const char* name = JS_ToCString(ctx, arg);
+-                JSValue v = JS_GetPropertyStr(ctx, p->object, name);
+-                if (JS_IsUndefined(v)) v = JS_GetPropertyStr(ctx, p->global, name);
+-                JS_FreeCString(ctx, name);
+-
+-                p->stack_index++;
+-                check_stack(p->stack_index);
+-                p->stack[p->stack_index] = JS_NewString(ctx, get_type_string(ctx, v).c_str());
+-                JS_FreeValue(ctx, v);
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_PROPERTY_TYPE: { // 3
+-                JSValue prop = p->stack[p->stack_index];
+-                JSValue obj = p->stack[p->stack_index - 1];
+-                JSAtom prop_atom = JS_ValueToAtom(ctx, prop);
+-                JSValue v = JS_GetProperty(ctx, obj, prop_atom);
+-                JS_FreeAtom(ctx, prop_atom);
+-                
+-                std::string t_str = get_type_string(ctx, v);
+-                JS_FreeValue(ctx, v);
+-                
+-                JS_FreeValue(ctx, p->stack[p->stack_index--]);
+-                JS_FreeValue(ctx, p->stack[p->stack_index]);
+-                p->stack[p->stack_index] = JS_NewString(ctx, t_str.c_str());
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_LOAD_IMPORT: { // 4
+-                int idx; JS_ToInt32(ctx, &idx, arg);
+-                p->stack_index++;
+-                check_stack(p->stack_index);
+-                p->stack[p->stack_index] = JS_DupValue(ctx, routine->import_values[idx]);
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_LOAD_THIS: { // 5
+-                p->stack_index++;
+-                check_stack(p->stack_index);
+-                p->stack[p->stack_index] = JS_DupValue(ctx, p->object);
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_LOAD_GLOBAL: { // 6
+-                p->stack_index++;
+-                check_stack(p->stack_index);
+-                p->stack[p->stack_index] = JS_DupValue(ctx, p->global);
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_LOAD_VALUE: { // 10
+-                p->stack_index++;
+-                check_stack(p->stack_index);
+-                p->stack[p->stack_index] = JS_DupValue(ctx, arg);
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_LOAD_LOCAL: { // 11
+-                int idx; JS_ToInt32(ctx, &idx, arg);
+-                p->stack_index++;
+-                check_stack(p->stack_index);
+-                p->stack[p->stack_index] = JS_DupValue(ctx, p->locals[p->locals_offset + idx]);
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_LOAD_VARIABLE: { // 12
+-                const char* name = JS_ToCString(ctx, arg);
+-                JSValue v = JS_GetPropertyStr(ctx, p->object, name);
+-                if (JS_IsUndefined(v)) {
+-                    JSValue obj = JS_DupValue(ctx, p->object);
+-                    while (JS_IsUndefined(v)) {
+-                        JSValue cls = JS_GetPropertyStr(ctx, obj, "class");
+-                        if (JS_IsUndefined(cls) || JS_IsNull(cls)) { JS_FreeValue(ctx, cls); break; }
+-                        JS_FreeValue(ctx, obj);
+-                        obj = cls;
+-                        v = JS_GetPropertyStr(ctx, obj, name);
+-                    }
+-                    JS_FreeValue(ctx, obj);
+-                }
+-                if (JS_IsUndefined(v)) v = JS_GetPropertyStr(ctx, p->global, name);
+-
+-                if (JS_IsUndefined(v)) {
+-                    JSValue ref_token = routine->ref[p->op_index];
+-                    JSValue token = JS_GetPropertyStr(ctx, ref_token, "token");
+-                    if (!JS_IsUndefined(token)) {
+-                        JSValue line = JS_GetPropertyStr(ctx, token, "line");
+-                        JSValue col = JS_GetPropertyStr(ctx, token, "column");
+-                        std::string id = std::string(name) + "-" + std::to_string(p->op_index);
+-                        JSValue warn = JS_NewObject(ctx);
+-                        JS_SetPropertyStr(ctx, warn, "expression", JS_NewString(ctx, name));
+-                        JS_SetPropertyStr(ctx, warn, "line", line);
+-                        JS_SetPropertyStr(ctx, warn, "column", col);
+-                        add_warning(ctx, context_val, "using_undefined_variable", id, warn);
+-                        JS_FreeValue(ctx, token);
+-                    }
+-                    v = JS_NewInt32(ctx, 0);
+-                }
+-                JS_FreeCString(ctx, name);
+-                p->stack_index++;
+-                check_stack(p->stack_index);
+-                p->stack[p->stack_index] = v;
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_LOAD_LOCAL_OBJECT: { // 13
+-                int idx; JS_ToInt32(ctx, &idx, arg);
+-                check_locals(p->locals_offset + idx);
+-                JSValue o = p->locals[p->locals_offset + idx];
+-                if (!JS_IsObject(o)) {
+-                    JS_FreeValue(ctx, o);
+-                    o = JS_NewObject(ctx);
+-                    p->locals[p->locals_offset + idx] = JS_DupValue(ctx, o);
+-                }
+-                p->stack_index++;
+-                check_stack(p->stack_index);
+-                p->stack[p->stack_index] = JS_DupValue(ctx, o);
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_LOAD_VARIABLE_OBJECT: { // 14
+-                const char* name = JS_ToCString(ctx, arg);
+-                JSValue obj = JS_DupValue(ctx, p->object);
+-                JSValue v = JS_GetPropertyStr(ctx, obj, name);
+-                
+-                while (JS_IsUndefined(v)) {
+-                    JSValue cls = JS_GetPropertyStr(ctx, obj, "class");
+-                    if (JS_IsUndefined(cls) || JS_IsNull(cls)) { JS_FreeValue(ctx, cls); break; }
+-                    JS_FreeValue(ctx, obj);
+-                    obj = cls;
+-                    v = JS_GetPropertyStr(ctx, obj, name);
+-                }
+-                
+-                if (JS_IsUndefined(v)) {
+-                    v = JS_GetPropertyStr(ctx, p->global, name);
+-                    if (!JS_IsUndefined(v)) {
+-                        JS_FreeValue(ctx, obj);
+-                        obj = JS_DupValue(ctx, p->global);
+-                    }
+-                }
+-                
+-                if (!JS_IsObject(v)) {
+-                    JS_FreeValue(ctx, v);
+-                    v = JS_NewObject(ctx);
+-                    JS_SetPropertyStr(ctx, obj, name, JS_DupValue(ctx, v));
+-                }
+-                
+-                JS_FreeCString(ctx, name);
+-                JS_FreeValue(ctx, obj);
+-                
+-                p->stack_index++;
+-                check_stack(p->stack_index);
+-                p->stack[p->stack_index] = v;
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_POP: { // 15
+-                JS_FreeValue(ctx, p->stack[p->stack_index--]);
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_LOAD_PROPERTY: // 16
+-            case OPCODE_LOAD_PROPERTY_ATOP: { // 68
+-                JSValue prop = p->stack[p->stack_index];
+-                JSValue obj = p->stack[p->stack_index - 1];
+-                JSAtom prop_atom = JS_ValueToAtom(ctx, prop);
+-                
+-                JSValue v = JS_GetProperty(ctx, obj, prop_atom);
+-                JSValue current_obj = JS_DupValue(ctx, obj);
+-                
+-                while (JS_IsUndefined(v)) {
+-                    JSValue cls = JS_GetPropertyStr(ctx, current_obj, "class");
+-                    if (JS_IsUndefined(cls) || JS_IsNull(cls)) { JS_FreeValue(ctx, cls); break; }
+-                    JS_FreeValue(ctx, current_obj);
+-                    current_obj = cls;
+-                    v = JS_GetProperty(ctx, current_obj, prop_atom);
+-                }
+-                
+-                JS_FreeValue(ctx, current_obj);
+-                JS_FreeAtom(ctx, prop_atom);
+-
+-                if (JS_IsUndefined(v)) {
+-                    v = JS_NewInt32(ctx, 0);
+-                    /* TODO: log warning!! */
+-                }
+-                
+-                if (opcode == OPCODE_LOAD_PROPERTY) {
+-                    JS_FreeValue(ctx, p->stack[p->stack_index--]);
+-                    JS_FreeValue(ctx, p->stack[p->stack_index]);
+-                    p->stack[p->stack_index] = v;
+-                } else {
+-                    p->stack_index++;
+-                    check_stack(p->stack_index);
+-                    p->stack[p->stack_index] = v;
+-                }
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_LOAD_PROPERTY_OBJECT: { // 17
+-                JSValue prop = p->stack[p->stack_index];
+-                JSValue obj = p->stack[p->stack_index - 1];
+-                JSAtom prop_atom = JS_ValueToAtom(ctx, prop);
+-                JSValue v = JS_GetProperty(ctx, obj, prop_atom);
+-                
+-                if (!JS_IsObject(v)) {
+-                    JS_FreeValue(ctx, v);
+-                    v = JS_NewObject(ctx);
+-                    JS_SetProperty(ctx, obj, prop_atom, JS_DupValue(ctx, v));
+-                }
+-                JS_FreeAtom(ctx, prop_atom);
+-                
+-                JS_FreeValue(ctx, p->stack[p->stack_index--]);
+-                JS_FreeValue(ctx, p->stack[p->stack_index]);
+-                p->stack[p->stack_index] = v;
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_CREATE_OBJECT: { // 18
+-                p->stack_index++;
+-                check_stack(p->stack_index);
+-                p->stack[p->stack_index] = JS_NewObject(ctx);
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_MAKE_OBJECT: { // 19
+-                if (!JS_IsObject(p->stack[p->stack_index])) {
+-                    JS_FreeValue(ctx, p->stack[p->stack_index]);
+-                    p->stack[p->stack_index] = JS_NewObject(ctx);
+-                }
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_CREATE_ARRAY: { // 20
+-                p->stack_index++;
+-                check_stack(p->stack_index);
+-                p->stack[p->stack_index] = JS_NewArray(ctx);
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_STORE_LOCAL: { // 21
+-                int idx; JS_ToInt32(ctx, &idx, arg);
+-                check_locals(p->locals_offset + idx);
+-                JS_FreeValue(ctx, p->locals[p->locals_offset + idx]);
+-                p->locals[p->locals_offset + idx] = JS_DupValue(ctx, p->stack[p->stack_index]);
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_STORE_LOCAL_POP: { // 22
+-                int idx; JS_ToInt32(ctx, &idx, arg);
+-                check_locals(p->locals_offset + idx);
+-                JS_FreeValue(ctx, p->locals[p->locals_offset + idx]);
+-                p->locals[p->locals_offset + idx] = p->stack[p->stack_index--];
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_STORE_VARIABLE: { // 23
+-                JSAtom name = JS_ValueToAtom(ctx, arg);
+-                assert(!JS_IsUndefined(p->object));
+-                JS_SetProperty(ctx, p->object, name, JS_DupValue(ctx, p->stack[p->stack_index]));
+-                JS_FreeAtom(ctx, name);
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_CREATE_PROPERTY: { // 24
+-                JSValue val = p->stack[p->stack_index];
+-                JSValue field = p->stack[p->stack_index - 1];
+-                JSValue obj = p->stack[p->stack_index - 2];
+-                JSAtom field_atom = JS_ValueToAtom(ctx, field);
+-                
+-                JS_SetProperty(ctx, obj, field_atom, JS_DupValue(ctx, val));
+-                JS_FreeAtom(ctx, field_atom);
+-                
+-                JS_FreeValue(ctx, p->stack[p->stack_index--]);
+-                JS_FreeValue(ctx, p->stack[p->stack_index--]);
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_STORE_PROPERTY: { // 25
+-                JSValue val = p->stack[p->stack_index];
+-                JSValue field = p->stack[p->stack_index - 1];
+-                JSValue obj = p->stack[p->stack_index - 2];
+-                JSAtom field_atom = JS_ValueToAtom(ctx, field);
+-                
+-                JS_SetProperty(ctx, obj, field_atom, JS_DupValue(ctx, val));
+-                JS_FreeAtom(ctx, field_atom);
+-
+-                JS_FreeValue(ctx, p->stack[p->stack_index--]);
+-                JS_FreeValue(ctx, p->stack[p->stack_index--]);
+-                JS_FreeValue(ctx, p->stack[p->stack_index]);
+-                p->stack[p->stack_index] = JS_DupValue(ctx, val);
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_DELETE: { // 26
+-                JSValue field = p->stack[p->stack_index];
+-                JSValue obj = p->stack[p->stack_index - 1];
+-                JSAtom field_atom = JS_ValueToAtom(ctx, field);
+-                
+-                JS_DeleteProperty(ctx, obj, field_atom, 0);
+-                JS_FreeAtom(ctx, field_atom);
+-                
+-                JS_FreeValue(ctx, p->stack[p->stack_index--]);
+-                JS_FreeValue(ctx, p->stack[p->stack_index]);
+-                p->stack[p->stack_index] = JS_NewInt32(ctx, 0);
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_UPDATE_CLASS: { // 27
+-                const char* name = JS_ToCString(ctx, arg);
+-                JSValue obj = JS_GetPropertyStr(ctx, p->object, name);
+-                JSValue src = p->stack[p->stack_index];
+-                
+-                if (JS_IsObject(obj)) {
+-                    // just copy properties for now
+-                    JSPropertyEnum *tab;
+-                    uint32_t len;
+-                    if (JS_GetOwnPropertyNames(ctx, &tab, &len, src, JS_GPN_STRING_MASK | JS_GPN_SYMBOL_MASK) == 0) {
+-                        for(uint32_t i = 0; i < len; i++) {
+-                            JSValue v = JS_GetProperty(ctx, src, tab[i].atom);
+-                            JS_SetProperty(ctx, obj, tab[i].atom, v);
+-                            JS_FreeAtom(ctx, tab[i].atom);
+-                        }
+-                        js_free(ctx, tab);
+-                    }
+-                } else {
+-                    JS_SetPropertyStr(ctx, p->object, name, JS_DupValue(ctx, src));
+-                }
+-                JS_FreeValue(ctx, obj);
+-                JS_FreeCString(ctx, name);
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_CREATE_CLASS: { // 28
+-                JSValue res = JS_NewObject(ctx);
+-                JSValue parent = p->stack[p->stack_index];
+-                if (JS_ToBool(ctx, parent)) {
+-                    JS_SetPropertyStr(ctx, res, "class", JS_DupValue(ctx, parent));
+-                } else if (!JS_IsUndefined(arg) && JS_ToBool(ctx, arg)) {
+-                    JS_SetPropertyStr(ctx, res, "class", JS_DupValue(ctx, arg));
+-                }
+-                
+-                JS_FreeValue(ctx, p->stack[p->stack_index]);
+-                p->stack[p->stack_index] = res;
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_NEW_CALL: { // 29
+-                int args_count; JS_ToInt32(ctx, &args_count, arg);
+-                JSValue c = p->stack[p->stack_index];
+-                
+-                if (JS_IsFunction(ctx, c)) {
+-                    std::vector<JSValue> native_args(args_count);
+-                    for (int i = 0; i < args_count; i++) {
+-                        native_args[i] = p->stack[p->stack_index - args_count + i];
+-                    }
+-                    p->stack_index -= args_count;
+-                    JSValue ret = JS_CallConstructor(ctx, c, args_count, native_args.data());
+-                    for (auto nv : native_args) JS_FreeValue(ctx, nv);
+-                    
+-                    JS_FreeValue(ctx, p->stack[p->stack_index - 1]);
+-                    p->stack[p->stack_index - 1] = ret;
+-                    p->op_index++;
+-                } else {
+-                    // construct routine
+-                    JSValue res = JS_NewObject(ctx);
+-                    JS_SetPropertyStr(ctx, res, "class", JS_DupValue(ctx, c));
+-                    
+-                    JSValue con = JS_GetPropertyStr(ctx, c, "constructor");
+-                    JSValue current_c = JS_DupValue(ctx, c);
+-                    while ((JS_IsUndefined(con) || JS_IsNull(con))) {
+-                        JSValue cls = JS_GetPropertyStr(ctx, current_c, "class");
+-                        if (JS_IsUndefined(cls) || JS_IsNull(cls)) { JS_FreeValue(ctx, cls); break; }
+-                        JS_FreeValue(ctx, current_c);
+-                        current_c = cls;
+-                        JS_FreeValue(ctx, con);
+-                        con = JS_GetPropertyStr(ctx, current_c, "constructor");
+-                    }
+-                    
+-                    Routine* con_routine = nullptr;
+-                    if (!JS_IsUndefined(con)) {
+-                        con_routine = (Routine*)JS_GetOpaque(con, js_routine_class_id);
+-                    }
+-                    
+-                    if (con_routine) {
+-                        JS_FreeValue(ctx, p->stack[p->stack_index - args_count - 1]);
+-                        p->stack[p->stack_index - args_count - 1] = JS_DupValue(ctx, res);
+-                        p->stack_index--;
+-                        
+-                        if ((int)p->call_stack.size() <= p->call_stack_index) p->call_stack.resize(p->call_stack_index + 5);
+-                        CallFrame& cs = p->call_stack[p->call_stack_index++];
+-                        cs.routine = routine;
+-                        cs.object = JS_DupValue(ctx, p->object);
+-                        cs.sup = JS_DupValue(ctx, p->call_super);
+-                        cs.supername = p->call_supername;
+-                        cs.op_index = p->op_index + 1;
+-                        
+-                        p->locals_offset += routine->locals_size;
+-                        routine = con_routine;
+-                        opcodes = con_routine->opcodes.data();
+-                        // arg1 is automatically set from routine
+-                        p->op_index = 0;
+-                        length = con_routine->opcodes.size();
+-                        
+-                        JS_FreeValue(ctx, p->object);
+-                        p->object = res; 
+-                        JS_FreeValue(ctx, p->call_super);
+-                        p->call_super = JS_DupValue(ctx, current_c);
+-                        p->call_supername = "constructor";
+-
+-                        JSValue argv_array = JS_UNDEFINED;
+-                        if (routine->uses_arguments) {
+-                            //argv_array = JS_NewArrayFrom(ctx, );
+-                        }
+-                        
+-                        // pad arguments (TODO: uses_arguments)
+-                        if (args_count < routine->num_args) {
+-                            for (int k = args_count + 1; k <= routine->num_args; k++) {
+-                                p->stack_index++;
+-                                check_stack(p->stack_index);
+-                                p->stack[p->stack_index] = JS_NewInt32(ctx, 0);
+-                            }
+-                        } else if (args_count > routine->num_args) {
+-                            for (int k = 0; k < args_count - routine->num_args; k++) {
+-                                JS_FreeValue(ctx, p->stack[p->stack_index--]);
+-                            }
+-                        }
+-                        
+-                        p->stack_index++; check_stack(p->stack_index);
+-                        p->stack[p->stack_index] = JS_NewInt32(ctx, args_count);
+-                    } else {
+-                        for(int k=0; k<args_count; k++) { JS_FreeValue(ctx, p->stack[p->stack_index--]); }
+-                        JS_FreeValue(ctx, p->stack[p->stack_index - 1]);
+-                        p->stack[p->stack_index - 1] = res;
+-                        p->op_index++;
+-                    }
+-                    JS_FreeValue(ctx, current_c);
+-                    JS_FreeValue(ctx, con);
+-                }
+-                break;
+-            }
+-            case OPCODE_ADD: // 30
+-            case OPCODE_SUB: // 31
+-            case OPCODE_MUL: // 32
+-            case OPCODE_DIV: // 33
+-            case OPCODE_MODULO: // 34
+-            case OPCODE_BINARY_AND: // 35
+-            case OPCODE_BINARY_OR: // 36
+-            case OPCODE_SHIFT_LEFT: // 37
+-            case OPCODE_SHIFT_RIGHT: { // 38
+-                JSValue b = p->stack[p->stack_index--];
+-                JSValue a = p->stack[p->stack_index];
+-                
+-                if (JS_IsNumber(a) && JS_IsNumber(b)) {
+-                    double n1, n2; JS_ToFloat64(ctx, &n1, a); JS_ToFloat64(ctx, &n2, b);
+-                    double result = 0;
+-                    if (opcode == OPCODE_ADD) result = n1 + n2;
+-                    else if (opcode == OPCODE_SUB) result = n1 - n2;
+-                    else if (opcode == OPCODE_MUL) result = n1 * n2;
+-                    else if (opcode == OPCODE_DIV) result = n1 / n2;
+-                    else if (opcode == OPCODE_MODULO) result = std::fmod(n1, n2);
+-                    else if (opcode == OPCODE_BINARY_AND) result = (int)n1 & (int)n2;
+-                    else if (opcode == OPCODE_BINARY_OR) result = (int)n1 | (int)n2;
+-                    else if (opcode == OPCODE_SHIFT_LEFT) result = (int)n1 << (int)n2;
+-                    else if (opcode == OPCODE_SHIFT_RIGHT) result = (int)n1 >> (int)n2;
+-                    
+-                    JS_FreeValue(ctx, a);
+-                    p->stack[p->stack_index] = JS_NewFloat64(ctx, result);
+-                } else {
+-                    const char* op_str = (opcode == OPCODE_ADD) ? "+" : (opcode == OPCODE_SUB) ? "-" :
+-                                         (opcode == OPCODE_MUL) ? "*" : (opcode == OPCODE_DIV) ? "/" :
+-                                         (opcode == OPCODE_MODULO) ? "%" : (opcode == OPCODE_BINARY_AND) ? "&" : "|";
+-                    
+-                    JSValue f = resolve_operator_func(ctx, context_val, a, op_str);
+-                    JS_FreeValue(ctx, a);
+-                    p->stack[p->stack_index] = execute_fallback_op(ctx, context_val, f, a, b, arg);
+-                    JS_FreeValue(ctx, f);
+-                }
+-                JS_FreeValue(ctx, b);
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_NEGATE: { // 39
+-                JSValue a = p->stack[p->stack_index];
+-                if (JS_IsNumber(a)) {
+-                    double n; JS_ToFloat64(ctx, &n, a);
+-                    JS_FreeValue(ctx, a);
+-                    p->stack[p->stack_index] = JS_NewFloat64(ctx, -n);
+-                } else {
+-                    JSValue f = resolve_operator_func(ctx, context_val, a, "-");
+-                    JSValue b = JS_NewInt32(ctx, 0); // Fakes '0' for binary negation overload 
+-                    p->stack[p->stack_index] = execute_fallback_op(ctx, context_val, f, b, a, arg);
+-                    JS_FreeValue(ctx, f);
+-                    JS_FreeValue(ctx, a);
+-                    JS_FreeValue(ctx, b);
+-                }
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_EQ: // 40
+-            case OPCODE_NEQ: // 41
+-            case OPCODE_LT: // 42
+-            case OPCODE_GT: // 43
+-            case OPCODE_LTE: // 44
+-            case OPCODE_GTE: { // 45
+-                JSValue b = p->stack[p->stack_index--];
+-                JSValue a = p->stack[p->stack_index];
+-                
+-                int cond = 0;
+-                if (opcode == OPCODE_EQ) cond = JS_IsStrictEqual(ctx, a, b);
+-                else if (opcode == OPCODE_NEQ) cond = !JS_IsStrictEqual(ctx, a, b);
+-                else {
+-                    double n1, n2;
+-                    JS_ToFloat64(ctx, &n1, a); JS_ToFloat64(ctx, &n2, b);
+-                    if (opcode == OPCODE_LT) cond = (n1 < n2);
+-                    else if (opcode == OPCODE_GT) cond = (n1 > n2);
+-                    else if (opcode == OPCODE_LTE) cond = (n1 <= n2);
+-                    else if (opcode == OPCODE_GTE) cond = (n1 >= n2);
+-                }
+-                
+-                JS_FreeValue(ctx, a); JS_FreeValue(ctx, b);
+-                p->stack[p->stack_index] = JS_NewInt32(ctx, cond ? 1 : 0);
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_NOT: { // 50
+-                int truthy = JS_ToBool(ctx, p->stack[p->stack_index]);
+-                JS_FreeValue(ctx, p->stack[p->stack_index]);
+-                p->stack[p->stack_index] = JS_NewInt32(ctx, truthy ? 0 : 1);
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_FORLOOP_INIT: { // 95
+-                JSValue iter_val = JS_GetPropertyUint32(ctx, arg, 0);
+-                int iter; JS_ToInt32(ctx, &iter, iter_val);
+-                JS_FreeValue(ctx, iter_val);
+-
+-                JSValue loop_by_val = p->stack[p->stack_index];
+-                JSValue loop_to_val = p->stack[p->stack_index - 1];
+-                
+-                check_locals(p->locals_offset + iter + 2);
+-                
+-                JS_FreeValue(ctx, p->locals[p->locals_offset + iter + 1]);
+-                p->locals[p->locals_offset + iter + 1] = JS_DupValue(ctx, loop_to_val);
+-                
+-                JSValue iterator_val = p->locals[p->locals_offset + iter];
+-                
+-                double loop_by, loop_to, iterator;
+-                JS_ToFloat64(ctx, &loop_by, loop_by_val);
+-                JS_ToFloat64(ctx, &loop_to, loop_to_val);
+-                JS_ToFloat64(ctx, &iterator, iterator_val);
+-                
+-                JS_FreeValue(ctx, p->stack[p->stack_index--]);
+-                JS_FreeValue(ctx, p->stack[p->stack_index]);
+-                p->stack[p->stack_index] = JS_NewInt32(ctx, 0);
+-                
+-                if (loop_by == 0) {
+-                    double dir = (loop_to > iterator) ? 1 : -1;
+-                    JS_FreeValue(ctx, p->locals[p->locals_offset + iter + 2]);
+-                    p->locals[p->locals_offset + iter + 2] = JS_NewFloat64(ctx, dir);
+-                    p->op_index++;
+-                } else {
+-                    JS_FreeValue(ctx, p->locals[p->locals_offset + iter + 2]);
+-                    p->locals[p->locals_offset + iter + 2] = JS_NewFloat64(ctx, loop_by);
+-                    if ((loop_by > 0 && iterator > loop_to) || (loop_by < 0 && iterator < loop_to)) {
+-                        JSValue jump_val = JS_GetPropertyUint32(ctx, arg, 1);
+-                        JS_ToInt32(ctx, &p->op_index, jump_val);
+-                        JS_FreeValue(ctx, jump_val);
+-                    } else {
+-                        p->op_index++;
+-                    }
+-                }
+-                break;
+-            }
+-            case OPCODE_FORLOOP_CONTROL: { // 96
+-                JSValue iter_val = JS_GetPropertyUint32(ctx, arg, 0);
+-                int iter; JS_ToInt32(ctx, &iter, iter_val);
+-                JS_FreeValue(ctx, iter_val);
+-
+-                double loop_by, loop_to, iterator;
+-                JS_ToFloat64(ctx, &loop_by, p->locals[p->locals_offset + iter + 2]);
+-                JS_ToFloat64(ctx, &loop_to, p->locals[p->locals_offset + iter + 1]);
+-                JS_ToFloat64(ctx, &iterator, p->locals[p->locals_offset + iter]);
+-                
+-                iterator += loop_by;
+-                
+-                if ((loop_by > 0 && iterator > loop_to) || (loop_by < 0 && iterator < loop_to)) {
+-                    p->op_index++;
+-                } else {
+-                    JS_FreeValue(ctx, p->locals[p->locals_offset + iter]);
+-                    p->locals[p->locals_offset + iter] = JS_NewFloat64(ctx, iterator);
+-                    
+-                    JSValue jump_val = JS_GetPropertyUint32(ctx, arg, 1);
+-                    JS_ToInt32(ctx, &p->op_index, jump_val);
+-                    JS_FreeValue(ctx, jump_val);
+-                }
+-                
+-                if (op_count++ > 100) {
+-                    op_count = 0; /* TODO: timelimit */
+-                }
+-                break;
+-            }
+-            case OPCODE_FORIN_INIT: // 97
+-            case OPCODE_FORIN_CONTROL: { // 98
+-                /* TODO: this needs logic that isn't directly accessible via QJS bindings */
+-                p->op_index++; // just enumerate for now 
+-                break;
+-            }
+-            case OPCODE_JUMP: { // 80
+-                int target; JS_ToInt32(ctx, &target, arg);
+-                p->op_index = target;
+-                if (op_count++ > 100) {
+-                    op_count = 0;
+-                    restore_op_index = p->op_index;
+-                    p->op_index = length; 
+-                }
+-                break;
+-            }
+-            case OPCODE_JUMPY: // 81
+-            case OPCODE_JUMPN: // 82
+-            case OPCODE_JUMPY_NOPOP: // 83
+-            case OPCODE_JUMPN_NOPOP: { // 84
+-                int target; JS_ToInt32(ctx, &target, arg);
+-                int cond = JS_ToBool(ctx, p->stack[p->stack_index]);
+-                
+-                if (opcode == OPCODE_JUMPY || opcode == OPCODE_JUMPN) {
+-                    JS_FreeValue(ctx, p->stack[p->stack_index--]);
+-                }
+-                
+-                bool jump = (opcode == OPCODE_JUMPY || opcode == OPCODE_JUMPY_NOPOP) ? cond : !cond;
+-                if (jump) p->op_index = target; else p->op_index++;
+-                break;
+-            }
+-            case OPCODE_LOAD_ROUTINE: { // 89
+-                // TODO: expose clone routine
+-                Routine* r = (Routine*)JS_GetOpaque(arg, js_routine_class_id);
+-                JSValue arg_str = JS_JSONStringify(ctx, routine->arg1, JS_UNDEFINED, JS_UNDEFINED);
+-                const char* arg_str_c = JS_ToCString(ctx, arg_str);
+-                printf("arg_str: %s\n", arg_str_c);
+-                if (r) {
+-                    JSValue rc_val = js_routine_ctor(ctx, JS_UNDEFINED, 0, nullptr);
+-                    Routine* rc = (Routine*)JS_GetOpaque(rc_val, js_routine_class_id);
+-                    *rc = *r; // struct copy for now
+-                    rc->object = JS_DupValue(ctx, p->object);
+-                    
+-                    p->stack_index++;
+-                    check_stack(p->stack_index);
+-                    p->stack[p->stack_index] = rc_val;
+-                }
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_FUNCTION_CALL: // 90
+-            case OPCODE_FUNCTION_APPLY_VARIABLE: // 91
+-            case OPCODE_FUNCTION_APPLY_PROPERTY: { // 92
+-                int args_count; JS_ToInt32(ctx, &args_count, arg);
+-                JSValue func = JS_UNDEFINED;
+-                JSValue apply_obj = JS_DupValue(ctx, p->object);
+-                JSValue sup = JS_DupValue(ctx, p->call_super);
+-                std::string apply_supername = p->call_supername;
+-                
+-                if (opcode == OPCODE_FUNCTION_CALL) {
+-                    func = JS_DupValue(ctx, p->stack[p->stack_index]);
+-                } else if (opcode == OPCODE_FUNCTION_APPLY_VARIABLE) {
+-                    const char* name = JS_ToCString(ctx, p->stack[p->stack_index]);
+-                    apply_supername = name;
+-                    func = JS_GetPropertyStr(ctx, apply_obj, name);
+-                    while (JS_IsUndefined(func) && !JS_IsUndefined(sup)) {
+-                        JSValue cls = JS_GetPropertyStr(ctx, sup, "class");
+-                        JS_FreeValue(ctx, sup);
+-                        sup = cls;
+-                        if (!JS_IsUndefined(sup)) func = JS_GetPropertyStr(ctx, sup, name);
+-                    }
+-                    if (JS_IsUndefined(func)) func = JS_GetPropertyStr(ctx, p->global, name);
+-                    JS_FreeCString(ctx, name);
+-                } else if (opcode == OPCODE_FUNCTION_APPLY_PROPERTY) {
+-                    JS_FreeValue(ctx, apply_obj);
+-                    JS_FreeValue(ctx, sup);
+-                    apply_obj = JS_DupValue(ctx, p->stack[p->stack_index - 1]);
+-                    sup = JS_DupValue(ctx, apply_obj);
+-                    const char* name = JS_ToCString(ctx, p->stack[p->stack_index]);
+-                    apply_supername = name;
+-                    
+-                    func = JS_GetPropertyStr(ctx, apply_obj, name);
+-                    while (JS_IsUndefined(func) && !JS_IsUndefined(sup)) {
+-                        JSValue cls = JS_GetPropertyStr(ctx, sup, "class");
+-                        JS_FreeValue(ctx, sup);
+-                        sup = cls;
+-                        if (!JS_IsUndefined(sup)) func = JS_GetPropertyStr(ctx, sup, name);
+-                    }
+-                    JS_FreeCString(ctx, name);
+-                }
+-
+-                Routine* target_routine = nullptr;
+-                if (!JS_IsUndefined(func)) target_routine = (Routine*)JS_GetOpaque(func, js_routine_class_id);
+-
+-                if (target_routine) {
+-                    int cleanup = (opcode == OPCODE_FUNCTION_CALL) ? 1 : (opcode == OPCODE_FUNCTION_APPLY_VARIABLE) ? 1 : 2;
+-                    for (int i=0; i<cleanup; i++) JS_FreeValue(ctx, p->stack[p->stack_index--]);
+-
+-                    if ((int)p->call_stack.size() <= p->call_stack_index) p->call_stack.resize(p->call_stack_index + 5);
+-                    CallFrame& cs = p->call_stack[p->call_stack_index++];
+-                    cs.routine = routine;
+-                    cs.object = JS_DupValue(ctx, p->object);
+-                    cs.sup = JS_DupValue(ctx, p->call_super);
+-                    cs.supername = p->call_supername;
+-                    cs.op_index = p->op_index + 1;
+-
+-                    p->locals_offset += routine->locals_size;
+-                    routine = target_routine;
+-                    p->op_index = 0;
+-                    length = routine->opcodes.size();
+-                    
+-                    JS_FreeValue(ctx, p->object);
+-                    p->object = !JS_IsUndefined(routine->object) ? JS_DupValue(ctx, routine->object) : JS_DupValue(ctx, apply_obj);
+-                    JS_FreeValue(ctx, p->call_super);
+-                    p->call_super = JS_DupValue(ctx, sup);
+-                    p->call_supername = apply_supername;
+-                    
+-                    // padding arguments
+-                    if (args_count < routine->num_args) {
+-                        for (int k = args_count + 1; k <= routine->num_args; k++) {
+-                            p->stack_index++; check_stack(p->stack_index);
+-                            p->stack[p->stack_index] = JS_NewInt32(ctx, 0);
+-                        }
+-                    } else if (args_count > routine->num_args) {
+-                        for (int k = 0; k < args_count - routine->num_args; k++) {
+-                            JS_FreeValue(ctx, p->stack[p->stack_index--]);
+-                        }
+-                    }
+-                    p->stack_index++; check_stack(p->stack_index);
+-                    p->stack[p->stack_index] = JS_NewInt32(ctx, args_count);
+-                } else if (JS_IsFunction(ctx, func)) {
+-                    std::vector<JSValue> native_args(args_count);
+-                    for (int i = 0; i < args_count; i++) {
+-                        native_args[i] = p->stack[p->stack_index - args_count + i];
+-                    }
+-                    p->stack_index -= args_count;
+-                    JSValue ret = JS_Call(ctx, func, apply_obj, args_count, native_args.data());
+-                    for (auto nv : native_args) JS_FreeValue(ctx, nv);
+-                    
+-                    if (opcode == OPCODE_FUNCTION_CALL || opcode == OPCODE_FUNCTION_APPLY_VARIABLE) {
+-                        JS_FreeValue(ctx, p->stack[p->stack_index]);
+-                        p->stack[p->stack_index] = ret;
+-                    } else {
+-                        JS_FreeValue(ctx, p->stack[p->stack_index - 1]);
+-                        JS_FreeValue(ctx, p->stack[p->stack_index]);
+-                        p->stack_index--;
+-                        p->stack[p->stack_index] = ret;
+-                    }
+-                    p->op_index++;
+-                } else {
+-                    int cleanup = (opcode == OPCODE_FUNCTION_CALL || opcode == OPCODE_FUNCTION_APPLY_VARIABLE) ? args_count : args_count + 1;
+-                    for (int i=0; i<cleanup; i++) JS_FreeValue(ctx, p->stack[p->stack_index--]);
+-                    p->stack_index++; check_stack(p->stack_index);
+-                    p->stack[p->stack_index] = JS_NewInt32(ctx, 0);
+-                    p->op_index++;
+-                }
+-                
+-                JS_FreeValue(ctx, func);
+-                JS_FreeValue(ctx, apply_obj);
+-                JS_FreeValue(ctx, sup);
+-                break;
+-            }
+-            case OPCODE_SUPER_CALL: { // 93
+-                int args_count; JS_ToInt32(ctx, &args_count, arg);
+-                if (!JS_IsUndefined(p->call_super) && !p->call_supername.empty()) {
+-                    JSValue sup = JS_DupValue(ctx, p->call_super);
+-                    JSValue f = JS_UNDEFINED;
+-                    
+-                    while (JS_IsUndefined(f) || JS_IsNull(f)) {
+-                        JSValue cls = JS_GetPropertyStr(ctx, sup, "class");
+-                        if (JS_IsUndefined(cls) || JS_IsNull(cls)) { JS_FreeValue(ctx, cls); break; }
+-                        JS_FreeValue(ctx, sup);
+-                        sup = cls;
+-                        f = JS_GetPropertyStr(ctx, sup, p->call_supername.c_str());
+-                    }
+-                    
+-                    Routine* target_routine = nullptr;
+-                    if (!JS_IsUndefined(f)) target_routine = (Routine*)JS_GetOpaque(f, js_routine_class_id);
+-                    
+-                    if (target_routine) {
+-                        if ((int)p->call_stack.size() <= p->call_stack_index) p->call_stack.resize(p->call_stack_index + 5);
+-                        CallFrame& cs = p->call_stack[p->call_stack_index++];
+-                        cs.object = JS_DupValue(ctx, p->object);
+-                        cs.sup = JS_DupValue(ctx, p->call_super);
+-                        cs.supername = p->call_supername;
+-                        cs.routine = routine;
+-                        cs.op_index = p->op_index + 1;
+-                        
+-                        p->locals_offset += routine->locals_size;
+-                        routine = target_routine;
+-                        p->op_index = 0;
+-                        length = routine->opcodes.size();
+-                        
+-                        JS_FreeValue(ctx, p->call_super);
+-                        p->call_super = JS_DupValue(ctx, sup);
+-                        
+-                        // padding arguments
+-                        if (args_count < routine->num_args) {
+-                            for (int k = args_count + 1; k <= routine->num_args; k++) {
+-                                p->stack_index++; check_stack(p->stack_index);
+-                                p->stack[p->stack_index] = JS_NewInt32(ctx, 0);
+-                            }
+-                        } else if (args_count > routine->num_args) {
+-                            for (int k = 0; k < args_count - routine->num_args; k++) {
+-                                JS_FreeValue(ctx, p->stack[p->stack_index--]);
+-                            }
+-                        }
+-                        p->stack_index++; check_stack(p->stack_index);
+-                        p->stack[p->stack_index] = JS_NewInt32(ctx, args_count);
+-                    } else {
+-                        for (int k=0; k<args_count; k++) JS_FreeValue(ctx, p->stack[p->stack_index--]);
+-                        p->stack_index++; check_stack(p->stack_index);
+-                        p->stack[p->stack_index] = JS_NewInt32(ctx, 0);
+-                        p->op_index++;
+-                    }
+-                    JS_FreeValue(ctx, f);
+-                    JS_FreeValue(ctx, sup);
+-                } else {
+-                    for (int k=0; k<args_count; k++) JS_FreeValue(ctx, p->stack[p->stack_index--]);
+-                    p->stack_index++; check_stack(p->stack_index);
+-                    p->stack[p->stack_index] = JS_NewInt32(ctx, 0);
+-                    p->op_index++;
+-                }
+-                break;
+-            }
+-            case OPCODE_RETURN: { // 94
+-                int drop_locals; JS_ToInt32(ctx, &drop_locals, arg);
+-                p->local_index -= drop_locals;
+-                
+-                if (p->call_stack_index <= 0) {
+-                    p->op_index = length;
+-                } else {
+-                    CallFrame& cs = p->call_stack[--p->call_stack_index];
+-                    JS_FreeValue(ctx, p->object);
+-                    JS_FreeValue(ctx, p->call_super);
+-                    p->object = cs.object;
+-                    p->call_super = cs.sup;
+-                    p->call_supername = cs.supername;
+-                    routine = cs.routine;
+-                    p->op_index = cs.op_index;
+-                    p->locals_offset -= routine->locals_size;
+-                    length = routine->opcodes.size();
+-                }
+-                break;
+-            }
+-            case OPCODE_AFTER: // 110
+-            case OPCODE_EVERY: { // 111
+-                JSValue func = p->stack[p->stack_index - 1];
+-                JSValue time = p->stack[p->stack_index];
+-                JSValue is_every = JS_NewBool(ctx, opcode == OPCODE_EVERY ? 1 : 0);
+-                JSValue args[3] = { func, time, is_every };
+-                JSValue create_thread = JS_GetPropertyStr(ctx, p->runner, "createThread");
+-                JSValue t = JS_Call(ctx, create_thread, p->runner, 3, args);
+-                
+-                JS_FreeValue(ctx, create_thread);
+-                JS_FreeValue(ctx, p->stack[p->stack_index--]);
+-                JS_FreeValue(ctx, p->stack[p->stack_index]);
+-                p->stack[p->stack_index] = t;
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_DO: { // 112
+-                JSValue func = p->stack[p->stack_index];
+-                JSValue args[3] = { func, JS_NewInt32(ctx, 0), JS_NewBool(ctx, 0) };
+-                JSValue create_thread = JS_GetPropertyStr(ctx, p->runner, "createThread");
+-                JSValue t = JS_Call(ctx, create_thread, p->runner, 3, args);
+-                
+-                JS_FreeValue(ctx, create_thread);
+-                JS_FreeValue(ctx, p->stack[p->stack_index]);
+-                p->stack[p->stack_index] = t;
+-                p->op_index++;
+-                break;
+-            }
+-            case OPCODE_SLEEP: { // 113
+-                JSValue time = p->stack[p->stack_index];
+-                JSValue sleep_func = JS_GetPropertyStr(ctx, p->runner, "sleep");
+-                JS_Call(ctx, sleep_func, p->runner, 1, &time);
+-                
+-                JS_FreeValue(ctx, sleep_func);
+-                p->op_index++;
+-                restore_op_index = p->op_index;
+-                p->op_index = length; // break exec for sleep
+-                break;
+-            }
+-            default:
+-                std::cerr << "Unsupported operation code: " << opcode << std::endl;
+-                p->op_index = length;
+-                break;
+-        }
+-
+-        JS_FreeValue(ctx, arg);
+-    }
+-
+-    if (restore_op_index >= 0) {
+-        p->op_index = restore_op_index;
+-        p->routine = routine;
+-        p->done = false;
+-    } else {
+-        p->op_index = 0;
+-        p->done = true;
+-        // callback check
+-        if (!JS_IsUndefined(routine->callback) && !JS_IsNull(routine->callback)) {
+-            JSValue res = p->stack[p->stack_index];
+-            JS_Call(ctx, routine->callback, JS_UNDEFINED, 1, &res);
+-            JS_FreeValue(ctx, routine->callback);
+-            routine->callback = JS_UNDEFINED;
+-        }
+-    }
+-
+-    return JS_DupValue(ctx, p->stack[p->stack_index]);
+-}
+-
+-static JSValue js_processor_done(JSContext* ctx, JSValue const this_val) {
+-    Processor* p = (Processor*)JS_GetOpaque(this_val, js_processor_class_id);
+-    if (!p) return JS_ThrowInternalError(ctx, "No processor");
+-    return JS_NewBool(ctx, p->done);
+-}
+-
+-#define JS_CFUNC_ROUTINE_DEF(name, len) JS_CFUNC_MAGIC_DEF((#name), (len), js_routine_OP, (OPCODE_##name))
+-
+-// REGISTRATION
+-static const JSCFunctionListEntry js_routine_proto_funcs[] = {
+-    JS_CFUNC_DEF("createLabel", 1, js_routine_create_label),
+-    JS_CFUNC_DEF("setLabel", 1, js_routine_set_label),
+-    JS_CFUNC_DEF("remove", 1, js_routine_remove),
+-    JS_CFUNC_DEF("optimize", 0, js_routine_optimize),
+-    JS_CFUNC_DEF("resolveLabels", 0, js_routine_resolve_labels),
+-    JS_CGETSET_MAGIC_DEF("opcodes", js_routine_get, nullptr, 0),
+-    JS_CGETSET_MAGIC_DEF("locals_size", js_routine_get, js_routine_set, 1),
+-    JS_CGETSET_MAGIC_DEF("arg1", js_routine_get, js_routine_set, 2),
+-    JS_CGETSET_MAGIC_DEF("num_args", js_routine_get, js_routine_set, 3),
+-    JS_CGETSET_MAGIC_DEF("uses_arguments", js_routine_get, js_routine_set, 4),    
+-    JS_CFUNC_MAGIC_DEF("OP", 3, js_routine_OP, 0),
+-
+-    JS_CFUNC_ROUTINE_DEF(TYPE, 1),
+-    JS_CFUNC_ROUTINE_DEF(VARIABLE_TYPE, 2),
+-    JS_CFUNC_ROUTINE_DEF(PROPERTY_TYPE, 1),
+-    JS_CFUNC_ROUTINE_DEF(LOAD_THIS, 1),
+-    JS_CFUNC_ROUTINE_DEF(LOAD_GLOBAL, 1),
+-    JS_CFUNC_ROUTINE_DEF(LOAD_VALUE, 2),
+-    JS_CFUNC_ROUTINE_DEF(LOAD_LOCAL, 2),
+-    JS_CFUNC_ROUTINE_DEF(LOAD_VARIABLE, 2),
+-    JS_CFUNC_ROUTINE_DEF(LOAD_LOCAL_OBJECT, 2),
+-    JS_CFUNC_ROUTINE_DEF(LOAD_VARIABLE_OBJECT, 2),
+-    JS_CFUNC_ROUTINE_DEF(POP, 1),
+-    JS_CFUNC_ROUTINE_DEF(LOAD_PROPERTY, 1),
+-    JS_CFUNC_ROUTINE_DEF(LOAD_PROPERTY_OBJECT, 1),
+-    JS_CFUNC_ROUTINE_DEF(CREATE_OBJECT, 1),
+-    JS_CFUNC_ROUTINE_DEF(MAKE_OBJECT, 1),
+-    JS_CFUNC_ROUTINE_DEF(CREATE_ARRAY, 1),
+-    JS_CFUNC_ROUTINE_DEF(CREATE_CLASS, 2),
+-    JS_CFUNC_ROUTINE_DEF(UPDATE_CLASS, 2),
+-    JS_CFUNC_ROUTINE_DEF(NEW_CALL, 2),
+-    JS_CFUNC_ROUTINE_DEF(ADD, 2),
+-    JS_CFUNC_ROUTINE_DEF(SUB, 2),
+-    JS_CFUNC_ROUTINE_DEF(MUL, 1),
+-    JS_CFUNC_ROUTINE_DEF(DIV, 1),
+-    JS_CFUNC_ROUTINE_DEF(MODULO, 1),
+-    JS_CFUNC_ROUTINE_DEF(BINARY_AND, 1),
+-    JS_CFUNC_ROUTINE_DEF(BINARY_OR, 1),
+-    JS_CFUNC_ROUTINE_DEF(SHIFT_LEFT, 1),
+-    JS_CFUNC_ROUTINE_DEF(SHIFT_RIGHT, 1),
+-    JS_CFUNC_ROUTINE_DEF(NEGATE, 1),
+-    JS_CFUNC_ROUTINE_DEF(LOAD_PROPERTY_ATOP, 1),
+-    JS_CFUNC_ROUTINE_DEF(EQ, 1),
+-    JS_CFUNC_ROUTINE_DEF(NEQ, 1),
+-    JS_CFUNC_ROUTINE_DEF(LT, 1),
+-    JS_CFUNC_ROUTINE_DEF(GT, 1),
+-    JS_CFUNC_ROUTINE_DEF(LTE, 1),
+-    JS_CFUNC_ROUTINE_DEF(GTE, 1),
+-    JS_CFUNC_ROUTINE_DEF(NOT, 1),
+-    JS_CFUNC_ROUTINE_DEF(FORLOOP_INIT, 2),
+-    JS_CFUNC_ROUTINE_DEF(FORLOOP_CONTROL, 2),
+-    JS_CFUNC_ROUTINE_DEF(FORIN_INIT, 2),
+-    JS_CFUNC_ROUTINE_DEF(FORIN_CONTROL, 2),
+-    JS_CFUNC_ROUTINE_DEF(JUMP, 2),
+-    JS_CFUNC_ROUTINE_DEF(JUMPY, 2),
+-    JS_CFUNC_ROUTINE_DEF(JUMPN, 2),
+-    JS_CFUNC_ROUTINE_DEF(JUMPY_NOPOP, 2),
+-    JS_CFUNC_ROUTINE_DEF(JUMPN_NOPOP, 2),
+-    JS_CFUNC_ROUTINE_DEF(STORE_LOCAL, 2),
+-    JS_CFUNC_ROUTINE_DEF(STORE_VARIABLE, 2),
+-    JS_CFUNC_ROUTINE_DEF(CREATE_PROPERTY, 1),
+-    JS_CFUNC_ROUTINE_DEF(STORE_PROPERTY, 1),
+-    JS_CFUNC_ROUTINE_DEF(LOAD_ROUTINE, 2),
+-    JS_CFUNC_ROUTINE_DEF(FUNCTION_CALL, 2),
+-    JS_CFUNC_ROUTINE_DEF(FUNCTION_APPLY_VARIABLE, 2),
+-    JS_CFUNC_ROUTINE_DEF(FUNCTION_APPLY_PROPERTY, 2),
+-    JS_CFUNC_ROUTINE_DEF(SUPER_CALL, 2),
+-    JS_CFUNC_ROUTINE_DEF(RETURN, 1),
+-    JS_CFUNC_ROUTINE_DEF(AFTER, 1),
+-    JS_CFUNC_ROUTINE_DEF(EVERY, 1),
+-    JS_CFUNC_ROUTINE_DEF(DO, 1),
+-    JS_CFUNC_ROUTINE_DEF(SLEEP, 1),
+-    JS_CFUNC_ROUTINE_DEF(DELETE, 1),
+-    JS_CFUNC_ROUTINE_DEF(UNARY_OP, 2),
+-    JS_CFUNC_ROUTINE_DEF(BINARY_OP, 2),
+-};
+-
+-static const JSCFunctionListEntry js_processor_proto_funcs[] = {
+-    JS_CFUNC_DEF("load", 1, js_processor_load),
+-    JS_CFUNC_DEF("run", 1, js_processor_run),
+-    JS_CGETSET_DEF("done", js_processor_done, nullptr),
+-};
+-
+-void js_init_native_vm(JSContext* ctx) {
+-    return;
+-    JSRuntime* rt = JS_GetRuntime(ctx);
+-    JSValue ns = JS_GetGlobalObject(ctx);
+-
+-    JSAtom test = JS_NewAtom(ctx, "type");
+-    JS_SetDumpFlags(rt, JS_DUMP_LEAKS);
+-
+-    // JSValue proc = JS_GetPropertyStr(ctx, ns, "Processor");
+-    // char const* ex = JS_ToCString(ctx, proc);
+-    // std::cout << ex << "\n";
+-    // JSValue proto = JS_GetPropertyStr(ctx, proc, "prototype");
+-    // ex = JS_ToCString(ctx, proto);
+-    // std::cout << ex << "\n";
+-    // JSValue run = JS_GetPropertyStr(ctx, proto, "run");
+-    // ex = JS_ToCString(ctx, run);
+-    // std::cout << ex << "\n";
+-    
+-    // ROUTINE
+-    JS_NewClassID(rt, &js_routine_class_id);
+-    JSClassDef routine_class = { "Routine", js_routine_finalizer, js_routine_gcmark };
+-    JS_NewClass(rt, js_routine_class_id, &routine_class);
+-    
+-    JSValue routine_proto = JS_NewObject(ctx);
+-    JS_SetPropertyFunctionList(ctx, routine_proto, js_routine_proto_funcs, sizeof(js_routine_proto_funcs)/sizeof(JSCFunctionListEntry));
+-    JSValue routine_ctor = JS_NewCFunction2(ctx, js_routine_ctor, "Routine", 1, JS_CFUNC_constructor, 0);
+-    JS_SetConstructor(ctx, routine_ctor, routine_proto);
+-    JS_SetClassProto(ctx, js_routine_class_id, routine_proto);
+-    JS_SetPropertyStr(ctx, ns, routine_class.class_name, routine_ctor);
+-
+-    // PROCESSOR
+-    JS_NewClassID(rt, &js_processor_class_id);
+-    JSClassDef processor_class = { "Processor", js_processor_finalizer, js_processor_gcmark };
+-    JS_NewClass(rt, js_processor_class_id, &processor_class);
+-    
+-    JSValue processor_proto = JS_NewObject(ctx);
+-    JS_SetPropertyFunctionList(ctx, processor_proto, js_processor_proto_funcs, sizeof(js_processor_proto_funcs)/sizeof(JSCFunctionListEntry));
+-    JSValue processor_ctor = JS_NewCFunction2(ctx, js_processor_ctor, "Processor", 1, JS_CFUNC_constructor, 0);
+-    JS_SetConstructor(ctx, processor_ctor, processor_proto);
+-    JS_SetClassProto(ctx, js_processor_class_id, processor_proto);
+-    JS_SetPropertyStr(ctx, ns, processor_class.class_name, processor_ctor);
+-
+-    // char value[64];
+-    // std::cin >> value;
+-    JS_FreeValueRT(rt, ns);
+-}
+diff --git a/src/browser/ms_native.hpp b/src/browser/ms_native.hpp
+deleted file mode 100644
+index 40d5b6e..0000000
+--- a/src/browser/ms_native.hpp
++++ /dev/null
+@@ -1,157 +0,0 @@
+-#pragma once
+-
+-#include <quickjs.h>
+-#include <vector>
+-#include <string>
+-#include <unordered_map>
+-#include <limits>
+-#include <cmath>
+-#include <algorithm>
+-#include <iostream>
+-
+-// OPCODES DEFINITION
+-enum Opcodes {
+-    OPCODE_TYPE = 1,
+-    OPCODE_VARIABLE_TYPE = 2,
+-    OPCODE_PROPERTY_TYPE = 3,
+-    OPCODE_LOAD_IMPORT = 4,
+-    OPCODE_LOAD_THIS = 5,
+-    OPCODE_LOAD_GLOBAL = 6,
+-    OPCODE_LOAD_VALUE = 10,
+-    OPCODE_LOAD_LOCAL = 11,
+-    OPCODE_LOAD_VARIABLE = 12,
+-    OPCODE_LOAD_LOCAL_OBJECT = 13,
+-    OPCODE_LOAD_VARIABLE_OBJECT = 14,
+-    OPCODE_POP = 15,
+-    OPCODE_LOAD_PROPERTY = 16,
+-    OPCODE_LOAD_PROPERTY_OBJECT = 17,
+-    OPCODE_CREATE_OBJECT = 18,
+-    OPCODE_MAKE_OBJECT = 19,
+-    OPCODE_CREATE_ARRAY = 20,
+-    OPCODE_STORE_LOCAL = 21,
+-    OPCODE_STORE_LOCAL_POP = 22,
+-    OPCODE_STORE_VARIABLE = 23,
+-    OPCODE_CREATE_PROPERTY = 24,
+-    OPCODE_STORE_PROPERTY = 25,
+-    OPCODE_DELETE = 26,
+-    OPCODE_UPDATE_CLASS = 27,
+-    OPCODE_CREATE_CLASS = 28,
+-    OPCODE_NEW_CALL = 29,
+-    OPCODE_ADD = 30,
+-    OPCODE_SUB = 31,
+-    OPCODE_MUL = 32,
+-    OPCODE_DIV = 33,
+-    OPCODE_MODULO = 34,
+-    OPCODE_BINARY_AND = 35,
+-    OPCODE_BINARY_OR = 36,
+-    OPCODE_SHIFT_LEFT = 37,
+-    OPCODE_SHIFT_RIGHT = 38,
+-    OPCODE_NEGATE = 39,
+-    OPCODE_EQ = 40,
+-    OPCODE_NEQ = 41,
+-    OPCODE_LT = 42,
+-    OPCODE_GT = 43,
+-    OPCODE_LTE = 44,
+-    OPCODE_GTE = 45,
+-    OPCODE_NOT = 50,
+-    OPCODE_LOAD_PROPERTY_ATOP = 68,
+-    OPCODE_JUMP = 80,
+-    OPCODE_JUMPY = 81,
+-    OPCODE_JUMPN = 82,
+-    OPCODE_JUMPY_NOPOP = 83,
+-    OPCODE_JUMPN_NOPOP = 84,
+-    OPCODE_LOAD_ROUTINE = 89,
+-    OPCODE_FUNCTION_CALL = 90,
+-    OPCODE_FUNCTION_APPLY_VARIABLE = 91,
+-    OPCODE_FUNCTION_APPLY_PROPERTY = 92,
+-    OPCODE_SUPER_CALL = 93,
+-    OPCODE_RETURN = 94,
+-    OPCODE_FORLOOP_INIT = 95,
+-    OPCODE_FORLOOP_CONTROL = 96,
+-    OPCODE_FORIN_INIT = 97,
+-    OPCODE_FORIN_CONTROL = 98,
+-    OPCODE_UNARY_OP = 100,
+-    OPCODE_BINARY_OP = 101,
+-    OPCODE_AFTER = 110,
+-    OPCODE_EVERY = 111,
+-    OPCODE_DO = 112,
+-    OPCODE_SLEEP = 113,
+-    OPCODE_COMPILED = 200
+-};
+-
+-extern JSClassID js_routine_class_id;
+-extern JSClassID js_processor_class_id;
+-
+-struct Routine {
+-    int num_args = 0;
+-    std::vector<int> opcodes;
+-    JSValue arg1; // JS array
+-    std::vector<JSValue> ref;
+-    int label_count = 0;
+-    std::unordered_map<std::string, int> labels;
+-    bool transpile = false;
+-    std::vector<int> import_refs;
+-    std::vector<JSValue> import_values;
+-    int import_self = -1;
+-    int locals_size = 0;
+-    bool uses_arguments = false;
+-    JSValue callback = JS_UNDEFINED;
+-    JSValue object = JS_UNDEFINED;
+-    JSValue as_function = JS_UNDEFINED;
+-
+-    Routine() = default;
+-    void free_values(JSContext* ctx) {
+-        for (auto v : ref) JS_FreeValue(ctx, v);
+-        for (auto v : import_values) JS_FreeValue(ctx, v);
+-        JS_FreeValue(ctx, callback);
+-        JS_FreeValue(ctx, object);
+-        JS_FreeValue(ctx, as_function);
+-        JS_FreeValue(ctx, arg1);
+-    }
+-};
+-
+-struct CallFrame {
+-    Routine* routine = nullptr;
+-    JSValue object = JS_UNDEFINED;
+-    JSValue sup = JS_UNDEFINED;
+-    std::string supername;
+-    int op_index = 0;
+-};
+-
+-struct Processor {
+-    JSValue runner = JS_UNDEFINED;
+-    std::vector<JSValue> locals;
+-    std::vector<JSValue> stack;
+-    std::vector<CallFrame> call_stack;
+-    bool log = false;
+-    double time_limit = std::numeric_limits<double>::infinity();
+-    bool done = true;
+-
+-    Routine* routine = nullptr;
+-    int local_index = 0;
+-    int stack_index = -1;
+-    int op_index = 0;
+-    int call_stack_index = 0;
+-    JSValue global = JS_UNDEFINED;
+-    JSValue object = JS_UNDEFINED;
+-    int locals_offset = 0;
+-    JSValue call_super = JS_UNDEFINED;
+-    std::string call_supername = "";
+-
+-    Processor() = default;
+-    void free_values(JSContext* ctx) {
+-        JS_FreeValue(ctx, runner);
+-        for (auto v : locals) JS_FreeValue(ctx, v);
+-        for (auto v : stack) JS_FreeValue(ctx, v);
+-        for (auto& frame : call_stack) {
+-            JS_FreeValue(ctx, frame.object);
+-            JS_FreeValue(ctx, frame.sup);
+-        }
+-        JS_FreeValue(ctx, global);
+-        JS_FreeValue(ctx, object);
+-        JS_FreeValue(ctx, call_super);
+-    }
+-};
+-
+-// for testing this has to be fetched as extern
+-void js_init_native_vm(JSContext* ctx, JSValue ns);
+diff --git a/src/browser/script_host.cpp b/src/browser/script_host.cpp
+index e41a8e0..68952c0 100644
+--- a/src/browser/script_host.cpp
++++ b/src/browser/script_host.cpp
+@@ -140,7 +140,6 @@ namespace browser {
+ 
+     void ScriptHost::onLoaded() {
+         patchRuntime();
+-        js_init_native_vm(m_engine->context);
+         try {
+             EVAL_STATIC_SCRIPT(patch);
+         } catch (ScriptEngineException const& see) {
+diff --git a/src/browser/script_host_libs.cpp b/src/browser/script_host_libs.cpp
+index 4249c41..76812d6 100644
+--- a/src/browser/script_host_libs.cpp
++++ b/src/browser/script_host_libs.cpp
+@@ -500,14 +500,6 @@ namespace browser {
+         JS_SetPropertyStr(ctx, console, "info", info);
+         JS_SetPropertyStr(ctx, console, "error", error);
+         JS_SetPropertyStr(ctx, globalThis, "console", console);
+-
+-        auto exitfn = [](JSContext *ctx, JSValueConst self, int argc, JSValueConst *argv) -> JSValue {
+-            int code = 0;
+-            exit(argc? JS_ToInt32(ctx, &code, argv[0]), code : 0);
+-            return JS_UNDEFINED;
+-        };
+-        JSValue exitv = JS_NewCFunction(ctx, exitfn, "exit", 1);
+-        JS_SetPropertyStr(ctx, globalThis, "exit", exitv);
+     }
+ 
+     /**
+diff --git a/src/browser/script_qjs.hpp b/src/browser/script_qjs.hpp
+index 1dfaaee..cd8414e 100644
+--- a/src/browser/script_qjs.hpp
++++ b/src/browser/script_qjs.hpp
+@@ -189,7 +189,4 @@ namespace browser {
+ /* Retrieve a script entry in script_embed.S */
+ #define SCRIPT_RESOLVE_EMBED(global_name) STATIC_RESOLVE_EMBED(__script_##global_name)
+ 
+-/* gilles' claude output test */
+-extern void js_init_native_vm(JSContext* ctx);
+-
+ #endif

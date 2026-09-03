@@ -1072,6 +1072,8 @@ this.Processor = class Processor {
           break;
         case 89: // OPCODE_LOAD_ROUTINE
           r = arg1[op_index++];
+          console.log(JSON.stringify(r));
+          exit();
           rc = r.clone();
           ref3 = r.import_refs;
           for (l = 0, len = ref3.length; l < len; l++) {
