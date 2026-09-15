@@ -173,6 +173,10 @@ namespace browser {
         m_canvas->setDrawAnchors(.5 + (x * .5), .5 + (y * .5));
     }
 
+    bool Screen::updateScreenTransform() {
+        return m_screenTransform = m_transX != 0.f || m_transY != 0.f || m_scaleX != 1.f || m_scaleY != 1.f || m_degrees != 0.f;
+    }
+
     void Screen::setDrawRotation(float deg) {
         m_objectDegrees = deg;
     }

@@ -113,6 +113,8 @@ namespace browser {
         /** Restore context */
         void closeDrawOp();
 
+        bool updateScreenTransform();
+
         /** Originally serves as to register all pointing events */
         void startControl();
 
