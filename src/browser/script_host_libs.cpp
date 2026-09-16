@@ -143,7 +143,7 @@ namespace browser {
     static JSValue ScreenProto_setDrawFloat2(JSContext* ctx, JSValueConst self, int argc, JSValueConst *argv, int magic) {
         auto* screen = opaqueToObject<Screen>(self);
         double x; JS_ToFloat64(ctx, &x, argv[0]);
-        double y; JS_ToFloat64(ctx, &y, argv[1]);
+        double y; if (argc > 1) JS_ToFloat64(ctx, &y, argv[1]); else y = std::numeric_limits<float>::quiet_NaN();
         switch (magic) {
             case 0: screen->setDrawAnchor(x, y); break;
             case 1: screen->setDrawScale(x, y); break;
