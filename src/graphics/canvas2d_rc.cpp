@@ -499,7 +499,7 @@ namespace gfx {
         if (spMesh) {
             // this transform is relative to the current m_engine->transform
             Matrix m3x3 = { w, 0.0f, 0.0f, x, 0.0f, h, 0.0f, y, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f };
-            Matrix transform = MatrixMultiply(MatrixIdentity(), m3x3);
+            Matrix transform = m3x3;
             DrawMesh(spMesh->data, m_engine->material, transform);
         }
     }
@@ -509,7 +509,7 @@ namespace gfx {
         if (spMesh) {
             // this transform is relative to the current m_engine->transform
             Matrix m3x3 = { w, 0.0f, 0.0f, x, 0.0f, h, 0.0f, y, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f };
-            Matrix transform = MatrixMultiply(MatrixIdentity(), m3x3);
+            Matrix transform = m3x3;
             DrawMesh(spMesh->data, m_engine->material, transform);
         }
     }
