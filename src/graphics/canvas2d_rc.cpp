@@ -91,7 +91,7 @@ namespace gfx {
     struct CanvasDynamicMesh : public CanvasMesh {
         unsigned reserved; // triangle count + triangles allocated ahead
 
-        int validatePageSize(unsigned triCursor) {
+        static int validatePageSize(unsigned triCursor) {
             --triCursor;
             unsigned bl2 = 0;
             while (triCursor & (size_t)-1) {
@@ -189,7 +189,7 @@ namespace gfx {
             // for the API that requires a material instead: inject the same shader
             m_engine->material.shader.id = m_engine->shader.id;
             m_engine->material.shader.locs = rlGetShaderLocsDefault(); // we can control our uniforms outside of raylib
-            m_engine->material.maps = (MaterialMap *)RL_CALLOC(2, sizeof(MaterialMap));
+            m_engine->material.maps = (MaterialMap *)RL_CALLOC(MAX_MATERIAL_MAPS, sizeof(MaterialMap));
             m_engine->material.maps[MATERIAL_MAP_DIFFUSE].texture = (Texture2D){ rlGetTextureIdDefault(), 1, 1, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 };
             m_engine->material.maps[MATERIAL_MAP_DIFFUSE].color = WHITE;    // Diffuse color
             m_engine->material.maps[MATERIAL_MAP_SPECULAR].color = WHITE;   // Specular color
