@@ -1,5 +1,6 @@
 #pragma once
 
+#include <limits>
 #include <stdint.h>
 #include "runtime.hpp"
 #include "graphics/canvas2d_rc.hpp"
@@ -102,7 +103,7 @@ namespace browser {
         void setDrawRotation(float deg);
 
         /** Global scale modifier */
-        void setDrawScale(float w, float h);
+        void setDrawScale(float w, float h = std::numeric_limits<float>::quiet_NaN());
 
         /** ? */
         void initDraw();
