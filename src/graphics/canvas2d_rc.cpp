@@ -7,6 +7,7 @@
 
 #include <list>
 #include <raylib.h>
+#include <config.h>
 #include <raymath.h>
 #include <rlgl.h>
 
