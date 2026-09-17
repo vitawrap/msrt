@@ -289,6 +289,7 @@ namespace gfx {
         m_engine->font          = nullptr;
         m_engine->states.pop_back();
         rlSetLineWidth(state.lineWidth);
+        rlSetMatrixModelview(m_engine->transform);
         return true;
     }
 
@@ -334,8 +335,9 @@ namespace gfx {
         BeginTextureMode(m_engine->renderTexture);
 
         // have to use rlgl here, because Camera2D is weirdly restrictive.
+        rlMatrixMode(RL_MODELVIEW);
         rlLoadIdentity();
-        rlMultMatrixf(MatrixToFloat(m_engine->transform));
+        m_engine->transform = MatrixIdentity();
 
         BeginShaderMode(m_engine->shader);
         // microstudio offloads clear control to script
@@ -382,7 +384,7 @@ namespace gfx {
                       0.0f, 0.0f, 1.0f, 0.0f,
                       0.0f, 0.0f, 0.0f, 1.0f };
         m_engine->transform = MatrixMultiply(m_engine->transform, m3x3);
-        /** TODO: this is a workaround, m_engine->transform could be desynced from gl matrix. */
+        rlSetMatrixModelview(m_engine->transform);
     }
 
     void CanvasRC2D::translate(float x, float y) {
