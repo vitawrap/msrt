@@ -25,7 +25,6 @@ namespace gfx {
     class CanvasRC2D : public CanvasRC {
         platform::IWindowManager* m_window;
         int m_windowId;
-        bool m_drawing;
 
         /** Renderer-specific storage */
         CanvasEngine* m_engine;
