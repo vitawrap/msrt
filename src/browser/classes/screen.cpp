@@ -182,8 +182,8 @@ namespace browser {
     }
 
     void Screen::setDrawScale(float w, float h) {
-        //m_objectScaleX = w;
-        //m_objectScaleY = h;
+        m_objectScaleX = w;
+        m_objectScaleY = std::isnan(h) ? w : h;
     }
 
     void Screen::drawSprite(std::string_view name, float x, float y, float w, float h) {
